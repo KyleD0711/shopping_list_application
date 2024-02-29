@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/controllers/recipe_controller.dart';
 import 'package:shopping_list_application/models/recipe.dart';
-import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe_page.dart';
+import 'package:shopping_list_application/pages/maintenance/recipe/view_recipe.dart';
 import 'package:modals/modals.dart';
 
 class RecipeHomePage extends StatefulWidget {
@@ -36,8 +36,8 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                   ),
             floatingActionButton: FloatingActionButton(
               onPressed: () => {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => AddRecipePage()))
+                // Navigator.push(context,
+                //     MaterialPageRoute(builder: (context) => ViewRecipePage()))
               },
               child: const Icon(Icons.add),
             ),
@@ -53,15 +53,23 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
         showModal(ModalEntry.aligned(context,
             tag: recipe.id,
             alignment: Alignment.center,
-            barrierColor: const Color.fromARGB(150, 55, 57, 58),
+            barrierColor: const Color.fromARGB(149, 212, 221, 226),
             barrierDismissible: true,
             child: SizedBox(
               width: 300,
               height: 300,
-              child: ListView(children: [
-                Text("Prep Time: ${recipe.prepTimeInMinutes}"),
-                Text("Cook Time: ${recipe.cookTimeInMinutes}")
-              ]),
+              child: Container(
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                child: ListView(
+                  children: [
+                    Center(child: Text(recipe.name)),
+                    Text("Prep Time: ${recipe.prepTimeInMinutes}"),
+                    Text("Cook Time: ${recipe.cookTimeInMinutes}")
+                  ],
+                ),
+              ),
             )))
       },
     );
