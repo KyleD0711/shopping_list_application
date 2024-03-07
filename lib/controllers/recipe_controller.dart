@@ -11,7 +11,9 @@ class RecipeController {
 
   static final _service = RecipeService();
 
-  Stream<List<Recipe>> getStream() => _service.getRecipes();
+  Stream<List<Recipe>> getStream() {
+    return _service.getRecipes();
+    }
 
   Future<void> insertRecipe(Map<Ingredient, String> ingredients, List<Recipe> recipes, int prepTimeInMinutes,
           int cookTimeInMinutes, String name) =>

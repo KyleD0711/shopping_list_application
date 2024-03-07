@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shopping_list_application/controllers/recipe_controller.dart';
 import 'package:shopping_list_application/models/recipe.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/view_recipe.dart';
-import 'package:modals/modals.dart';
 
 class RecipeHomePage extends StatefulWidget {
   const RecipeHomePage({super.key});
@@ -12,7 +11,7 @@ class RecipeHomePage extends StatefulWidget {
 }
 
 class _RecipeHomePageState extends State<RecipeHomePage> {
-  final _stream = RecipeController().getStream();
+  final Stream<List<Recipe>> _stream = RecipeController().getStream();
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +50,8 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                         onPressed: () {
                           //  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ()));
                         },
-                        child: const Text("Add Recipe", style: TextStyle(color: Colors.white))))
+                        child: const Text("Add Recipe",
+                            style: TextStyle(color: Colors.white))))
               ],
             ),
             bottomNavigationBar: BottomNavigationBar(
@@ -76,8 +76,16 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       tileColor: Colors.white,
       title: Text(recipe.name),
+      trailing: SizedBox(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Prep Time: ${recipe.prepTimeInMinutes}\nCook Time: ${recipe.cookTimeInMinutes}"),
+        ],
+      )),
       onTap: () => {
-         Navigator.of(context).push(MaterialPageRoute(builder: (context) => ViewRecipePage(recipe: recipe)))
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ViewRecipePage(recipe: recipe)))
       },
     );
   }

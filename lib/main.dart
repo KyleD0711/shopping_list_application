@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_list_application/controllers/auth_controller.dart';
+import 'package:shopping_list_application/pages/home_page.dart';
 import 'package:shopping_list_application/pages/opening_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -9,10 +11,16 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // final _stream = AuthController().loggedInStream;
+  final Stream<bool> _stream = AuthController().loggedInStream;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

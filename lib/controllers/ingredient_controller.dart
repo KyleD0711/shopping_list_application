@@ -1,6 +1,4 @@
-import "package:cloud_firestore/cloud_firestore.dart";
 import "package:shopping_list_application/models/ingredient.dart";
-import "package:shopping_list_application/services/firestore_storage.dart";
 import "package:shopping_list_application/services/ingredient_service.dart";
 
 class IngredientController{

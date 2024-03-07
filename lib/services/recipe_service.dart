@@ -20,10 +20,10 @@ class RecipeService {
         .collection(_recipes)
         .snapshots()
         .map((event) => event.docs.map((e) {
-              print(e.data());
+              List ingredients = e.data()[_ingredients];
               return Recipe(
                   e.id,
-                  Map<Ingredient, String>.from(e.data()[_ingredients]),
+                  List<Map<String, String>>.from(ingredients.map((e) => Map<String, String>.from(e))),
                   List<Recipe>.from(e.data()[_recipes]),
                   e.data()[_prepTimeInMinutes],
                   e.data()[_cookTimeInMinutes],

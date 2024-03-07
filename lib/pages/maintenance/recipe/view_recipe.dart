@@ -1,18 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dynamic_form/dynamic_form.dart';
 import 'package:flutter/material.dart';
-import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:shopping_list_application/controllers/ingredient_controller.dart';
-import 'package:shopping_list_application/controllers/recipe_controller.dart';
-import 'package:shopping_list_application/models/ingredient.dart';
 import 'package:shopping_list_application/models/recipe.dart';
-import 'package:shopping_list_application/utils/form_validators.dart';
+import 'package:modals/modals.dart';
 
 class ViewRecipePage extends StatelessWidget {
   const ViewRecipePage({super.key, required this.recipe});
 
   final Recipe recipe;
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +17,7 @@ class ViewRecipePage extends StatelessWidget {
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Theme.of(context).colorScheme.tertiary,
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.save), label: "Save"),
+            BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
             BottomNavigationBarItem(icon: Icon(Icons.cancel), label: "Cancel")
           ],
           onTap: (value) {
@@ -40,38 +34,123 @@ class ViewRecipePage extends StatelessWidget {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
                   color: Colors.white),
-              child: Column(children: [
-                Text("Description"),
-                Divider(height: 15.0, color: Colors.black),
-                Text(recipe.description == ""
-                    ? "Etiam nunc justo, gravida et augue eu, feugiat finibus lectus. Aliquam aliquam scelerisque efficitur"
-                    : recipe.description)
-              ]),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Descrption"),
+                  const Divider(height: 15.0, color: Colors.black),
+                  Text(
+                    recipe.description,
+                    textAlign: TextAlign.left,
+                  )
+                ],
+              ),
             ),
             Container(
-              margin: const EdgeInsets.all(10.0),
-              padding: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  color: Colors.white),
-              child: Column(children: [
-                Text("Ingredients"),
-                Divider(height: 15.0, color: Colors.black),
-                SizedBox(
-                  child: ListView.separated(
-                      itemBuilder: (_, index) => _toWidget(
-                          recipe.ingredients.keys.elementAt(index),
-                          recipe.ingredients.values.elementAt(index)),
-                      separatorBuilder: (_, __) => const Divider(),
-                      itemCount: recipe.ingredients.length),
-                )
-              ]),
-            )
+                height: 200,
+                margin: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: Colors.white),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Ingredients"),
+                        const Divider(height: 15.0, color: Colors.black),
+                        Expanded(
+                          child: SizedBox(
+                            height: 150,
+                            child: ListView.separated(
+                              padding: const EdgeInsets.all(10.0),
+                              itemBuilder: (_, index) => _toIngredientWidget(
+                                  recipe.ingredients[index]),
+                              separatorBuilder: (_, __) => const Divider(),
+                              itemCount: recipe.ingredients.length,
+                            ),
+                          ),
+                        )
+                      ],
+                    );
+                  },
+                )),
+            Container(
+                height: 150,
+                margin: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: Colors.white),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Recipes"),
+                        const Divider(height: 15.0, color: Colors.black),
+                        Expanded(
+                          child: SizedBox(
+                            height: constraints.maxHeight / 2,
+                            child: ListView.separated(
+                              padding: const EdgeInsets.all(10.0),
+                              itemBuilder: (_, index) =>
+                                  _toRecipeWidget(recipe.recipes[index]),
+                              separatorBuilder: (_, __) => const Divider(),
+                              itemCount: recipe.recipes.length,
+                            ),
+                          ),
+                        )
+                      ],
+                    );
+                  },
+                )),
+            // Align(
+            //   alignment: Alignment.bottomCenter,
+            //   child: ElevatedButton(
+            //       style: ButtonStyle(
+            //           fixedSize: MaterialStateProperty.all(
+            //               Size.fromWidth(MediaQuery.of(context).size.width))),
+            //       onPressed: () => showDialog(
+            //           context: context,
+            //           builder: (context) {
+            //             return ModalEntry.positioned(context,
+            //             barrierDismissible: false,
+            //                 tag: recipe.id,
+            //                 child: Container(
+            //                   child: Column(
+            //                     mainAxisAlignment: MainAxisAlignment.center,
+            //                     children: [
+            //                       IconButton(onPressed: () => removeModal(recipe.id), icon: Icon(Icons.cancel)),
+            //                       Text("Instructions"),
+            //                       const Divider(height: 15.0, color: Colors.black),
+            //                       Text(recipe.instructions)
+            //                     ],
+            //                   ),
+            //                 ));
+            //           }),
+            //       child: const Text(
+            //         "Instructions",
+            //         style: TextStyle(color: Colors.white),
+            //       )),
+            // )
           ],
         ));
   }
 
-  Widget _toWidget(Ingredient ingredient, String quantity) {
-    return Text("${ingredient.name}: $quantity");
+  Widget _toIngredientWidget(Map<String, String> ingredient) {
+    return Text("${ingredient['ingredient']}: ${ingredient['qty']}");
+  }
+
+  Widget _toRecipeWidget(Recipe recipe) {
+    return Row(
+      children: [
+        Text(recipe.name),
+        ElevatedButton(onPressed: () {}, child: const Text("Go To"))
+      ],
+    );
   }
 }
