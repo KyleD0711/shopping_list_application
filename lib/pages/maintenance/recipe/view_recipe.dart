@@ -6,7 +6,7 @@ class ViewRecipePage extends StatelessWidget {
   const ViewRecipePage({super.key, required this.recipe});
 
   final Recipe recipe;
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +47,7 @@ class ViewRecipePage extends StatelessWidget {
               ),
             ),
             Container(
-                height: 200,
+                height: MediaQuery.of(context).size.height * .25,
                 margin: const EdgeInsets.all(10.0),
                 padding: const EdgeInsets.all(10.0),
                 decoration: BoxDecoration(
@@ -59,11 +59,11 @@ class ViewRecipePage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Ingredients"),
+                        const Text("Ingredients"),
                         const Divider(height: 15.0, color: Colors.black),
                         Expanded(
                           child: SizedBox(
-                            height: 150,
+                            height: MediaQuery.of(context).size.height * .25,
                             child: ListView.separated(
                               padding: const EdgeInsets.all(10.0),
                               itemBuilder: (_, index) => _toIngredientWidget(
@@ -78,7 +78,7 @@ class ViewRecipePage extends StatelessWidget {
                   },
                 )),
             Container(
-                height: 150,
+                height: MediaQuery.of(context).size.height * .25,
                 margin: const EdgeInsets.all(10.0),
                 padding: const EdgeInsets.all(10.0),
                 decoration: BoxDecoration(
@@ -90,7 +90,7 @@ class ViewRecipePage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Recipes"),
+                        const Text("Recipes"),
                         const Divider(height: 15.0, color: Colors.black),
                         Expanded(
                           child: SizedBox(
@@ -108,35 +108,49 @@ class ViewRecipePage extends StatelessWidget {
                     );
                   },
                 )),
-            // Align(
-            //   alignment: Alignment.bottomCenter,
-            //   child: ElevatedButton(
-            //       style: ButtonStyle(
-            //           fixedSize: MaterialStateProperty.all(
-            //               Size.fromWidth(MediaQuery.of(context).size.width))),
-            //       onPressed: () => showDialog(
-            //           context: context,
-            //           builder: (context) {
-            //             return ModalEntry.positioned(context,
-            //             barrierDismissible: false,
-            //                 tag: recipe.id,
-            //                 child: Container(
-            //                   child: Column(
-            //                     mainAxisAlignment: MainAxisAlignment.center,
-            //                     children: [
-            //                       IconButton(onPressed: () => removeModal(recipe.id), icon: Icon(Icons.cancel)),
-            //                       Text("Instructions"),
-            //                       const Divider(height: 15.0, color: Colors.black),
-            //                       Text(recipe.instructions)
-            //                     ],
-            //                   ),
-            //                 ));
-            //           }),
-            //       child: const Text(
-            //         "Instructions",
-            //         style: TextStyle(color: Colors.white),
-            //       )),
-            // )
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: ElevatedButton(
+                  style: ButtonStyle(
+                      fixedSize: MaterialStateProperty.all(
+                          Size.fromWidth(MediaQuery.of(context).size.width))),
+                  onPressed: () => showModal(
+                        ModalEntry.aligned(context,
+                            barrierDismissible: false,
+                            alignment: Alignment.bottomCenter,
+                            tag: recipe.id,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Colors.white),
+                              height: MediaQuery.of(context).size.height * .85,
+                              padding:
+                                  const EdgeInsets.only(left: 20, right: 20),
+                              child: Column(
+                                children: [
+                                  Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Text("Instructions",
+                                            style: TextStyle(fontSize: 20, color: Colors.black, )),
+                                        IconButton(
+                                            onPressed: () =>
+                                                removeModal(recipe.id),
+                                            icon: const Icon(Icons.cancel)),
+                                      ]),
+                                  const Divider(
+                                      height: 15.0, color: Colors.black),
+                                  Text(recipe.instructions, style: const TextStyle(fontSize: 18, color: Colors.black))
+                                ],
+                              ),
+                            )),
+                      ),
+                  child: const Text(
+                    "Instructions",
+                    style: TextStyle(color: Colors.white),
+                  )),
+            )
           ],
         ));
   }
