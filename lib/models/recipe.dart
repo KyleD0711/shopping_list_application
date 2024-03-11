@@ -3,8 +3,8 @@ import "package:uuid/uuid.dart";
 import "package:shopping_list_application/models/ingredient.dart";
 
 class Recipe {
-  Recipe(String? id, List<Map<String, String>>? ingredients, List<Recipe>? recipes, int? prepTimeInMinutes,
-      int? cookTimeInMinutes, String? name, String? description, String? instructions)
+  Recipe({String? id, List<Map<String, String>>? ingredients, List<Recipe>? recipes, int? prepTimeInMinutes,
+      int? cookTimeInMinutes, String? name, String? description, String? instructions})
       : id = id ?? _uuid.v1(),
         ingredients = ingredients ?? List<Map<String, String>>.empty(),
         recipes = recipes ?? List<Recipe>.empty(), 

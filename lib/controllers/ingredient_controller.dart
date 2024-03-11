@@ -10,7 +10,9 @@ class IngredientController{
 
   static final _service = IngredientService();
 
-  Stream<List<Ingredient>> getStream() => _service.getIngredients();
+  Stream<List<Ingredient>> getStream() => _service.getIngredientsStream();
+
+  Future<List<Ingredient>> getIngredients() => _service.getIngredients();
 
   Future<void> insertRecipe(String name) =>
       _service.insertIngredient(name);

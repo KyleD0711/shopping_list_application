@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/controllers/recipe_controller.dart';
 import 'package:shopping_list_application/models/recipe.dart';
+import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/view_recipe.dart';
 
 class RecipeHomePage extends StatefulWidget {
@@ -48,7 +49,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                             fixedSize: MaterialStateProperty.all(Size.fromWidth(
                                 MediaQuery.of(context).size.width))),
                         onPressed: () {
-                          //  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ()));
+                           Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddRecipePage()));
                         },
                         child: const Text("Add Recipe",
                             style: TextStyle(color: Colors.white))))

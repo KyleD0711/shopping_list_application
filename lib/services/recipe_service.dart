@@ -22,14 +22,14 @@ class RecipeService {
         .map((event) => event.docs.map((e) {
               List ingredients = e.data()[_ingredients];
               return Recipe(
-                  e.id,
-                  List<Map<String, String>>.from(ingredients.map((e) => Map<String, String>.from(e))),
-                  List<Recipe>.from(e.data()[_recipes]),
-                  e.data()[_prepTimeInMinutes],
-                  e.data()[_cookTimeInMinutes],
-                  e.data()[_name],
-                  e.data()[_description],
-                  e.data()[_instructions]);
+                  id: e.id,
+                  ingredients: List<Map<String, String>>.from(ingredients.map((e) => Map<String, String>.from(e))),
+                  recipes: List<Recipe>.from(e.data()[_recipes]),
+                  prepTimeInMinutes: e.data()[_prepTimeInMinutes],
+                  cookTimeInMinutes: e.data()[_cookTimeInMinutes],
+                  name: e.data()[_name],
+                  description: e.data()[_description],
+                  instructions: e.data()[_instructions]);
             }).toList());
   }
 
