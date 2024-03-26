@@ -1,3 +1,4 @@
+import "package:flutter/material.dart";
 import "package:shopping_list_application/models/ingredient.dart";
 import "package:shopping_list_application/models/recipe.dart";
 import "package:shopping_list_application/services/auth.dart";
@@ -21,10 +22,11 @@ class RecipeService {
         .snapshots()
         .map((event) => event.docs.map((e) {
               List ingredients = e.data()[_ingredients];
+              List recipes = e.data()[_recipes];
               return Recipe(
                   id: e.id,
                   ingredients: List<Map<String, String>>.from(ingredients.map((e) => Map<String, String>.from(e))),
-                  recipes: List<Recipe>.from(e.data()[_recipes]),
+                  recipes: List<Map<String, String>>.from(recipes.map((e) => Map<String, String>.from(e))),
                   prepTimeInMinutes: e.data()[_prepTimeInMinutes],
                   cookTimeInMinutes: e.data()[_cookTimeInMinutes],
                   name: e.data()[_name],
@@ -34,14 +36,14 @@ class RecipeService {
   }
 
   Future<void> insertRecipe(
-      Map<Ingredient, String> ingredients,
-      List<Recipe> recipes,
+      List<Map<String, String>> ingredients,
+      List<Map<String, String>> recipes,
       int prepTimeInMinutes,
       int cookTimeInMinutes,
       String name) {
     final data = {
       "ingredients": ingredients,
-      "recipes": recipes.toList(),
+      "recipes": recipes,
       "prepTimeInMinutes": prepTimeInMinutes,
       "cookTimeInMinutes": cookTimeInMinutes,
       "name": name

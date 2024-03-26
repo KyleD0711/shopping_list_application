@@ -6,14 +6,9 @@ import 'package:shopping_list_application/utils/authentication_validators.dart';
 import 'package:shopping_list_application/utils/form_validators.dart';
 // import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class OpeningPage extends StatefulWidget {
+class OpeningPage extends StatelessWidget {
   const OpeningPage({super.key});
 
-  @override
-  State<OpeningPage> createState() => _OpeningPageState();
-}
-
-class _OpeningPageState extends State<OpeningPage> {
   Duration get loginTime => const Duration(milliseconds: 2250);
 
   Future<String?> _signupUser(SignupData data) {
@@ -46,10 +41,11 @@ class _OpeningPageState extends State<OpeningPage> {
           onLogin: (LoginData data) {
             return _authUser(data);
           },
-          onSubmitAnimationCompleted: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                  settings: const RouteSettings(name: "/HomePage"),
-                  builder: (context) => const HomePage())),
+          onSubmitAnimationCompleted: () {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+                settings: const RouteSettings(name: "/HomePage"),
+                builder: (context) => const HomePage()));
+          },
           onSignup: (signupData) {
             return _signupUser(signupData);
           },

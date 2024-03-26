@@ -11,16 +11,10 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
-   const MyApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
 
-class _MyAppState extends State<MyApp> {
-  // final _stream = AuthController().loggedInStream;
-  final Stream<bool> _stream = AuthController().loggedInStream;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -7,4 +7,9 @@ class Ingredient {
   final String id;
   final String name;
   // Add stdqty for other functionality here
+
+  @override
+  String toString() {
+    return name;
+  }
 }

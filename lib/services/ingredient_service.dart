@@ -11,14 +11,10 @@ class IngredientService {
     return FirestoreStorage.database
         .collection(_users)
         .doc(Auth().userId)
-        .collection(_ingredients)
-        .snapshots()
-        .map((event) => event.docs
-            .map((e) => Ingredient(
-                  e.data()[_name],
-                  e.id,
-                ))
-            .toList());
+        .snapshots().map((event) {
+          List ingredients = event.data() != null? event.data()![_ingredients] : List.empty();
+          return ingredients.map((e) => Ingredient(e.toString(), null)).toList();
+        } );
   }
 
   Future<void> insertIngredient(String name) {
@@ -46,7 +42,6 @@ class IngredientService {
         .collection(_ingredients)
         .get();
 
-        
     return ingredientsDoc.docs.map((e) => Ingredient(e.data()[_name], e.id)).toList();
   }
 }

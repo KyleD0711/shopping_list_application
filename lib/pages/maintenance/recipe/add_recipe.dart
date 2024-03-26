@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_list_application/controllers/recipe_controller.dart';
 import 'package:shopping_list_application/models/ingredient.dart';
 import 'package:shopping_list_application/models/recipe.dart';
 import 'package:modals/modals.dart';
 import 'package:shopping_list_application/controllers/ingredient_controller.dart';
 import 'package:shopping_list_application/services/ingredient_service.dart';
+import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
 
 class AddRecipePage extends StatefulWidget {
@@ -19,20 +21,24 @@ class _AddRecipePageState extends State<AddRecipePage> {
   final _descriptionController = TextEditingController();
   final _instructionsController = TextEditingController();
 
-  final List<Map<String, String>> ingredients = List.empty();
-  final List<Recipe> recipes = List.empty();
+  final List<Map<String, String>> ingredients = List.empty(growable: true);
+  final List<Map<String, String>> recipes = List.empty(growable: true);
 
-  final Future<List<Ingredient>> existingInrgedient =
+  final Future<List<Ingredient>> existingIngredient =
       IngredientController().getIngredients();
-
-  final String _name = "name";
-  final String _qty = "qty";
+  String instructions = "";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: TextField(controller: _nameController),
+          title: TextField(
+            textAlign: TextAlign.center,
+            controller: _nameController,
+            style: const TextStyle(fontSize: 20),
+            decoration: const InputDecoration(hintText: "Recipe Name"),
+          ),
+          automaticallyImplyLeading: false,
         ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -41,167 +47,186 @@ class _AddRecipePageState extends State<AddRecipePage> {
             BottomNavigationBarItem(icon: Icon(Icons.cancel), label: "Cancel")
           ],
           onTap: (value) {
-            if (value == 0) {
+            if (value == 1) {
               Navigator.of(context).pop();
-            }
+            } else if (value == 0) {}
           },
         ),
         body: Form(
           child: Column(
             children: [
-              Container(
-                margin: const EdgeInsets.all(10.0),
-                padding: const EdgeInsets.all(10.0),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.white),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Descrption"),
-                    const Divider(height: 15.0, color: Colors.black),
-                    TextFormField(controller: _descriptionController)
-                  ],
-                ),
-              ),
-              Container(
-                  height: MediaQuery.of(context).size.height * .25,
-                  margin: const EdgeInsets.all(10.0),
-                  padding: const EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.white),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const Text("Ingredients"),
-                              IconButton(
-                                  onPressed: () async {
-                                    List<Map<String, String>> listItems = await IngredientService().getIngredients().then((value) => value.map((e) => {_name: e.name, _qty: ""}).toList());
-                                    final selectedRecipes =
-                                        await Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    SelectableListView(
-                                                      items: listItems,
-                                                      itemKey: _name,
-                                                      screenName:
-                                                          "Add Ingredients",
-                                                    )));
-                                  },
-                                  icon: const Icon(Icons.add))
-                            ],
-                          ),
-                          const Divider(height: 15.0, color: Colors.black),
-                          Expanded(
-                            child: SizedBox(
-                              height: MediaQuery.of(context).size.height * .25,
-                              child: ListView.separated(
-                                padding: const EdgeInsets.all(10.0),
-                                itemBuilder: (_, index) =>
-                                    _toIngredientWidget(ingredients[index]),
-                                separatorBuilder: (_, __) => const Divider(),
-                                itemCount: ingredients.length,
-                              ),
-                            ),
-                          )
-                        ],
-                      );
-                    },
-                  )),
-              Container(
-                  height: MediaQuery.of(context).size.height * .25,
-                  margin: const EdgeInsets.all(10.0),
-                  padding: const EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.white),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Recipes"),
-                          const Divider(height: 15.0, color: Colors.black),
-                          Expanded(
-                            child: SizedBox(
-                              height: constraints.maxHeight / 2,
-                              child: ListView.separated(
-                                padding: const EdgeInsets.all(10.0),
-                                itemBuilder: (_, index) =>
-                                    _toRecipeWidget(recipes[index]),
-                                separatorBuilder: (_, __) => const Divider(),
-                                itemCount: recipes.length,
-                              ),
-                            ),
-                          )
-                        ],
-                      );
-                    },
-                  )),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: ElevatedButton(
-                    style: ButtonStyle(
-                        fixedSize: MaterialStateProperty.all(
-                            Size.fromWidth(MediaQuery.of(context).size.width))),
-                    onPressed: () => showModal(
-                          ModalEntry.aligned(context,
-                              barrierDismissible: false,
-                              alignment: Alignment.bottomCenter,
-                              tag: "Rando tag",
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Colors.white),
-                                height:
-                                    MediaQuery.of(context).size.height * .85,
-                                padding:
-                                    const EdgeInsets.only(left: 20, right: 20),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const Text("Instructions",
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                color: Colors.black,
-                                              )),
-                                          IconButton(
-                                              onPressed: () =>
-                                                  removeModal("Rando"),
-                                              icon: const Icon(Icons.cancel)),
-                                        ]),
-                                    const Divider(
-                                        height: 15.0, color: Colors.black),
-                                    TextField(
-                                      controller: _instructionsController,
-                                    )
-                                  ],
-                                ),
-                              )),
-                        ),
-                    child: const Text(
-                      "Instructions",
-                      style: TextStyle(color: Colors.white),
-                    )),
-              )
+              descriptionCard(),
+              ingredientsCard(),
+              instructionsCard(),
+              recipesCard()
             ],
           ),
         ));
   }
 
+  void _saveRecipe(
+      List<Map<String, String>> ingredients,
+      List<Map<String, String>> recipes,
+      int prepTimeInMinutes,
+      int cookTimeInMinutes,
+      String name) {
+    RecipeService().insertRecipe(
+        ingredients, recipes, prepTimeInMinutes, cookTimeInMinutes, name);
+  }
+
+  Widget descriptionCard() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+          color: Colors.white,
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text("Descrption"),
+              ),
+              const Divider(height: 15.0, color: Colors.black),
+              TextFormField(controller: _descriptionController)
+            ],
+          )),
+    );
+  }
+
+  Widget instructionsCard() {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          color: Colors.white,
+          child: Column(
+            children: [
+              const Align(
+                  alignment: Alignment.center,
+                  child: Padding(
+                    padding: EdgeInsets.all(13.0),
+                    child: Text(
+                      "Instructions",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  )),
+              const Divider(
+                height: 15,
+                color: Colors.black,
+              ),
+              Text(instructions)
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget recipesCard() {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          color: Colors.white,
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(13.0),
+                    child: Align(
+                        alignment: Alignment.center,
+                        child: Text("Recipes", style: TextStyle(fontSize: 16))),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                        onPressed: () async {
+                          await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => SelectableListView(
+                                    itemStream: RecipeController().getStream(),
+                                    screenName: "Select Recipes",
+                                    selectedItems: recipes,
+                                  )));
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.add)),
+                  )
+                ],
+              ),
+              const Divider(height: 15.0, color: Colors.black),
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(10.0),
+                  itemBuilder: (_, index) =>
+                      _toIngredientWidget(recipes[index]),
+                  separatorBuilder: (_, __) => const Divider(),
+                  itemCount: recipes.length,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget ingredientsCard() {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          color: Colors.white,
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(13.0),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Ingredients",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                        onPressed: () async {
+                          // final List<Map<String, String>> selectedIngredients =
+                          await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => SelectableListView(
+                                    itemStream:
+                                        IngredientController().getStream(),
+                                    screenName: "Select Ingredients",
+                                    selectedItems: ingredients,
+                                  )));
+                          print(ingredients);
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.add)),
+                  )
+                ],
+              ),
+              const Divider(height: 15.0, color: Colors.black),
+              Expanded(
+                child: ListView.separated(
+                  itemBuilder: (_, index) =>
+                      _toIngredientWidget(ingredients[index]),
+                  separatorBuilder: (_, __) => const Divider(),
+                  itemCount: ingredients.length,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _toIngredientWidget(Map<String, String> ingredient) {
-    return Text("${ingredient['ingredient']}: ${ingredient['qty']}");
+    return Text("${ingredient['name']}: ${ingredient['qty']}");
   }
 
   Widget _toRecipeWidget(Recipe recipe) {

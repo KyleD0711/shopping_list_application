@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/recipe.dart';
-import 'package:modals/modals.dart';
 
 class ViewRecipePage extends StatelessWidget {
   const ViewRecipePage({super.key, required this.recipe});
 
   final Recipe recipe;
+
+  static const cardPadding = EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0);
 
   @override
   Widget build(BuildContext context) {
@@ -28,142 +29,131 @@ class ViewRecipePage extends StatelessWidget {
         ),
         body: Column(
           children: [
-            Container(
-              margin: const EdgeInsets.all(10.0),
-              padding: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  color: Colors.white),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Descrption"),
-                  const Divider(height: 15.0, color: Colors.black),
-                  Text(
-                    recipe.description,
-                    textAlign: TextAlign.left,
-                  )
-                ],
+            Padding(
+              padding: cardPadding,
+              child: Card(
+                color: Colors.white,
+                child: Column(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        "Descrption",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    const Divider(height: 15.0, color: Colors.black),
+                    Text(
+                      recipe.description,
+                      textAlign: TextAlign.left,
+                    )
+                  ],
+                ),
               ),
             ),
-            Container(
-                height: MediaQuery.of(context).size.height * .25,
-                margin: const EdgeInsets.all(10.0),
-                padding: const EdgeInsets.all(10.0),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.white),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Ingredients"),
-                        const Divider(height: 15.0, color: Colors.black),
-                        Expanded(
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height * .25,
-                            child: ListView.separated(
-                              padding: const EdgeInsets.all(10.0),
-                              itemBuilder: (_, index) => _toIngredientWidget(
-                                  recipe.ingredients[index]),
-                              separatorBuilder: (_, __) => const Divider(),
-                              itemCount: recipe.ingredients.length,
-                            ),
-                          ),
-                        )
-                      ],
-                    );
-                  },
-                )),
-            Container(
-                height: MediaQuery.of(context).size.height * .25,
-                margin: const EdgeInsets.all(10.0),
-                padding: const EdgeInsets.all(10.0),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.white),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Recipes"),
-                        const Divider(height: 15.0, color: Colors.black),
-                        Expanded(
-                          child: SizedBox(
-                            height: constraints.maxHeight / 2,
-                            child: ListView.separated(
-                              padding: const EdgeInsets.all(10.0),
-                              itemBuilder: (_, index) =>
-                                  _toRecipeWidget(recipe.recipes[index]),
-                              separatorBuilder: (_, __) => const Divider(),
-                              itemCount: recipe.recipes.length,
-                            ),
-                          ),
-                        )
-                      ],
-                    );
-                  },
-                )),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: ElevatedButton(
-                  style: ButtonStyle(
-                      fixedSize: MaterialStateProperty.all(
-                          Size.fromWidth(MediaQuery.of(context).size.width))),
-                  onPressed: () => showModal(
-                        ModalEntry.aligned(context,
-                            barrierDismissible: false,
-                            alignment: Alignment.bottomCenter,
-                            tag: recipe.id,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.white),
-                              height: MediaQuery.of(context).size.height * .85,
-                              padding:
-                                  const EdgeInsets.only(left: 20, right: 20),
-                              child: Column(
-                                children: [
-                                  Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Text("Instructions",
-                                            style: TextStyle(fontSize: 20, color: Colors.black, )),
-                                        IconButton(
-                                            onPressed: () =>
-                                                removeModal(recipe.id),
-                                            icon: const Icon(Icons.cancel)),
-                                      ]),
-                                  const Divider(
-                                      height: 15.0, color: Colors.black),
-                                  Text(recipe.instructions, style: const TextStyle(fontSize: 18, color: Colors.black))
-                                ],
-                              ),
-                            )),
+            Expanded(
+              child: Padding(
+                padding: cardPadding,
+                child: Card(
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child:
+                            Text("Ingredients", style: TextStyle(fontSize: 16)),
                       ),
-                  child: const Text(
-                    "Instructions",
-                    style: TextStyle(color: Colors.white),
-                  )),
+                      const Divider(height: 15.0, color: Colors.black),
+                      Expanded(
+                        child: ListView.separated(
+                          itemBuilder: (_, index) =>
+                              _toIngredientWidget(recipe.ingredients[index]),
+                          separatorBuilder: (_, __) => const Divider(
+                            color: Colors.transparent,
+                          ),
+                          itemCount: recipe.ingredients.length,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: cardPadding,
+                child: Card(
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text("Instructions", style: TextStyle(fontSize: 16)),
+                      ),
+                      const Divider(height: 15.0, color: Colors.black),
+                      Text(recipe.instructions, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12),)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: cardPadding,
+                child: Card(
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text("Recipes", style: TextStyle(fontSize: 16)),
+                      ),
+                      const Divider(height: 15.0, color: Colors.black),
+                      Expanded(
+                        child: ListView.separated(
+                          padding: const EdgeInsets.all(10.0),
+                          itemBuilder: (_, index) =>
+                              _toRecipeWidget(recipe.recipes[index]),
+                          separatorBuilder: (_, __) => const Divider(),
+                          itemCount: recipe.recipes.length,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             )
           ],
         ));
   }
 
   Widget _toIngredientWidget(Map<String, String> ingredient) {
-    return Text("${ingredient['ingredient']}: ${ingredient['qty']}");
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Text("${ingredient['name']}: ${ingredient['qty']}"),
+    );
   }
 
-  Widget _toRecipeWidget(Recipe recipe) {
-    return Row(
+  Widget _toRecipeWidget(Map<String, String> recipe) {
+    return Stack(
       children: [
-        Text(recipe.name),
-        ElevatedButton(onPressed: () {}, child: const Text("Go To"))
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "${recipe['name']}: ${recipe['qty']}",
+                style: const TextStyle(fontSize: 18),
+              )),
+        ),
+        Align(
+            alignment: Alignment.centerRight,
+            child: ElevatedButton(
+                onPressed: () {},
+                child: const Text(
+                  "Go To",
+                  style: TextStyle(color: Colors.white),
+                )))
       ],
     );
   }
