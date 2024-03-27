@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/recipe.dart';
+import 'package:shopping_list_application/services/recipe_service.dart';
 
 class ViewRecipePage extends StatelessWidget {
   const ViewRecipePage({super.key, required this.recipe});
@@ -19,10 +20,14 @@ class ViewRecipePage extends StatelessWidget {
           backgroundColor: Theme.of(context).colorScheme.tertiary,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
-            BottomNavigationBarItem(icon: Icon(Icons.cancel), label: "Cancel")
+            BottomNavigationBarItem(icon: Icon(Icons.delete), label: "Delete")
           ],
           onTap: (value) {
             if (value == 0) {
+              Navigator.of(context).pop();
+            }
+            else if (value == 1){
+              RecipeService().removeRecipe(recipe);              
               Navigator.of(context).pop();
             }
           },

@@ -16,9 +16,9 @@ class RecipeController{
     }
 
   Future<void> insertRecipe(List<Map<String, String>> ingredients, List<Map<String, String>> recipes, int prepTimeInMinutes,
-          int cookTimeInMinutes, String name) =>
+          int cookTimeInMinutes, String name, String instructions, String description) =>
       _service.insertRecipe(
-          ingredients, recipes ,prepTimeInMinutes, cookTimeInMinutes, name);
+          ingredients, recipes ,prepTimeInMinutes, cookTimeInMinutes, name, instructions, description);
 
   Future<void> removeRecipe(Recipe recipe) => _service.removeRecipe(recipe);
 }

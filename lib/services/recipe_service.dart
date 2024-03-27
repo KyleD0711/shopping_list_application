@@ -40,13 +40,15 @@ class RecipeService {
       List<Map<String, String>> recipes,
       int prepTimeInMinutes,
       int cookTimeInMinutes,
-      String name) {
+      String name, String instructions, String description) {
     final data = {
       "ingredients": ingredients,
       "recipes": recipes,
       "prepTimeInMinutes": prepTimeInMinutes,
       "cookTimeInMinutes": cookTimeInMinutes,
-      "name": name
+      "name": name,
+      "instructions": instructions,
+      "description": description,
     };
 
     return FirestoreStorage.database

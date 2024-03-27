@@ -34,7 +34,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                             padding: const EdgeInsets.all(10.0),
                             itemBuilder: (_, index) =>
                                 _toWidget(recipes[index]),
-                            separatorBuilder: (_, __) => const Divider(),
+                            separatorBuilder: (_, __) => const Divider(color: Colors.transparent,),
                             itemCount: recipes.length,
                           )
                         : const Center(
