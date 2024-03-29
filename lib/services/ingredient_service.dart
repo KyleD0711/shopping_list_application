@@ -11,14 +11,18 @@ class IngredientService {
     return FirestoreStorage.database
         .collection(_users)
         .doc(Auth().userId)
-        .snapshots().map((event) {
-          List ingredients = event.data() != null? event.data()![_ingredients] : List.empty();
-          return ingredients.map((e) => Ingredient(e.toString(), null)).toList();
-        } );
+        .collection(_ingredients)
+        .snapshots().map((event) =>
+          event.docs.map((e) {
+            Ingredient newIngredient = Ingredient(e.data()['name'], e.id);
+            return newIngredient;
+          }).toList()
+         );
   }
 
   Future<void> insertIngredient(String name) {
     final data = {"name": name};
+    print(data);
     return FirestoreStorage.database
         .collection(_users)
         .doc(Auth().userId)

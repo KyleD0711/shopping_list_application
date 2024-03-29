@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shopping_list_application/controllers/recipe_controller.dart';
 import 'package:shopping_list_application/models/ingredient.dart';
 import 'package:shopping_list_application/models/recipe.dart';
-import 'package:modals/modals.dart';
 import 'package:shopping_list_application/controllers/ingredient_controller.dart';
-import 'package:shopping_list_application/pages/maintenance/ingredient/add_ingredient_page.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/instructions_page.dart';
-import 'package:shopping_list_application/services/ingredient_service.dart';
-import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
 
 class AddRecipePage extends StatefulWidget {
@@ -61,11 +57,15 @@ class _AddRecipePageState extends State<AddRecipePage> {
               Navigator.of(context).pop();
             } else if (value == 0) {
               if (_formKey.currentState!.validate()) {
-                // TODO create the account and store the result
-                // If the result is null, navigate back a page
-                // Otherwise, show the error message on the screen using _errorMessage
-                _saveRecipe(ingredients, recipes, int.parse(_prepTimeController.text), int.parse(_cookTimeController.text), _nameController.text, instructions, _descriptionController.text);
-                Navigator.of(context).pop();              
+                _saveRecipe(
+                    ingredients,
+                    recipes,
+                    int.parse(_prepTimeController.text),
+                    int.parse(_cookTimeController.text),
+                    _nameController.text,
+                    instructions,
+                    _descriptionController.text);
+                Navigator.of(context).pop();
               }
             }
           },
@@ -192,13 +192,22 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                     itemStream: RecipeController().getStream(),
                                     screenName: "Select Recipes",
                                     selectedItems: recipes,
-                                    bottomActions: const [BottomNavigationBarItem(icon: Icon(Icons.arrow_back), label: "Back"), BottomNavigationBarItem(icon: Icon(Icons.add), label: "Add Recipe")],
+                                    bottomActions: const [
+                                      BottomNavigationBarItem(
+                                          icon: Icon(Icons.arrow_back),
+                                          label: "Back"),
+                                      BottomNavigationBarItem(
+                                          icon: Icon(Icons.add),
+                                          label: "Add Recipe")
+                                    ],
                                     actionTap: (int value) {
-                                      if (value == 0){
+                                      if (value == 0) {
                                         Navigator.of(context).pop();
-                                      }
-                                      else if (value == 1){
-                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddRecipePage()));
+                                      } else if (value == 1) {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const AddRecipePage()));
                                       }
                                     },
                                   )));
@@ -337,10 +346,11 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                       if (value == 0) {
                                         Navigator.of(context).pop();
                                       } else if (value == 1) {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: ((context) =>
-                                                    AddIngredientPage())));
+                                        showDialog(
+                                            builder: (context) {
+                                              return addIngredientDialog();
+                                            },
+                                            context: context);
                                       }
                                     })),
                           );
@@ -362,6 +372,40 @@ class _AddRecipePageState extends State<AddRecipePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget addIngredientDialog() {
+    final ingredientNameController = TextEditingController();
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            if (ingredientNameController.text != "") {
+              IngredientController()
+                  .addIngredient(ingredientNameController.text);
+              Navigator.of(context).pop();
+            }
+          },
+          style: ButtonStyle(
+            backgroundColor:
+                MaterialStatePropertyAll(Theme.of(context).colorScheme.primary),
+          ),
+          child: const Text("Add", style: TextStyle(color: Colors.white)),
+        )
+      ],
+      title: const Text("Add Ingredient"),
+      content: TextField(
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Theme.of(context).colorScheme.tertiary,
+          hintText: "Name:",
+          hintStyle: const TextStyle(color: Colors.white),
+        ),
+        controller: ingredientNameController,
       ),
     );
   }

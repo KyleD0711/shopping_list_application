@@ -42,10 +42,7 @@ class _SelectableListViewState extends State<SelectableListView> {
           items: widget.bottomActions,
           onTap: widget.actionTap),
       body: Center(
-        child: Column(children: [
-          searchBar(),
-          itemStreamBuilder()
-        ]),
+        child: Column(children: [searchBar(), itemStreamBuilder()]),
       ),
     );
   }
@@ -76,29 +73,30 @@ class _SelectableListViewState extends State<SelectableListView> {
 
   Widget itemStreamBuilder() {
     return StreamBuilder<List<dynamic>>(
-              stream: widget.itemStream,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData || snapshot.data == null) {
-                  return const Text("No Results");
-                }
+        stream: widget.itemStream,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.data == null) {
+            return const Text("No Results");
+          }
 
-                List<Map<String, String>> items =
-                    formatStreamData(snapshot.data);
+          List<Map<String, String>> items = formatStreamData(snapshot.data);
 
-                return Expanded(
-                  child: ListView.separated(
-                    itemBuilder: (_, index) => _toWidget(items[index]),
-                    separatorBuilder: (_, __) =>
-                        const Divider(height: 5, color: Colors.transparent),
-                    itemCount: items.length,
-                  ),
-                );
-              });
+          return Expanded(
+            child: ListView.separated(
+              itemBuilder: (_, index) => _toWidget(items[index]),
+              separatorBuilder: (_, __) =>
+                  const Divider(height: 5, color: Colors.transparent),
+              itemCount: items.length,
+            ),
+          );
+        });
   }
 
   List<Map<String, String>> formatStreamData(List<dynamic>? data) {
-    List<Map<String, String>> items =
-        data!.map((e) => {"name": e.toString(), "qty": ""}).toList();
+    List<Map<String, String>> items = data!.map((e) {
+      print(e);
+      return {"name": e.toString(), "qty": ""};
+    }).toList();
 
     // Set selected items
     for (var element in widget.selectedItems) {

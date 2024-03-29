@@ -14,8 +14,8 @@ class IngredientController{
 
   Future<List<Ingredient>> getIngredients() => _service.getIngredients();
 
-  Future<void> insertRecipe(String name) =>
+  Future<void> addIngredient(String name) =>
       _service.insertIngredient(name);
 
-  Future<void> removeRecipe(Ingredient ingredient) => _service.removeIngredient(ingredient);
+  Future<void> removeIngredient(Ingredient ingredient) => _service.removeIngredient(ingredient);
 }
