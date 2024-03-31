@@ -23,6 +23,7 @@ class _SelectableListViewState extends State<SelectableListView> {
   final _searchController = TextEditingController();
   String pageName = "";
   final Map<String, TextEditingController> _controllers = {};
+  String searchFilter = "";
 
   @override
   void initState() {
@@ -55,6 +56,11 @@ class _SelectableListViewState extends State<SelectableListView> {
           child: Align(
             alignment: Alignment.centerLeft,
             child: TextField(
+                onSubmitted: (value) {
+                  setState(() {
+                    searchFilter = value;
+                  });
+                },
                 decoration: InputDecoration(
                   suffixIcon: const Icon(Icons.search),
                   fillColor: Colors.white,
@@ -79,39 +85,69 @@ class _SelectableListViewState extends State<SelectableListView> {
             return const Text("No Results");
           }
 
-          List<Map<String, String>> items = formatStreamData(snapshot.data);
+          List<Map<String, String>> items =
+              formatStreamData(snapshot.data, searchFilter);
 
           return Expanded(
             child: ListView.separated(
               itemBuilder: (_, index) => _toWidget(items[index]),
               separatorBuilder: (_, __) =>
-                  const Divider(height: 5, color: Colors.transparent),
+                  const Divider(color: Colors.transparent),
               itemCount: items.length,
             ),
           );
         });
   }
 
-  List<Map<String, String>> formatStreamData(List<dynamic>? data) {
-    List<Map<String, String>> items = data!.map((e) {
-      print(e);
-      return {"name": e.toString(), "qty": ""};
-    }).toList();
+  List<Map<String, String>> formatStreamData(
+      List<dynamic>? data, String searchFilter) {
+    List<Map<String, String>> items =
+        List<Map<String, String>>.empty(growable: true);
+
+    for (dynamic element in data!) {
+      if (searchFilter == "") {
+        items.add({"name": element.toString(), "qty": ""});
+      } else {
+        if (element.toString().contains(searchFilter)) {
+          items.add({"name": element.toString(), "qty": ""});
+        }
+      }
+    }
 
     // Set selected items
     for (var element in widget.selectedItems) {
-      for (Map<String, String> item in items) {
+      for (Map<String, String>? item in items) {
+        if (item == null) {
+          continue;
+        }
         if (item['name'] == element['name']) {
           item['qty'] = element['qty'] ?? "No Quantity";
         }
       }
     }
-    return items;
+  
+    return putSelectedMapsAtBeginning(items);
+  }
+
+  List<Map<String, String>> putSelectedMapsAtBeginning(
+      List<Map<String, String>> list) {
+    List<Map<String, String>> matched = [];
+    List<Map<String, String>> unmatched = [];
+
+    for (var map in list) {
+      if (widget.selectedItems.any(
+                              (element) => element['name'] == map['name'])) {
+        matched.add(map);
+      } else {
+        unmatched.add(map);
+      }
+    }
+
+    return [...matched, ...unmatched];
   }
 
   Widget _toWidget(Map<String, String> item) {
     String itemName = item["name"] ?? "No Name";
-    print(item);
     if (!_controllers.keys.contains(itemName)) {
       _controllers[itemName] = TextEditingController(text: item['qty']);
     }

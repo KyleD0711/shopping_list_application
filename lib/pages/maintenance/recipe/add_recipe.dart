@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/controllers/recipe_controller.dart';
 import 'package:shopping_list_application/models/ingredient.dart';
@@ -7,7 +8,8 @@ import 'package:shopping_list_application/pages/maintenance/recipe/instructions_
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
 
 class AddRecipePage extends StatefulWidget {
-  const AddRecipePage({super.key});
+  const AddRecipePage({super.key, this.recipe});
+  final Recipe? recipe;
 
   @override
   State<AddRecipePage> createState() => _AddRecipePageState();
@@ -15,13 +17,13 @@ class AddRecipePage extends StatefulWidget {
 
 class _AddRecipePageState extends State<AddRecipePage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _prepTimeController = TextEditingController();
-  final _cookTimeController = TextEditingController();
+  late TextEditingController _nameController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _prepTimeController;
+  late TextEditingController _cookTimeController;
 
-  final List<Map<String, String>> ingredients = List.empty(growable: true);
-  final List<Map<String, String>> recipes = List.empty(growable: true);
+  late List<Map<String, String>> ingredients;
+  late List<Map<String, String>> recipes;
 
   final Future<List<Ingredient>> existingIngredient =
       IngredientController().getIngredients();
@@ -31,41 +33,63 @@ class _AddRecipePageState extends State<AddRecipePage> {
   final double instructionsHeight = 150;
 
   @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.recipe?.name);
+    _descriptionController =
+        TextEditingController(text: widget.recipe?.description);
+    _prepTimeController = TextEditingController(text: widget.recipe?.prepTime);
+    _cookTimeController = TextEditingController(text: widget.recipe?.cookTime);
+    ingredients = widget.recipe?.ingredients ??
+        List<Map<String, String>>.empty(growable: true);
+    recipes = widget.recipe?.recipes ??
+        List<Map<String, String>>.empty(growable: true);
+    instructions = widget.recipe?.instructions ?? "";
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: TextFormField(
-            textAlign: TextAlign.center,
-            controller: _nameController,
-            style: const TextStyle(fontSize: 20),
-            decoration: const InputDecoration(hintText: "Recipe Name"),
-            validator: (value) {
-              return validateNonEmptyMessage(value);
-            },
-          ),
+          title: const Text("New Ingredient"),
           automaticallyImplyLeading: false,
         ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Theme.of(context).colorScheme.tertiary,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.save), label: "Save"),
-            BottomNavigationBarItem(icon: Icon(Icons.cancel), label: "Cancel")
+            BottomNavigationBarItem(
+              icon: Icon(Icons.cancel),
+              label: "Cancel",
+            )
           ],
           onTap: (value) async {
             if (value == 1) {
               Navigator.of(context).pop();
             } else if (value == 0) {
               if (_formKey.currentState!.validate()) {
-                _saveRecipe(
-                    ingredients,
-                    recipes,
-                    int.parse(_prepTimeController.text),
-                    int.parse(_cookTimeController.text),
-                    _nameController.text,
-                    instructions,
-                    _descriptionController.text);
-                Navigator.of(context).pop();
+                if (widget.recipe == null) {
+                  _saveRecipe(
+                      ingredients,
+                      recipes,
+                      _prepTimeController.text,
+                      _cookTimeController.text,
+                      _nameController.text,
+                      instructions,
+                      _descriptionController.text);
+                  Navigator.of(context).pop();
+                } else {
+                  _updateRecipe(
+                      ingredients,
+                      recipes,
+                      _prepTimeController.text,
+                      _cookTimeController.text,
+                      _nameController.text,
+                      instructions,
+                      _descriptionController.text);
+                  Navigator.of(context).pop();
+                }
               }
             }
           },
@@ -73,6 +97,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
         body: Form(
           key: _formKey,
           child: ListView(children: [
+            nameCard(),
             descriptionCard(),
             ingredientsCard(),
             instructionsCard(),
@@ -82,16 +107,52 @@ class _AddRecipePageState extends State<AddRecipePage> {
         ));
   }
 
+  Widget nameCard() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+          color: Colors.white,
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text("Name"),
+              ),
+              const Divider(height: 15.0, color: Colors.black),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  controller: _nameController,
+                  validator: (value) => validateNonEmptyMessage(value),
+                ),
+              )
+            ],
+          )),
+    );
+  }
+
   void _saveRecipe(
       List<Map<String, String>> ingredients,
       List<Map<String, String>> recipes,
-      int prepTimeInMinutes,
-      int cookTimeInMinutes,
+      String prepTime,
+      String cookTime,
       String name,
       String instructions,
       String description) {
-    RecipeController().insertRecipe(ingredients, recipes, prepTimeInMinutes,
-        cookTimeInMinutes, name, instructions, description);
+    RecipeController().insertRecipe(ingredients, recipes, prepTime, cookTime,
+        name, instructions, description);
+  }
+
+  void _updateRecipe(
+      List<Map<String, String>> ingredients,
+      List<Map<String, String>> recipes,
+      String prepTime,
+      String cookTime,
+      String name,
+      String instructions,
+      String description) {
+    RecipeController().updateRecipe(widget.recipe!.id, ingredients, recipes,
+        prepTime, cookTime, name, instructions, description);
   }
 
   Widget descriptionCard() {

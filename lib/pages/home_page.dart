@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
         items: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.tab_outlined), label: "Recipes"),
-          BottomNavigationBarItem(icon: Icon(Icons.cancel), label: "Meals")
+          BottomNavigationBarItem(icon: Icon(Icons.set_meal), label: "Meals")
         ],
         onTap: (value){
           if (value == 0){

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/controllers/auth_controller.dart';
-import 'package:shopping_list_application/pages/home_page.dart';
 import 'package:shopping_list_application/pages/opening_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';

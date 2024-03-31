@@ -3,13 +3,13 @@ import "package:uuid/uuid.dart";
 import "package:shopping_list_application/models/ingredient.dart";
 
 class Recipe {
-  Recipe({String? id, List<Map<String, String>>? ingredients, List<Map<String, String>>? recipes, int? prepTimeInMinutes,
-      int? cookTimeInMinutes, String? name, String? description, String? instructions})
+  Recipe({String? id, List<Map<String, String>>? ingredients, List<Map<String, String>>? recipes, String? prepTime,
+      String? cookTime, String? name, String? description, String? instructions})
       : id = id ?? _uuid.v1(),
         ingredients = ingredients ?? List<Map<String, String>>.empty(growable: true),
         recipes = recipes ?? List<Map<String, String>>.empty(growable: true), 
-        prepTimeInMinutes = prepTimeInMinutes ?? 0, 
-        cookTimeInMinutes = cookTimeInMinutes ?? 0,
+        prepTime = prepTime ?? "", 
+        cookTime = cookTime ?? "",
         description = description ?? "",
         instructions = instructions ?? "",
         name = name ?? "Unamed recipe";
@@ -18,8 +18,8 @@ class Recipe {
   final String id;
   final List<Map<String, String>> ingredients;
   final List<Map<String, String>> recipes;
-  final int prepTimeInMinutes;
-  final int cookTimeInMinutes;
+  final String prepTime;
+  final String cookTime;
   final String description;
   final String instructions;
   final String name;

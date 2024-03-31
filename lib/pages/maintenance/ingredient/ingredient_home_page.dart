@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/controllers/recipe_controller.dart';
 import 'package:shopping_list_application/models/recipe.dart';
-import 'package:shopping_list_application/pages/maintenance/recipe/view_recipe.dart';
 import 'package:modals/modals.dart';
 
 class RecipeHomePage extends StatefulWidget {
@@ -65,8 +64,8 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                 child: ListView(
                   children: [
                     Center(child: Text(recipe.name)),
-                    Text("Prep Time: ${recipe.prepTimeInMinutes}"),
-                    Text("Cook Time: ${recipe.cookTimeInMinutes}")
+                    Text("Prep Time: ${recipe.prepTime}"),
+                    Text("Cook Time: ${recipe.cookTime}")
                   ],
                 ),
               ),

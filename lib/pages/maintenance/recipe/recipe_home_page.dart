@@ -73,17 +73,21 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
   }
 
   Widget _toWidget(Recipe recipe) {
+    print(recipe.cookTime);
     return ListTile(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       tileColor: Colors.white,
       title: Text(recipe.name),
-      trailing: SizedBox(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Prep Time: ${recipe.prepTimeInMinutes}\nCook Time: ${recipe.cookTimeInMinutes}"),
-        ],
-      )),
+      trailing: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Prep Time: ${recipe.prepTime}\nCook Time: ${recipe.cookTime}"),
+          ],
+        )),
+      ),
       onTap: () => {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => ViewRecipePage(recipe: recipe)))
