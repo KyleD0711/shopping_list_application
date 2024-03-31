@@ -1,4 +1,3 @@
-import "package:shopping_list_application/models/ingredient.dart";
 import "package:shopping_list_application/models/recipe.dart";
 import "package:shopping_list_application/services/recipe_service.dart";
 

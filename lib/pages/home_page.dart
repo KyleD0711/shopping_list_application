@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/recipe_home_page.dart';
-import 'package:shopping_list_application/services/recipe_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,7 +9,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _recipeStream = RecipeService().getRecipes();
   @override
   Widget build(BuildContext context) {
     return Scaffold(

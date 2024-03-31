@@ -1,6 +1,4 @@
-import "package:cloud_firestore/cloud_firestore.dart";
 import "package:uuid/uuid.dart";
-import "package:shopping_list_application/models/ingredient.dart";
 
 class Recipe {
   Recipe({String? id, List<Map<String, String>>? ingredients, List<Map<String, String>>? recipes, String? prepTime,

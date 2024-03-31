@@ -1,6 +1,3 @@
-import "package:cloud_firestore/cloud_firestore.dart";
-import "package:flutter/material.dart";
-import "package:shopping_list_application/models/ingredient.dart";
 import "package:shopping_list_application/models/recipe.dart";
 import "package:shopping_list_application/services/auth.dart";
 import "./firestore_storage.dart";
@@ -90,10 +87,7 @@ class RecipeService {
   Future<Recipe?> getRecipe(String recipeId) async {
     
     final recipeData = await FirestoreStorage.database.collection(_users).doc(Auth().userId).collection(_recipes).doc(recipeId).get();
-    if (recipeData == null){
-      return null;
-    }
-    else if (recipeData.data() == null){
+    if (recipeData.data() == null){
       return null;
     }
     else {
