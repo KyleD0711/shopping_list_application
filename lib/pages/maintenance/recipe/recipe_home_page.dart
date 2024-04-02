@@ -60,7 +60,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
               items: const [
                 BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.cancel), label: "Meals")
+                    icon: Icon(Icons.set_meal), label: "Meal Planning")
               ],
               onTap: (value) {
                 if (value == 0) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/recipe_home_page.dart';
+import 'package:shopping_list_application/pages/maintenance/weeks/week_home_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,6 +28,9 @@ class _HomePageState extends State<HomePage> {
         onTap: (value){
           if (value == 0){
             Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RecipeHomePage()));
+          }
+          else if (value == 1){
+             Navigator.of(context).push(MaterialPageRoute(builder: (context) => const WeekHomePage()));
           }
         },
       ),

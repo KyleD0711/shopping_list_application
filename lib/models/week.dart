@@ -13,5 +13,5 @@ class Week {
   final String id;
   final DateTime beginDate;
   final DateTime endDate;
-  final Map<String, List<String>> days;
+  final Map<String, List<Map<String, String>>> days;
 }

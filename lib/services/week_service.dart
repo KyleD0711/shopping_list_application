@@ -24,18 +24,40 @@ class WeekService {
                   endDate:
                       DateTime.fromMillisecondsSinceEpoch(e.data()[_endDate]),
                   days: days.map(
-                      (key, value) => MapEntry(key, List<String>.from(value))));
+                      (key, value) => MapEntry(key, List<Map<String, String>>.from(value))));
             }).toList());
   }
 
-  Future<void> insertWeek(DateTime beginningDate, DateTime endDate, Map<String, List<String>> days){
-    final data = {
-      "beginningDate": beginningDate.millisecondsSinceEpoch,
-      "endDate": endDate.millisecondsSinceEpoch,
-      "days": days
-    };
+  Stream<Week> getWeek(String weekId) {
+    return FirestoreStorage.database
+        .collection(_users)
+        .doc(Auth().userId)
+        .collection(_weeks)
+        .doc(weekId)
+        .snapshots()
+        .map((e) {
+      Map<String, dynamic> days = e.data()![_days];
+      return Week(
+          id: e.id,
+          beginDate:
+              DateTime.fromMillisecondsSinceEpoch(e.data()![_beginningDate]),
+          endDate: DateTime.fromMillisecondsSinceEpoch(e.data()![_endDate]),
+          days: days
+              .map((key, value) => MapEntry(key, List<Map<String,String>>.from(value))));
+    });
+  }
 
-   return FirestoreStorage.database
+  Future<void> insertWeek(DateTime beginningDate,
+      Map<String, List<String>> days) {
+      
+      DateTime endDate = beginningDate.add(const Duration(days: 7));
+      final data = {
+        "beginningDate": beginningDate.millisecondsSinceEpoch,
+        "endDate": endDate.millisecondsSinceEpoch,
+        "days": days
+      };
+
+    return FirestoreStorage.database
         .collection(_users)
         .doc(Auth().userId)
         .collection(_weeks)

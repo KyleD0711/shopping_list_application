@@ -14,9 +14,9 @@ class WeekController {
     return _service.getWeeks();
   }
 
-  Future<void> insertWeek(DateTime beginningDate, DateTime endDate, Map<String, List<String>> days
+  Future<void> insertWeek(DateTime beginningDate, Map<String, List<String>> days
           ) =>
-      _service.insertWeek(beginningDate, endDate, days);
+      _service.insertWeek(beginningDate, days);
 
   Future<void> removeWeek(Week week) => _service.removeWeek(week);
 
