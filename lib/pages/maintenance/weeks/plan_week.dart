@@ -1,9 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:shopping_list_application/models/week.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
+import 'package:shopping_list_application/utils/date_helpers.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
 
 class PlanWeekPage extends StatefulWidget {
@@ -20,22 +20,15 @@ class PlanWeekPage extends StatefulWidget {
 }
 
 class _PlanWeekPageState extends State<PlanWeekPage> {
-  late final Map<String, List<Map<String, String>>> days;
+  final Map<DateTime, List<Map<String, String>>> days = {};
   DateTime? beginDate;
+  DateTime? endDate;
   @override
   void initState() {
     super.initState();
-    days = widget.week?.days ??
-        <String, List<Map<String, String>>>{
-          'Monday': [],
-          'Tuesday': [],
-          'Wednesday': [],
-          'Thursday': [],
-          'Friday': [],
-          'Saturday': [],
-          'Sunday': [],
-        };
+    days.addAll(widget.week?.days ?? {});
     beginDate = widget.week?.beginDate;
+    endDate = widget.week?.endDate;
   }
 
   @override
@@ -56,31 +49,101 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
           )
         ],
         onTap: (value) async {
-          if (value == 1){
+          if (value == 0) {
+            if (beginDate == null || endDate == null){
+              showDialog(context: context, builder: (context) => errorPopUp("Dates can't be null"));
+            }
+            else{
+              WeekService().insertWeek(beginDate!, endDate!, days);
+              Navigator.of(context).pop();
+            }
+          } else if (value == 1) {
             Navigator.of(context).pop();
           }
         },
       ),
       body: ListView(children: [
-        dateCard(beginDate, "Begin Date"),
-        CarouselSlider(
-          items: getAllDayCards(days),
-          options: CarouselOptions(autoPlay: false, height: 500),
-        )
+        Row(
+          children: [
+            dateCard(beginDate, "Begin Date"),
+            dateCard(endDate, "End Date")
+          ],
+        ),
+        beginDate != null && endDate != null
+            ? CarouselSlider(
+                items: getAllDayCards(days!),
+                options: CarouselOptions(
+                    autoPlay: false,
+                    enableInfiniteScroll: days.entries.length > 1 ? true : false,
+                    enlargeCenterPage: true,
+                    height: 550,
+                    enlargeFactor: .2),
+              )
+            : const Text(
+                "Please select dates",
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
       ]),
     );
   }
 
-  List<Widget> getAllDayCards(Map<String, List<Map<String, String>>> days) {
+  String? validateDates(DateTime? date, String errorMessage) {
+    if (date == null) {
+      return errorMessage;
+    }
+
+    return null;
+  }
+
+  Widget errorPopUp(String message) {
+    return AlertDialog(
+      title: Text(message),
+      actions: [
+        ElevatedButton(
+          child: const Text(
+            "Acknowledge",
+            style: TextStyle(color: Colors.red, fontSize: 20),
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        )
+      ],
+    );
+  }
+
+  void calcDayCards(DateTime? startDate, DateTime? finishDate) {
+    if (startDate == null || finishDate == null) {
+      return;
+    } else if (startDate.isAfter(finishDate)) {
+      return;
+    }
+
+    Map<DateTime, List<Map<String, String>>> newDays = {};
+    Duration difference = finishDate.difference(startDate);
+    for (int i = 0; i <= difference.inDays; i++) {
+      if (days.containsKey(startDate.add(Duration(days: i)))) {
+        newDays.addEntries([
+          MapEntry(startDate.add(Duration(days: i)),
+              days[startDate.add(Duration(days: i))]!)
+        ]);
+      } else {
+        newDays.addEntries([MapEntry(startDate.add(Duration(days: i)), [])]);
+      }
+    }
+    days.clear();
+    days.addAll(newDays);
+  }
+
+  List<Widget> getAllDayCards(Map<DateTime, List<Map<String, String>>> days) {
     List<Widget> dayCards = [];
-    print(days);
     for (int i = 0; i < days.keys.length; i++) {
-      dayCards.add(dayCard(days.keys.toList()[i], days.values.toList()[i]));
+      dayCards.add(dayCard(getDayOfWeek(days.keys.toList()[i]),
+          formatDate(days.keys.toList()[i]), days.values.toList()[i]));
     }
     return dayCards;
   }
 
-  Widget dayCard(String name, List<Map<String, String>> weeks) {
+  Widget dayCard(String name, String date, List<Map<String, String>> weeks) {
     return Padding(
       padding: PlanWeekPage.cardPadding,
       child: SizedBox(
@@ -94,6 +157,13 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                date,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w300,
                 ),
               ),
               const Divider(height: 15.0, color: Colors.black),
@@ -150,65 +220,76 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
   }
 
   Widget dateCard(DateTime? date, String title) {
-    return Card(
-      color: Colors.white,
-      margin: const EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Stack(children: [
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+    return Expanded(
+      child: Card(
+        color: Colors.white,
+        margin: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Stack(children: [
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  onPressed: () async {
-                    date = await showDatePicker(
-                        context: context,
-                        firstDate: DateTime(2024),
-                        lastDate: DateTime(2025),
-                        currentDate: DateTime.now(),
-                        confirmText: "Confirm",
-                        cancelText: "Cancel");
-                    setState(() {
-                      beginDate = date;
-                    });
-                  },
-                  icon: const Icon(Icons.add),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    onPressed: () async {
+                      date = await showDatePicker(
+                          context: context,
+                          firstDate: DateTime(2024),
+                          lastDate: DateTime(2025),
+                          currentDate: DateTime.now(),
+                          confirmText: "Confirm",
+                          cancelText: "Cancel",
+                          switchToCalendarEntryModeIcon:
+                              const Icon(Icons.date_range));
+                      setState(() {
+                        if (title == "Begin Date") {
+                          beginDate = date;
+                        } else if (title == "End Date") {
+                          endDate = date;
+                        }
+                        calcDayCards(beginDate, endDate);
+                      });
+                    },
+                    icon: const Icon(Icons.add),
+                  ),
+                ),
+              ]),
+            ),
+            const Divider(
+              color: Colors.black,
+              height: 4,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                date != null
+                    ? "${getDayOfWeek(date!)}\n${formatDate(date!)}"
+                    : "No Date",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
                 ),
               ),
-            ]),
-          ),
-          const Divider(
-            color: Colors.black,
-            height: 4,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              date != null ? date.toString() : "No Date",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

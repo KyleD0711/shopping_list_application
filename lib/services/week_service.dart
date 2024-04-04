@@ -16,6 +16,7 @@ class WeekService {
         .collection(_weeks)
         .snapshots()
         .map((event) => event.docs.map((e) {
+              print(e);
               Map<String, dynamic> days = e.data()[_days];
               return Week(
                   id: e.id,
@@ -24,7 +25,7 @@ class WeekService {
                   endDate:
                       DateTime.fromMillisecondsSinceEpoch(e.data()[_endDate]),
                   days: days.map(
-                      (key, value) => MapEntry(key, List<Map<String, String>>.from(value))));
+                      (key, value) => MapEntry(DateTime.fromMillisecondsSinceEpoch(int.parse(key)), List<Map<String, String>>.from(value))));
             }).toList());
   }
 
@@ -43,14 +44,13 @@ class WeekService {
               DateTime.fromMillisecondsSinceEpoch(e.data()![_beginningDate]),
           endDate: DateTime.fromMillisecondsSinceEpoch(e.data()![_endDate]),
           days: days
-              .map((key, value) => MapEntry(key, List<Map<String,String>>.from(value))));
+              .map((key, value) => MapEntry(DateTime.fromMillisecondsSinceEpoch(int.parse(key)), List<Map<String,String>>.from(value))));
     });
   }
 
-  Future<void> insertWeek(DateTime beginningDate,
-      Map<String, List<String>> days) {
+  Future<void> insertWeek(DateTime beginningDate, DateTime endDate,
+      Map<DateTime, List<Map<String, String>>> days) {
       
-      DateTime endDate = beginningDate.add(const Duration(days: 7));
       final data = {
         "beginningDate": beginningDate.millisecondsSinceEpoch,
         "endDate": endDate.millisecondsSinceEpoch,

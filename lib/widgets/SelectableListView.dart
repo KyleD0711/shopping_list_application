@@ -178,7 +178,8 @@ class _SelectableListViewState extends State<SelectableListView> {
                         });
                       },
                       color: Colors.white,
-                      icon: const Icon(Icons.add)),
+                      icon: !widget.selectedItems
+                        .any((element) => element['name'] == item['name']) ? const Icon(Icons.add) : const Text("-")),
                   Text(
                     itemName,
                     style: const TextStyle(color: Colors.white, fontSize: 16),
