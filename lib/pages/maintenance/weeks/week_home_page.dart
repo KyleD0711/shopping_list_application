@@ -15,10 +15,6 @@ class _WeekHomePageState extends State<WeekHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Week>>(
-        stream: _stream,
-        builder: ((context, snapshot) {
-          final weeks = snapshot.data ?? [];
           return Scaffold(
             appBar: AppBar(
               centerTitle: true,
@@ -42,13 +38,13 @@ class _WeekHomePageState extends State<WeekHomePage> {
               },
             ),
           );
-        }));
   }
 
   Widget displayWeeks() {
     return StreamBuilder<List<Week>>(
         stream: _stream,
         builder: ((context, snapshot) {
+          print("Snapshot data: ${snapshot.data}");
           final weeks = snapshot.data ?? [];
           return Expanded(
               child: snapshot.hasData

@@ -52,7 +52,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text("New Ingredient"),
+          title: const Text("New Recipe"),
           automaticallyImplyLeading: false,
         ),
         bottomNavigationBar: BottomNavigationBar(
