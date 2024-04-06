@@ -1,6 +1,10 @@
+import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/controllers/week_controller.dart';
-import 'package:shopping_list_application/models/week.dart';
+import 'package:shopping_list_application/models/user.dart';
+import 'package:shopping_list_application/pages/maintenance/recipe/recipe_home_page.dart';
+import 'package:shopping_list_application/pages/maintenance/weeks/view_week.dart';
+import 'package:shopping_list_application/services/week_service.dart';
+import 'package:shopping_list_application/utils/date_helpers.dart';
 import './plan_week.dart';
 
 class WeekHomePage extends StatefulWidget {
@@ -11,7 +15,9 @@ class WeekHomePage extends StatefulWidget {
 }
 
 class _WeekHomePageState extends State<WeekHomePage> {
-  final Stream<List<Week>> _stream = WeekController().getStream();
+  // final Stream<List<Week>> _stream = WeekController().getStream();
+  
+  final WeekCollectionReference weeksRef = WeekService().getWeeks();
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +32,17 @@ class _WeekHomePageState extends State<WeekHomePage> {
             ),
             bottomNavigationBar: BottomNavigationBar(
               backgroundColor: Theme.of(context).colorScheme.tertiary,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+              items: [
+                const BottomNavigationBarItem(icon: Icon(Icons.tab_outlined), label: "Recipes"),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.set_meal), label: "Meal Planning")
+                    icon: Icon(Icons.home, color: Theme.of(context).colorScheme.primary,), label: "Home")
               ],
               onTap: (value) {
                 if (value == 0) {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RecipeHomePage()));
+                }
+                else if (value == 1){
                   Navigator.of(context).pop();
                 }
               },
@@ -41,16 +51,17 @@ class _WeekHomePageState extends State<WeekHomePage> {
   }
 
   Widget displayWeeks() {
-    return StreamBuilder<List<Week>>(
-        stream: _stream,
-        builder: ((context, snapshot) {
-          print("Snapshot data: ${snapshot.data}");
-          final weeks = snapshot.data ?? [];
-          return Expanded(
+      return FirestoreBuilder(ref: weeksRef, builder: (BuildContext context, AsyncSnapshot<WeekQuerySnapshot> snapshot, Widget? child) {
+        if (snapshot.hasError) return Text(snapshot.error.toString());
+        if (!snapshot.hasData) return const Text('Loading data...');
+
+        List<WeekQueryDocumentSnapshot> weeks = snapshot.requireData.docs;
+
+        return Expanded(
               child: snapshot.hasData
                   ? ListView.separated(
                       padding: const EdgeInsets.all(10.0),
-                      itemBuilder: (_, index) => _toWidget(weeks[index]),
+                      itemBuilder: (_, index) => _toWidget(weeks[index].data),
                       separatorBuilder: (_, __) => const Divider(
                         color: Colors.transparent,
                       ),
@@ -59,7 +70,7 @@ class _WeekHomePageState extends State<WeekHomePage> {
                   : const Center(
                       child: Text("No results"),
                     ));
-        }));
+      });
   }
 
   Widget addButton() {
@@ -82,10 +93,14 @@ class _WeekHomePageState extends State<WeekHomePage> {
   Widget _toWidget(Week week) {
     return GestureDetector(
       child: Card(
+        color: Colors.white,
         child:
-            Text("${week.beginDate.toString()} - ${week.endDate.toString()}"),
+            Text(textAlign: TextAlign.center, "${formatDate(week.beginDate)} - ${formatDate(week.endDate)}", style: const TextStyle(fontSize: 25),),
       ),
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ViewWeekPage(id :week.id)));
+      },
     );
   }
 }

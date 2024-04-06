@@ -1,8 +1,10 @@
+import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/controllers/recipe_controller.dart';
-import 'package:shopping_list_application/models/recipe.dart';
+import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/view_recipe.dart';
+import 'package:shopping_list_application/pages/maintenance/weeks/week_home_page.dart';
+import 'package:shopping_list_application/services/recipe_service.dart';
 
 class RecipeHomePage extends StatefulWidget {
   const RecipeHomePage({super.key});
@@ -12,14 +14,18 @@ class RecipeHomePage extends StatefulWidget {
 }
 
 class _RecipeHomePageState extends State<RecipeHomePage> {
-  final Stream<List<Recipe>> _stream = RecipeController().getStream();
+  // final Stream<List<Recipe>> _stream = RecipeController().getStream();
+  final RecipeCollectionReference recipeRef = RecipeService().recipes;
+  
+  @override 
+  Widget build(BuildContext context){
+    return FirestoreBuilder<RecipeQuerySnapshot>(
+        ref: recipeRef,
+        builder: ((context, AsyncSnapshot<RecipeQuerySnapshot> snapshot, Widget? child) {
+          if (snapshot.hasError) return const Text('Something went wrong!');
 
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<Recipe>>(
-        stream: _stream,
-        builder: ((context, snapshot) {
-          final recipes = snapshot.data ?? [];
+          RecipeQuerySnapshot? querySnapshot = snapshot.data;
+           
           return Scaffold(
             appBar: AppBar(
               centerTitle: true,
@@ -29,17 +35,18 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
             body: Column(
               children: [
                 Expanded(
-                    child: snapshot.hasData
-                        ? ListView.separated(
+                    child:
+                          querySnapshot != null
+                         ?
+                         ListView.separated(
                             padding: const EdgeInsets.all(10.0),
-                            itemBuilder: (_, index) =>
-                                _toWidget(recipes[index]),
+                            itemBuilder: (_, index) {
+                              Recipe recipe = querySnapshot.docs[index].data;
+                              return _toWidget(recipe);
+                            },
                             separatorBuilder: (_, __) => const Divider(color: Colors.transparent,),
-                            itemCount: recipes.length,
-                          )
-                        : const Center(
-                            child: Text("No results"),
-                          )),
+                            itemCount: querySnapshot.docs.length,
+                          ) : const Text("Loading Data..")),
                 Align(
                     alignment: Alignment.bottomCenter,
                     child: ElevatedButton(
@@ -57,14 +64,18 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
             ),
             bottomNavigationBar: BottomNavigationBar(
               backgroundColor: Theme.of(context).colorScheme.tertiary,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+              items:  [
+                const BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.set_meal), label: "Meal Planning")
+                    icon: Icon(Icons.set_meal, color: Theme.of(context).colorScheme.primary), label: "Meal Planning")
               ],
               onTap: (value) {
                 if (value == 0) {
                   Navigator.of(context).pop();
+                }
+                else if (value == 1){
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const WeekHomePage()));
                 }
               },
             ),
@@ -90,7 +101,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
       ),
       onTap: () => {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ViewRecipePage(recipe: recipe)))
+            builder: (context) => ViewRecipePage(id :recipe.id)))
       },
     );
   }

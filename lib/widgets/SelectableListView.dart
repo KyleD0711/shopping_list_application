@@ -1,15 +1,17 @@
+import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
 
 class SelectableListView extends StatefulWidget {
   SelectableListView(
       {super.key,
-      required this.itemStream,
+      required this.itemRef,
       required this.screenName,
       required this.selectedItems,
       required this.bottomActions,
       this.actionTap});
 
-  final Stream<List<dynamic>> itemStream;
+  // final Stream<List<dynamic>> itemStream;
+  final FirestoreCollectionReference itemRef;
   final String screenName;
   final List<Map<String, String>> selectedItems;
   final List<BottomNavigationBarItem> bottomActions;
@@ -24,7 +26,6 @@ class _SelectableListViewState extends State<SelectableListView> {
   String pageName = "";
   final Map<String, TextEditingController> _controllers = {};
   String searchFilter = "";
-
   @override
   void initState() {
     super.initState();
@@ -78,17 +79,16 @@ class _SelectableListViewState extends State<SelectableListView> {
   }
 
   Widget itemStreamBuilder() {
-    return StreamBuilder<List<dynamic>>(
-        stream: widget.itemStream,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data == null) {
-            return const Text("No Results");
-          }
+    return FirestoreBuilder(ref: widget.itemRef, builder: (BuildContext context, AsyncSnapshot<FirestoreQuerySnapshot> snapshot, Widget? child) { 
+      if (snapshot.hasError) return Text(snapshot.error.toString());
+      if (!snapshot.hasData) return const Text('Loading data...');
+      
+      List<FirestoreDocumentSnapshot> snapshots = snapshot.requireData.docs;
 
-          List<Map<String, String>> items =
-              formatStreamData(snapshot.data, searchFilter);
+      List<Map<String, String>> items = formatStreamData(snapshots, searchFilter);
 
-          return Expanded(
+
+      return Expanded(
             child: ListView.separated(
               itemBuilder: (_, index) => _toWidget(items[index]),
               separatorBuilder: (_, __) =>
@@ -96,20 +96,21 @@ class _SelectableListViewState extends State<SelectableListView> {
               itemCount: items.length,
             ),
           );
-        });
+     },);
   }
 
   List<Map<String, String>> formatStreamData(
-      List<dynamic>? data, String searchFilter) {
+      List<FirestoreDocumentSnapshot>? snapshots, String searchFilter) {
     List<Map<String, String>> items =
         List<Map<String, String>>.empty(growable: true);
 
-    for (dynamic element in data!) {
+    for (dynamic element in snapshots!) {
+      dynamic item = element.data;
       if (searchFilter == "") {
-        items.add({"name": element.toString(), "qty": ""});
+        items.add({"name": item.name, "qty": ""});
       } else {
         if (element.toString().contains(searchFilter)) {
-          items.add({"name": element.toString(), "qty": ""});
+          items.add({"name": item.name, "qty": ""});
         }
       }
     }

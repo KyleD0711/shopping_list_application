@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/controllers/recipe_controller.dart';
-import 'package:shopping_list_application/models/ingredient.dart';
-import 'package:shopping_list_application/models/recipe.dart';
-import 'package:shopping_list_application/controllers/ingredient_controller.dart';
+import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/instructions_page.dart';
+import 'package:shopping_list_application/services/ingredient_service.dart';
+import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
 
 class AddRecipePage extends StatefulWidget {
@@ -25,8 +23,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
   late List<Map<String, String>> ingredients;
   late List<Map<String, String>> recipes;
 
-  final Future<List<Ingredient>> existingIngredient =
-      IngredientController().getIngredients();
   String instructions = "";
 
   final double _listHeights = 200;
@@ -46,6 +42,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
         List<Map<String, String>>.empty(growable: true);
     instructions = widget.recipe?.instructions ?? "";
   }
+
+  final RecipeCollectionReference recipeRef = RecipeService().getRecipes();
 
   @override
   Widget build(BuildContext context) {
@@ -139,8 +137,14 @@ class _AddRecipePageState extends State<AddRecipePage> {
       String name,
       String instructions,
       String description) {
-    RecipeController().insertRecipe(ingredients, recipes, prepTime, cookTime,
-        name, instructions, description);
+    recipeRef.add(Recipe(
+        ingredients: ingredients,
+        recipes: recipes,
+        prepTime: prepTime,
+        cookTime: cookTime,
+        name: name,
+        instructions: instructions,
+        description: description));
   }
 
   void _updateRecipe(
@@ -151,8 +155,15 @@ class _AddRecipePageState extends State<AddRecipePage> {
       String name,
       String instructions,
       String description) {
-    RecipeController().updateRecipe(widget.recipe!.id, ingredients, recipes,
-        prepTime, cookTime, name, instructions, description);
+    recipeRef.doc(widget.recipe!.id).set(Recipe(
+        ingredients: ingredients,
+        recipes: recipes,
+        prepTime: prepTime,
+        cookTime: cookTime,
+        name: name,
+        instructions: instructions,
+        description: description,
+        id: widget.recipe!.id));
   }
 
   Widget descriptionCard() {
@@ -250,7 +261,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         onPressed: () async {
                           await Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => SelectableListView(
-                                    itemStream: RecipeController().getStream(),
+                                    itemRef: RecipeService().recipes,
                                     screenName: "Select Recipes",
                                     selectedItems: recipes,
                                     bottomActions: const [
@@ -391,8 +402,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                           await Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (context) => SelectableListView(
-                                    itemStream:
-                                        IngredientController().getStream(),
+                                    itemRef:
+                                        IngredientService().ingredientsRef,
                                     screenName: "Select Ingredients",
                                     selectedItems: ingredients,
                                     bottomActions: const [
@@ -445,8 +456,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
         ElevatedButton(
           onPressed: () {
             if (ingredientNameController.text != "") {
-              IngredientController()
-                  .addIngredient(ingredientNameController.text);
+              IngredientService().ingredientsRef.add(Ingredient(name: ingredientNameController.text));
               Navigator.of(context).pop();
             }
           },

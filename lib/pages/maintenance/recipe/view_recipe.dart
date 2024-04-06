@@ -1,13 +1,13 @@
+import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/controllers/recipe_controller.dart';
-import 'package:shopping_list_application/models/recipe.dart';
+import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
 
 class ViewRecipePage extends StatefulWidget {
-  ViewRecipePage({super.key, required this.recipe});
+  ViewRecipePage({super.key, required this.id});
 
-  Recipe recipe;
+  String id;
 
   static const cardPadding =
       EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0);
@@ -17,46 +17,63 @@ class ViewRecipePage extends StatefulWidget {
 }
 
 class _ViewRecipePageState extends State<ViewRecipePage> {
+  late final RecipeDocumentReference recipeRef;
+
+  
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(widget.recipe.name),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Theme.of(context).colorScheme.tertiary,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
-            BottomNavigationBarItem(icon: Icon(Icons.delete), label: "Delete")
-          ],
-          onTap: (value) async {
-            if (value == 0) {
-              await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return AddRecipePage(recipe: widget.recipe);
-              }));
-              Recipe? updatedRecipe = await RecipeController().getRecipe(widget.recipe.id);
-              if (updatedRecipe != null){
-                widget.recipe = updatedRecipe;
-                setState((){});
-              }
-            } else if (value == 1) {
-              RecipeService().removeRecipe(widget.recipe);
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-        body: Column(
-          children: [
-            descriptionWidget(),
-            ingredientsWidget(),
-            instructionsWidget(context),
-            recipesWidget()
-          ],
-        ));
+  void initState() {
+    super.initState();
+    print(widget.id);
+    recipeRef = RecipeService().getRecipe(widget.id);
   }
 
-  Widget descriptionWidget() {
+
+  @override
+  Widget build(BuildContext context) {
+    return FirestoreBuilder(
+      ref: recipeRef,
+      builder: (BuildContext context, AsyncSnapshot<RecipeDocumentSnapshot> snapshot, Widget? child) {  
+        if (snapshot.hasError) return const Text('Something went wrong!');
+        if (!snapshot.hasData) return const Text('Loading data...');
+
+        RecipeDocumentSnapshot querySnapshot = snapshot.requireData;
+        Recipe? recipe = querySnapshot.data;
+
+        return Scaffold(
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text(recipe?.name ?? ""),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
+              BottomNavigationBarItem(icon: Icon(Icons.delete), label: "Delete")
+            ],
+            onTap: (value) async {
+              if (value == 0) {
+                await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                  return AddRecipePage(recipe: recipe);
+                }));
+              } else if (value == 1) {
+                recipeRef.delete();
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          body: Column(
+            children: [
+              descriptionWidget(recipe),
+              ingredientsWidget(recipe),
+              instructionsWidget(context, recipe),
+              recipesWidget(recipe)
+            ],
+          ));
+      },
+    );
+  }
+
+  Widget descriptionWidget(Recipe? recipe) {
     return Padding(
       padding: ViewRecipePage.cardPadding,
       child: Card(
@@ -72,7 +89,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
             ),
             const Divider(height: 15.0, color: Colors.black),
             Text(
-              widget.recipe.description,
+              recipe?.description ?? "",
               textAlign: TextAlign.left,
             )
           ],
@@ -81,7 +98,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
     );
   }
 
-  Widget ingredientsWidget() {
+  Widget ingredientsWidget(Recipe? recipe) {
     return Expanded(
       child: Padding(
         padding: ViewRecipePage.cardPadding,
@@ -97,11 +114,11 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
               Expanded(
                 child: ListView.separated(
                   itemBuilder: (_, index) =>
-                      _toIngredientWidget(widget.recipe.ingredients[index]),
+                      _toIngredientWidget(recipe?.ingredients[index] ?? <String, String>{}),
                   separatorBuilder: (_, __) => const Divider(
                     color: Colors.transparent,
                   ),
-                  itemCount: widget.recipe.ingredients.length,
+                  itemCount: recipe?.ingredients.length ?? 0,
                 ),
               )
             ],
@@ -111,7 +128,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
     );
   }
 
-  Widget instructionsWidget(context) {
+  Widget instructionsWidget(context, Recipe? recipe) {
     return Expanded(
       child: Padding(
         padding: ViewRecipePage.cardPadding,
@@ -122,7 +139,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
                 builder: (context) {
                   return AlertDialog(
                     title: const Text('Instructions'),
-                    content: Text(widget.recipe.instructions),
+                    content: Text(recipe?.instructions ?? ""),
                     actions: <Widget>[
                       TextButton(
                         onPressed: () {
@@ -149,7 +166,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      widget.recipe.instructions,
+                     recipe?.instructions ?? "",
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12),
                       maxLines: 3,
@@ -168,7 +185,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
     );
   }
 
-  Widget recipesWidget() {
+  Widget recipesWidget(Recipe? recipe) {
     return Expanded(
       child: Padding(
         padding: ViewRecipePage.cardPadding,
@@ -185,9 +202,9 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
                 child: ListView.separated(
                   padding: const EdgeInsets.all(10.0),
                   itemBuilder: (_, index) =>
-                      _toRecipeWidget(widget.recipe.recipes[index]),
+                      _toRecipeWidget(recipe?.recipes[index] ?? <String, String>{}),
                   separatorBuilder: (_, __) => const Divider(),
-                  itemCount: widget.recipe.recipes.length,
+                  itemCount: recipe?.recipes.length ?? 0,
                 ),
               ),
             ],

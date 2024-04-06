@@ -1,6 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/models/week.dart';
+import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
@@ -31,6 +31,8 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
     endDate = widget.week?.endDate;
   }
 
+  final WeekCollectionReference weekRef = WeekService().getWeeks();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +56,13 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
               showDialog(context: context, builder: (context) => errorPopUp("Dates can't be null"));
             }
             else{
-              WeekService().insertWeek(beginDate!, endDate!, days);
+              if (widget.week == null){
+                weekRef.add(Week(beginDate: beginDate!, endDate: endDate!, days: days));
+              }
+              else {
+                weekRef.doc(widget.week!.id).set(Week(beginDate: beginDate!, endDate: endDate!, days: days));
+              }
+              
               Navigator.of(context).pop();
             }
           } else if (value == 1) {
@@ -136,10 +144,11 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
 
   List<Widget> getAllDayCards(Map<DateTime, List<Map<String, String>>> days) {
     List<Widget> dayCards = [];
-    for (int i = 0; i < days.keys.length; i++) {
-      dayCards.add(dayCard(getDayOfWeek(days.keys.toList()[i]),
-          formatDate(days.keys.toList()[i]), days.values.toList()[i]));
-    }
+    List<DateTime> keys = days.keys.toList();
+    keys.sort((x, y) => x.compareTo(y));
+    keys.forEach((element) {
+      dayCards.add(dayCard(getDayOfWeek(element), formatDate(element), days[element] ?? []));
+    });
     return dayCards;
   }
 
@@ -192,7 +201,7 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                   onPressed: () async {
                     await Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => SelectableListView(
-                            itemStream: RecipeService().getRecipes(),
+                            itemRef: RecipeService().getRecipes(),
                             screenName: name,
                             selectedItems: weeks,
                             bottomActions: const [

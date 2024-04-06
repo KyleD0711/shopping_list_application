@@ -1,5 +1,7 @@
-import "package:shopping_list_application/models/recipe.dart";
+import "package:cloud_firestore_odm/annotation.dart";
+import "package:shopping_list_application/models/user.dart";
 import "package:shopping_list_application/services/auth.dart";
+import "package:shopping_list_application/services/user_service.dart";
 import "./firestore_storage.dart";
 
 class RecipeService {
@@ -12,26 +14,37 @@ class RecipeService {
   static const _description = 'description';
   static const _instructions = 'instructions';
 
-  Stream<List<Recipe>> getRecipes() {
-    return FirestoreStorage.database
-        .collection(_users)
-        .doc(Auth().userId)
-        .collection(_recipes)
-        .snapshots()
-        .map((event) => event.docs.map((e) {
-              List ingredients = e.data()[_ingredients];
-              List recipes = e.data()[_recipes];
-              return Recipe(
-                  id: e.id,
-                  ingredients: List<Map<String, String>>.from(ingredients.map((e) => Map<String, String>.from(e))),
-                  recipes: List<Map<String, String>>.from(recipes.map((e) => Map<String, String>.from(e))),
-                  prepTime: e.data()[_prepTime],
-                  cookTime: e.data()[_cookTime],
-                  name: e.data()[_name],
-                  description: e.data()[_description],
-                  instructions: e.data()[_instructions]);
-            }).toList());
+  @Collection<Recipe>('users/*/recipes')
+  RecipeCollectionReference recipes = UserService.usersRef.doc(Auth().userId).recipes;
+
+  RecipeCollectionReference getRecipes() {
+    return recipes;
   }
+
+  RecipeDocumentReference getRecipe(String id){
+    return recipes.doc(id);
+  }
+
+  // Stream<List<Recipe>> getRecipes() {
+  //   return FirestoreStorage.database
+  //       .collection(_users)
+  //       .doc(Auth().userId)
+  //       .collection(_recipes)
+  //       .snapshots()
+  //       .map((event) => event.docs.map((e) {
+  //             List ingredients = e.data()[_ingredients];
+  //             List recipes = e.data()[_recipes];
+  //             return Recipe(
+  //                 id: e.id,
+  //                 ingredients: List<Map<String, String>>.from(ingredients.map((e) => Map<String, String>.from(e))),
+  //                 recipes: List<Map<String, String>>.from(recipes.map((e) => Map<String, String>.from(e))),
+  //                 prepTime: e.data()[_prepTime],
+  //                 cookTime: e.data()[_cookTime],
+  //                 name: e.data()[_name],
+  //                 description: e.data()[_description],
+  //                 instructions: e.data()[_instructions]);
+  //           }).toList());
+  // }
 
   Future<void> insertRecipe(
       List<Map<String, String>> ingredients,
@@ -84,26 +97,26 @@ class RecipeService {
       .update(data); // Update the document with the new data
 }
 
-  Future<Recipe?> getRecipe(String recipeId) async {
+  // Future<Recipe?> getRecipe(String recipeId) async {
     
-    final recipeData = await FirestoreStorage.database.collection(_users).doc(Auth().userId).collection(_recipes).doc(recipeId).get();
-    if (recipeData.data() == null){
-      return null;
-    }
-    else {
-      List ingredients = recipeData.data()![_ingredients];
-              List recipes = recipeData.data()![_recipes];
-      return Recipe(id: recipeData.id,
-                  ingredients: List<Map<String, String>>.from(ingredients.map((e) => Map<String, String>.from(e))),
-                  recipes: List<Map<String, String>>.from(recipes.map((e) => Map<String, String>.from(e))),
-                  prepTime: recipeData.data()![_prepTime],
-                  cookTime: recipeData.data()![_cookTime],
-                  name: recipeData.data()![_name],
-                  description: recipeData.data()![_description],
-                  instructions: recipeData.data()![_instructions]);
-    }
+  //   final recipeData = await FirestoreStorage.database.collection(_users).doc(Auth().userId).collection(_recipes).doc(recipeId).get();
+  //   if (recipeData.data() == null){
+  //     return null;
+  //   }
+  //   else {
+  //     List ingredients = recipeData.data()![_ingredients];
+  //             List recipes = recipeData.data()![_recipes];
+  //     return Recipe(id: recipeData.id,
+  //                 ingredients: List<Map<String, String>>.from(ingredients.map((e) => Map<String, String>.from(e))),
+  //                 recipes: List<Map<String, String>>.from(recipes.map((e) => Map<String, String>.from(e))),
+  //                 prepTime: recipeData.data()![_prepTime],
+  //                 cookTime: recipeData.data()![_cookTime],
+  //                 name: recipeData.data()![_name],
+  //                 description: recipeData.data()![_description],
+  //                 instructions: recipeData.data()![_instructions]);
+  //   }
     
-  }
+  // }
 
   Future<void> removeRecipe(Recipe recipe) {
     return FirestoreStorage.database
