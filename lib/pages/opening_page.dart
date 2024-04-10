@@ -3,7 +3,7 @@ import 'package:flutter_login/flutter_login.dart';
 import 'package:shopping_list_application/controllers/auth_controller.dart';
 import 'package:shopping_list_application/pages/home_page.dart';
 import 'package:shopping_list_application/utils/authentication_validators.dart';
-import 'package:shopping_list_application/utils/form_validators.dart';
+import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
 // import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OpeningPage extends StatelessWidget {

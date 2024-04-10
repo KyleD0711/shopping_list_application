@@ -46,6 +46,8 @@ dependencies:
   carousel_slider: ^4.2.1
   cloud_firestore_odm: ^1.0.0-dev.84
   json_annotation: ^4.8.1
+  fraction: ^5.0.2
+  google_sign_in: ^6.2.1
 
 dev_dependencies:
   flutter_test:

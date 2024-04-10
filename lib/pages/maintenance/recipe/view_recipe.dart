@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
+import 'package:shopping_list_application/services/shopping_list_service.dart';
 
 class ViewRecipePage extends StatefulWidget {
   ViewRecipePage({super.key, required this.id});
@@ -48,7 +49,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
             backgroundColor: Theme.of(context).colorScheme.tertiary,
             items: const [
               BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
-              BottomNavigationBarItem(icon: Icon(Icons.delete), label: "Delete")
+              BottomNavigationBarItem(icon: Icon(Icons.delete), label: "Delete"),
             ],
             onTap: (value) async {
               if (value == 0) {
@@ -59,6 +60,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
                 recipeRef.delete();
                 Navigator.of(context).pop();
               }
+
             },
           ),
           body: Column(

@@ -4,6 +4,7 @@ import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
+import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
 
 class PlanWeekPage extends StatefulWidget {
@@ -216,7 +217,10 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                               } else if (value == 1) {
                                 Navigator.of(context).pop();
                               }
-                            })));
+                            },
+                            itemValidator: (value) {
+                                      return validateNonEmptyMessage(value);
+                                    })));
                     setState(() {});
                   },
                 ),

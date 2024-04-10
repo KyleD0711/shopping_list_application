@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_list_application/models/quantity.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/instructions_page.dart';
 import 'package:shopping_list_application/services/ingredient_service.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
+import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
 
 class AddRecipePage extends StatefulWidget {
@@ -282,6 +284,9 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                                     const AddRecipePage()));
                                       }
                                     },
+                                    itemValidator: (value) {
+                                      return validateNonEmptyMessage(value);
+                                    },
                                   )));
                           setState(() {});
                         },
@@ -398,33 +403,41 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     alignment: Alignment.centerRight,
                     child: IconButton(
                         onPressed: () async {
-                          // final List<Map<String, String>> selectedIngredients =
                           await Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (context) => SelectableListView(
-                                    itemRef:
-                                        IngredientService().ingredientsRef,
-                                    screenName: "Select Ingredients",
-                                    selectedItems: ingredients,
-                                    bottomActions: const [
-                                      BottomNavigationBarItem(
-                                          icon: Icon(Icons.arrow_back),
-                                          label: "Back"),
-                                      BottomNavigationBarItem(
-                                          icon: Icon(Icons.add),
-                                          label: "Add Ingredient")
-                                    ],
-                                    actionTap: (int value) {
-                                      if (value == 0) {
-                                        Navigator.of(context).pop();
-                                      } else if (value == 1) {
-                                        showDialog(
-                                            builder: (context) {
-                                              return addIngredientDialog();
-                                            },
-                                            context: context);
-                                      }
-                                    })),
+                                      itemRef:
+                                          IngredientService().ingredientsRef,
+                                      screenName: "Select Ingredients",
+                                      selectedItems: ingredients,
+                                      bottomActions: const [
+                                        BottomNavigationBarItem(
+                                            icon: Icon(Icons.arrow_back),
+                                            label: "Back"),
+                                        BottomNavigationBarItem(
+                                            icon: Icon(Icons.add),
+                                            label: "Add Ingredient")
+                                      ],
+                                      actionTap: (int value) {
+                                        if (value == 0) {
+                                          Navigator.of(context).pop();
+                                        } else if (value == 1) {
+                                          showDialog(
+                                              builder: (context) {
+                                                return addIngredientDialog();
+                                              },
+                                              context: context);
+                                        }
+                                      },
+                                      itemValidator: (value) {
+                                        return validateFractionOrInteger(value);
+                                      },
+                                      dropDown: true,
+                                      dropDownItems: measurements
+                                          .map((e) => DropdownMenuItem(
+                                              value: e, child: Text(e)))
+                                          .toList(),
+                                    )),
                           );
                           setState(() {});
                         },
@@ -456,7 +469,9 @@ class _AddRecipePageState extends State<AddRecipePage> {
         ElevatedButton(
           onPressed: () {
             if (ingredientNameController.text != "") {
-              IngredientService().ingredientsRef.add(Ingredient(name: ingredientNameController.text));
+              IngredientService()
+                  .ingredientsRef
+                  .add(Ingredient(name: ingredientNameController.text));
               Navigator.of(context).pop();
             }
           },

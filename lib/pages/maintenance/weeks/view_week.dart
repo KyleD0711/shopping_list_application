@@ -3,6 +3,7 @@ import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/weeks/plan_week.dart';
+import 'package:shopping_list_application/services/shopping_list_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
 
@@ -20,19 +21,19 @@ class ViewWeekPage extends StatefulWidget {
 }
 
 class _ViewWeekPageState extends State<ViewWeekPage> {
-  late final WeekDocumentReference recipeRef;
+  late final WeekDocumentReference weekRef;
 
 
   @override
   void initState() {
     super.initState();
-    recipeRef = WeekService().getWeek(widget.id);
+    weekRef = WeekService().getWeek(widget.id);
   }
 
   @override
   Widget build(BuildContext context) {
     return FirestoreBuilder(
-      ref: recipeRef,
+      ref: weekRef,
       builder: (BuildContext context, AsyncSnapshot<WeekDocumentSnapshot> snapshot, Widget? child) {
         if (snapshot.hasError) return Text(snapshot.error.toString());
         if (!snapshot.hasData) return const Text('Loading data...');
@@ -51,15 +52,19 @@ class _ViewWeekPageState extends State<ViewWeekPage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.delete),
               label: "Delete",
-            )
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Shopping"),
           ],
           onTap: (value) async {
             if (value == 0) {
               await Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => PlanWeekPage(week :week)));
             } else if (value == 1) {
-              recipeRef.delete();
+              weekRef.delete();
               Navigator.of(context).pop();
+            }
+            else if (value == 2){
+              ShoppingListService().generateShoppingList(widget.id);
             }
           },
         ),

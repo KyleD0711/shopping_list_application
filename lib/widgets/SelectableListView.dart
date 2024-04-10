@@ -1,5 +1,6 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
+import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
 
 class SelectableListView extends StatefulWidget {
   SelectableListView(
@@ -8,6 +9,9 @@ class SelectableListView extends StatefulWidget {
       required this.screenName,
       required this.selectedItems,
       required this.bottomActions,
+      required this.itemValidator,
+      this.dropDown = false,
+      this.dropDownItems,
       this.actionTap});
 
   // final Stream<List<dynamic>> itemStream;
@@ -15,6 +19,10 @@ class SelectableListView extends StatefulWidget {
   final String screenName;
   final List<Map<String, String>> selectedItems;
   final List<BottomNavigationBarItem> bottomActions;
+  final String? Function(String value) itemValidator;
+  final bool dropDown;
+  final List<DropdownMenuItem>? dropDownItems;
+
   void Function(int value)? actionTap;
 
   @override
@@ -24,7 +32,6 @@ class SelectableListView extends StatefulWidget {
 class _SelectableListViewState extends State<SelectableListView> {
   final _searchController = TextEditingController();
   String pageName = "";
-  final Map<String, TextEditingController> _controllers = {};
   String searchFilter = "";
   @override
   void initState() {
@@ -79,24 +86,30 @@ class _SelectableListViewState extends State<SelectableListView> {
   }
 
   Widget itemStreamBuilder() {
-    return FirestoreBuilder(ref: widget.itemRef, builder: (BuildContext context, AsyncSnapshot<FirestoreQuerySnapshot> snapshot, Widget? child) { 
-      if (snapshot.hasError) return Text(snapshot.error.toString());
-      if (!snapshot.hasData) return const Text('Loading data...');
-      
-      List<FirestoreDocumentSnapshot> snapshots = snapshot.requireData.docs;
+    return FirestoreBuilder(
+      ref: widget.itemRef,
+      builder: (BuildContext context,
+          AsyncSnapshot<FirestoreQuerySnapshot> snapshot, Widget? child) {
+        if (snapshot.hasError) return Text(snapshot.error.toString());
+        if (!snapshot.hasData) return const Text('Loading data...');
 
-      List<Map<String, String>> items = formatStreamData(snapshots, searchFilter);
+        List<FirestoreDocumentSnapshot> snapshots = snapshot.requireData.docs;
 
+        List<Map<String, String>> items =
+            formatStreamData(snapshots, searchFilter);
 
-      return Expanded(
-            child: ListView.separated(
-              itemBuilder: (_, index) => _toWidget(items[index]),
-              separatorBuilder: (_, __) =>
-                  const Divider(color: Colors.transparent),
-              itemCount: items.length,
+        return Expanded(
+          child: ListView.separated(
+            itemBuilder: (_, index) => _toWidget(items[index]),
+            separatorBuilder: (_, __) => const Divider(
+              color: Colors.transparent,
+              height: 5,
             ),
-          );
-     },);
+            itemCount: items.length,
+          ),
+        );
+      },
+    );
   }
 
   List<Map<String, String>> formatStreamData(
@@ -126,7 +139,7 @@ class _SelectableListViewState extends State<SelectableListView> {
         }
       }
     }
-  
+
     return putSelectedMapsAtBeginning(items);
   }
 
@@ -136,8 +149,8 @@ class _SelectableListViewState extends State<SelectableListView> {
     List<Map<String, String>> unmatched = [];
 
     for (var map in list) {
-      if (widget.selectedItems.any(
-                              (element) => element['name'] == map['name'])) {
+      if (widget.selectedItems
+          .any((element) => element['name'] == map['name'])) {
         matched.add(map);
       } else {
         unmatched.add(map);
@@ -149,81 +162,141 @@ class _SelectableListViewState extends State<SelectableListView> {
 
   Widget _toWidget(Map<String, String> item) {
     String itemName = item["name"] ?? "No Name";
-    if (!_controllers.keys.contains(itemName)) {
-      _controllers[itemName] = TextEditingController(text: item['qty']);
-    }
+
     return StatefulBuilder(
-      builder: (context, setState) => Card(
-        color: widget.selectedItems
-                .any((element) => element['name'] == item['name'])
-            ? Theme.of(context).colorScheme.secondary
-            : Theme.of(context).colorScheme.tertiary,
-        child: Stack(children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          if (widget.selectedItems.any(
-                              (element) => element['name'] == item['name'])) {
-                            widget.selectedItems.removeWhere(
-                                (element) => element['name'] == item['name']);
-                          } else {
-                            item['qty'] = _controllers[itemName]!.text;
-                            widget.selectedItems.add(item);
-                          }
-                        });
-                      },
-                      color: Colors.white,
-                      icon: !widget.selectedItems
-                        .any((element) => element['name'] == item['name']) ? const Icon(Icons.add) : const Text("-")),
-                  Text(
-                    itemName,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                  )
-                ],
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: SizedBox(
-              width: 200,
+      builder: (context, setState) => GestureDetector(
+        onTap: () {
+          if (widget.selectedItems
+              .any((element) => element['name'] == item['name'])) {
+            widget.selectedItems
+                .removeWhere((element) => element['name'] == item['name']);
+            item['qty'] = "";
+            setState(() {});
+          } else {
+            showDialog(
+                context: context,
+                builder: (context) {
+                  return toWidgetDialog(item);
+                });
+          }
+        },
+        child: Card(
+          color: widget.selectedItems
+                  .any((element) => element['name'] == item['name'])
+              ? Theme.of(context).colorScheme.secondary
+              : Theme.of(context).colorScheme.tertiary,
+          child: Stack(children: [
+            Align(
+              alignment: Alignment.centerLeft,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                    textAlignVertical: TextAlignVertical.top,
-                    enabled: !widget.selectedItems
-                        .any((element) => element['name'] == item['name']),
-                    controller: _controllers[itemName],
-                    style: TextStyle(
-                        color: widget.selectedItems.any(
-                                (element) => element['name'] == item['name'])
-                            ? Colors.white
-                            : Colors.black),
-                    decoration: InputDecoration(
-                        filled: !widget.selectedItems
-                            .any((element) => element['name'] == item['name']),
-                        fillColor: Colors.white,
-                        labelText: "Qty:",
-                        floatingLabelBehavior: FloatingLabelBehavior.never)),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    !widget.selectedItems
+                            .any((element) => element['name'] == item['name'])
+                        ? const Padding(
+                            padding: EdgeInsets.only(left: 10.0),
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Padding(
+                            padding: EdgeInsets.only(left: 10.0),
+                            child: Icon(Icons.remove, color: Colors.white),
+                          ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text(
+                        item['qty'] == ""
+                            ? itemName
+                            : "$itemName: ${item['qty']}",
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 20),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
-        ]),
+          ]),
+        ),
       ),
+    );
+  }
+
+  Widget toWidgetDialog(Map<String, String> item) {
+    TextEditingController widgetTextController = TextEditingController();
+    dynamic dropDownValue;
+    final key = GlobalKey<FormState>();
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      title: Align(
+          alignment: Alignment.center, child: Text(item['name'] ?? "No Name")),
+      content: Form(
+        key: key,
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: TextFormField(
+                  keyboardType: !widget.dropDown ? TextInputType.number : null,
+                  decoration: InputDecoration(hintText: "Amount", border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                  controller: widgetTextController,
+                  validator: (value) => widget.itemValidator(value ?? ""),
+                ),
+              ),
+            ),
+            if (widget.dropDown)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: DropdownButtonFormField(
+                   decoration: InputDecoration(hintText: "Measure", border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))), 
+                    items: widget.dropDownItems,
+                    onChanged: (value) {
+                      setState(() {
+                        dropDownValue = value;
+                      });
+                    },
+                    value: dropDownValue,
+                    validator: (value) =>
+                        value == null ? "This field can't be null" : null,
+                  ),
+                ),
+              )
+          ],
+        ),
+      ),
+      actions: [
+        ElevatedButton(
+          child: const Text(
+            "Add",
+            style: TextStyle(color: Colors.white),
+          ),
+          onPressed: () {
+            if (key.currentState!.validate()) {
+              if (widget.dropDown) {
+                item['qty'] = "${widgetTextController.text} $dropDownValue";
+                
+              } else {
+                item['qty'] = widgetTextController.text;
+            }
+
+             widget.selectedItems.add(item);
+                setState(() {});
+                Navigator.of(context).pop();
+              }
+          },
+        )
+      ],
     );
   }
 
   @override
   void dispose() {
-    _controllers.values.forEach((element) {
-      element.dispose();
-    });
     super.dispose();
   }
 }

@@ -128,6 +128,11 @@ abstract class UserDocumentReference
     reference,
   );
 
+  late final ShoppingListCollectionReference shoppinglists =
+      _$ShoppingListCollectionReference(
+    reference,
+  );
+
   @override
   Stream<UserDocumentSnapshot> snapshots();
 
@@ -161,6 +166,11 @@ class _$UserDocumentReference
   );
 
   late final WeekCollectionReference weeks = _$WeekCollectionReference(
+    reference,
+  );
+
+  late final ShoppingListCollectionReference shoppinglists =
+      _$ShoppingListCollectionReference(
     reference,
   );
 
@@ -4442,6 +4452,2018 @@ class WeekQueryDocumentSnapshot extends FirestoreQueryDocumentSnapshot<Week>
   }
 }
 
+/// A collection reference object can be used for adding documents,
+/// getting document references, and querying for documents
+/// (using the methods inherited from Query).
+abstract class ShoppingListCollectionReference
+    implements
+        ShoppingListQuery,
+        FirestoreCollectionReference<ShoppingList, ShoppingListQuerySnapshot> {
+  factory ShoppingListCollectionReference(
+    DocumentReference<User> parent,
+  ) = _$ShoppingListCollectionReference;
+
+  static ShoppingList fromFirestore(
+    DocumentSnapshot<Map<String, Object?>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    return _$ShoppingListFromJson({'id': snapshot.id, ...?snapshot.data()});
+  }
+
+  static Map<String, Object?> toFirestore(
+    ShoppingList value,
+    SetOptions? options,
+  ) {
+    return {..._$ShoppingListToJson(value)}..remove('id');
+  }
+
+  @override
+  CollectionReference<ShoppingList> get reference;
+
+  /// A reference to the containing [UserDocumentReference] if this is a subcollection.
+  UserDocumentReference get parent;
+
+  @override
+  ShoppingListDocumentReference doc([String? id]);
+
+  /// Add a new document to this collection with the specified data,
+  /// assigning it a document ID automatically.
+  Future<ShoppingListDocumentReference> add(ShoppingList value);
+}
+
+class _$ShoppingListCollectionReference extends _$ShoppingListQuery
+    implements ShoppingListCollectionReference {
+  factory _$ShoppingListCollectionReference(
+    DocumentReference<User> parent,
+  ) {
+    return _$ShoppingListCollectionReference._(
+      UserDocumentReference(parent),
+      parent.collection('shoppinglists').withConverter(
+            fromFirestore: ShoppingListCollectionReference.fromFirestore,
+            toFirestore: ShoppingListCollectionReference.toFirestore,
+          ),
+    );
+  }
+
+  _$ShoppingListCollectionReference._(
+    this.parent,
+    CollectionReference<ShoppingList> reference,
+  ) : super(reference, $referenceWithoutCursor: reference);
+
+  @override
+  final UserDocumentReference parent;
+
+  String get path => reference.path;
+
+  @override
+  CollectionReference<ShoppingList> get reference =>
+      super.reference as CollectionReference<ShoppingList>;
+
+  @override
+  ShoppingListDocumentReference doc([String? id]) {
+    assert(
+      id == null || id.split('/').length == 1,
+      'The document ID cannot be from a different collection',
+    );
+    return ShoppingListDocumentReference(
+      reference.doc(id),
+    );
+  }
+
+  @override
+  Future<ShoppingListDocumentReference> add(ShoppingList value) {
+    return reference
+        .add(value)
+        .then((ref) => ShoppingListDocumentReference(ref));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is _$ShoppingListCollectionReference &&
+        other.runtimeType == runtimeType &&
+        other.reference == reference;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, reference);
+}
+
+abstract class ShoppingListDocumentReference extends FirestoreDocumentReference<
+    ShoppingList, ShoppingListDocumentSnapshot> {
+  factory ShoppingListDocumentReference(
+          DocumentReference<ShoppingList> reference) =
+      _$ShoppingListDocumentReference;
+
+  DocumentReference<ShoppingList> get reference;
+
+  /// A reference to the [ShoppingListCollectionReference] containing this document.
+  ShoppingListCollectionReference get parent {
+    return _$ShoppingListCollectionReference(
+      reference.parent.parent!.withConverter<User>(
+        fromFirestore: UserCollectionReference.fromFirestore,
+        toFirestore: UserCollectionReference.toFirestore,
+      ),
+    );
+  }
+
+  late final ShoppingListItemCollectionReference shoppinglistitems =
+      _$ShoppingListItemCollectionReference(
+    reference,
+  );
+
+  @override
+  Stream<ShoppingListDocumentSnapshot> snapshots();
+
+  @override
+  Future<ShoppingListDocumentSnapshot> get([GetOptions? options]);
+
+  @override
+  Future<void> delete();
+
+  /// Updates data on the document. Data will be merged with any existing
+  /// document data.
+  ///
+  /// If no document exists yet, the update will fail.
+  Future<void> update({
+    String name,
+    FieldValue nameFieldValue,
+  });
+
+  /// Updates fields in the current document using the transaction API.
+  ///
+  /// The update will fail if applied to a document that does not exist.
+  void transactionUpdate(
+    Transaction transaction, {
+    String name,
+    FieldValue nameFieldValue,
+  });
+}
+
+class _$ShoppingListDocumentReference extends FirestoreDocumentReference<
+    ShoppingList,
+    ShoppingListDocumentSnapshot> implements ShoppingListDocumentReference {
+  _$ShoppingListDocumentReference(this.reference);
+
+  @override
+  final DocumentReference<ShoppingList> reference;
+
+  /// A reference to the [ShoppingListCollectionReference] containing this document.
+  ShoppingListCollectionReference get parent {
+    return _$ShoppingListCollectionReference(
+      reference.parent.parent!.withConverter<User>(
+        fromFirestore: UserCollectionReference.fromFirestore,
+        toFirestore: UserCollectionReference.toFirestore,
+      ),
+    );
+  }
+
+  late final ShoppingListItemCollectionReference shoppinglistitems =
+      _$ShoppingListItemCollectionReference(
+    reference,
+  );
+
+  @override
+  Stream<ShoppingListDocumentSnapshot> snapshots() {
+    return reference.snapshots().map(ShoppingListDocumentSnapshot._);
+  }
+
+  @override
+  Future<ShoppingListDocumentSnapshot> get([GetOptions? options]) {
+    return reference.get(options).then(ShoppingListDocumentSnapshot._);
+  }
+
+  @override
+  Future<ShoppingListDocumentSnapshot> transactionGet(Transaction transaction) {
+    return transaction.get(reference).then(ShoppingListDocumentSnapshot._);
+  }
+
+  Future<void> update({
+    Object? name = _sentinel,
+    FieldValue? nameFieldValue,
+  }) async {
+    assert(
+      name == _sentinel || nameFieldValue == null,
+      "Cannot specify both name and nameFieldValue",
+    );
+    final json = {
+      if (name != _sentinel)
+        _$ShoppingListFieldMap['name']!:
+            _$ShoppingListPerFieldToJson.name(name as String),
+      if (nameFieldValue != null)
+        _$ShoppingListFieldMap['name']!: nameFieldValue,
+    };
+
+    return reference.update(json);
+  }
+
+  void transactionUpdate(
+    Transaction transaction, {
+    Object? name = _sentinel,
+    FieldValue? nameFieldValue,
+  }) {
+    assert(
+      name == _sentinel || nameFieldValue == null,
+      "Cannot specify both name and nameFieldValue",
+    );
+    final json = {
+      if (name != _sentinel)
+        _$ShoppingListFieldMap['name']!:
+            _$ShoppingListPerFieldToJson.name(name as String),
+      if (nameFieldValue != null)
+        _$ShoppingListFieldMap['name']!: nameFieldValue,
+    };
+
+    transaction.update(reference, json);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ShoppingListDocumentReference &&
+        other.runtimeType == runtimeType &&
+        other.parent == parent &&
+        other.id == id;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, parent, id);
+}
+
+abstract class ShoppingListQuery
+    implements QueryReference<ShoppingList, ShoppingListQuerySnapshot> {
+  @override
+  ShoppingListQuery limit(int limit);
+
+  @override
+  ShoppingListQuery limitToLast(int limit);
+
+  /// Perform a where query based on a [FieldPath].
+  ///
+  /// This method is considered unsafe as it does check that the field path
+  /// maps to a valid property or that parameters such as [isEqualTo] receive
+  /// a value of the correct type.
+  ///
+  /// If possible, instead use the more explicit variant of where queries:
+  ///
+  /// **AVOID**:
+  /// ```dart
+  /// collection.whereFieldPath(FieldPath.fromString('title'), isEqualTo: 'title');
+  /// ```
+  ///
+  /// **PREFER**:
+  /// ```dart
+  /// collection.whereTitle(isEqualTo: 'title');
+  /// ```
+  ShoppingListQuery whereFieldPath(
+    Object fieldPath, {
+    Object? isEqualTo,
+    Object? isNotEqualTo,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    Object? arrayContains,
+    List<Object?>? arrayContainsAny,
+    List<Object?>? whereIn,
+    List<Object?>? whereNotIn,
+    bool? isNull,
+  });
+
+  ShoppingListQuery whereDocumentId({
+    String? isEqualTo,
+    String? isNotEqualTo,
+    String? isLessThan,
+    String? isLessThanOrEqualTo,
+    String? isGreaterThan,
+    String? isGreaterThanOrEqualTo,
+    List<String>? whereIn,
+    List<String>? whereNotIn,
+    bool? isNull,
+  });
+
+  ShoppingListQuery whereName({
+    String? isEqualTo,
+    String? isNotEqualTo,
+    String? isLessThan,
+    String? isLessThanOrEqualTo,
+    String? isGreaterThan,
+    String? isGreaterThanOrEqualTo,
+    List<String>? whereIn,
+    List<String>? whereNotIn,
+    bool? isNull,
+  });
+
+  /// Perform an order query based on a [FieldPath].
+  ///
+  /// This method is considered unsafe as it does check that the field path
+  /// maps to a valid property or that parameters such as [isEqualTo] receive
+  /// a value of the correct type.
+  ///
+  /// If possible, instead use the more explicit variant of order queries:
+  ///
+  /// **AVOID**:
+  /// ```dart
+  /// collection.orderByFieldPath(
+  ///   FieldPath.fromString('title'),
+  ///   startAt: 'title',
+  /// );
+  /// ```
+  ///
+  /// **PREFER**:
+  /// ```dart
+  /// collection.orderByTitle(startAt: 'title');
+  /// ```
+  ShoppingListQuery orderByFieldPath(
+    Object fieldPath, {
+    bool descending = false,
+    Object startAt,
+    Object startAfter,
+    Object endAt,
+    Object endBefore,
+    ShoppingListDocumentSnapshot? startAtDocument,
+    ShoppingListDocumentSnapshot? endAtDocument,
+    ShoppingListDocumentSnapshot? endBeforeDocument,
+    ShoppingListDocumentSnapshot? startAfterDocument,
+  });
+
+  ShoppingListQuery orderByDocumentId({
+    bool descending = false,
+    String startAt,
+    String startAfter,
+    String endAt,
+    String endBefore,
+    ShoppingListDocumentSnapshot? startAtDocument,
+    ShoppingListDocumentSnapshot? endAtDocument,
+    ShoppingListDocumentSnapshot? endBeforeDocument,
+    ShoppingListDocumentSnapshot? startAfterDocument,
+  });
+
+  ShoppingListQuery orderByName({
+    bool descending = false,
+    String startAt,
+    String startAfter,
+    String endAt,
+    String endBefore,
+    ShoppingListDocumentSnapshot? startAtDocument,
+    ShoppingListDocumentSnapshot? endAtDocument,
+    ShoppingListDocumentSnapshot? endBeforeDocument,
+    ShoppingListDocumentSnapshot? startAfterDocument,
+  });
+}
+
+class _$ShoppingListQuery
+    extends QueryReference<ShoppingList, ShoppingListQuerySnapshot>
+    implements ShoppingListQuery {
+  _$ShoppingListQuery(
+    this._collection, {
+    required Query<ShoppingList> $referenceWithoutCursor,
+    $QueryCursor $queryCursor = const $QueryCursor(),
+  }) : super(
+          $referenceWithoutCursor: $referenceWithoutCursor,
+          $queryCursor: $queryCursor,
+        );
+
+  final CollectionReference<Object?> _collection;
+
+  @override
+  Stream<ShoppingListQuerySnapshot> snapshots([SnapshotOptions? options]) {
+    return reference
+        .snapshots()
+        .map(ShoppingListQuerySnapshot._fromQuerySnapshot);
+  }
+
+  @override
+  Future<ShoppingListQuerySnapshot> get([GetOptions? options]) {
+    return reference
+        .get(options)
+        .then(ShoppingListQuerySnapshot._fromQuerySnapshot);
+  }
+
+  @override
+  ShoppingListQuery limit(int limit) {
+    return _$ShoppingListQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.limit(limit),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListQuery limitToLast(int limit) {
+    return _$ShoppingListQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.limitToLast(limit),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListQuery whereFieldPath(
+    Object fieldPath, {
+    Object? isEqualTo = _sentinel,
+    Object? isNotEqualTo = _sentinel,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    Object? arrayContains,
+    List<Object?>? arrayContainsAny,
+    List<Object?>? whereIn,
+    List<Object?>? whereNotIn,
+    bool? isNull,
+  }) {
+    return _$ShoppingListQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.where(
+        fieldPath,
+        isEqualTo: isEqualTo != _sentinel ? isEqualTo : null,
+        isNotEqualTo: isNotEqualTo != _sentinel ? isNotEqualTo : null,
+        isLessThan: isLessThan,
+        isLessThanOrEqualTo: isLessThanOrEqualTo,
+        isGreaterThan: isGreaterThan,
+        isGreaterThanOrEqualTo: isGreaterThanOrEqualTo,
+        arrayContains: arrayContains,
+        arrayContainsAny: arrayContainsAny,
+        whereIn: whereIn,
+        whereNotIn: whereNotIn,
+        isNull: isNull ??
+            (isEqualTo == null ? false : null) ??
+            (isNotEqualTo == null ? true : null),
+      ),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListQuery whereDocumentId({
+    Object? isEqualTo = _sentinel,
+    Object? isNotEqualTo = _sentinel,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    List<String>? whereIn,
+    List<String>? whereNotIn,
+    bool? isNull,
+  }) {
+    return _$ShoppingListQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.where(
+        FieldPath.documentId,
+        isEqualTo: isEqualTo != _sentinel ? isEqualTo : null,
+        isNotEqualTo: isNotEqualTo != _sentinel ? isNotEqualTo : null,
+        isLessThan: isLessThan,
+        isLessThanOrEqualTo: isLessThanOrEqualTo,
+        isGreaterThan: isGreaterThan,
+        isGreaterThanOrEqualTo: isGreaterThanOrEqualTo,
+        whereIn: whereIn,
+        whereNotIn: whereNotIn,
+        isNull: isNull ??
+            (isEqualTo == null ? false : null) ??
+            (isNotEqualTo == null ? true : null),
+      ),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListQuery whereName({
+    Object? isEqualTo = _sentinel,
+    Object? isNotEqualTo = _sentinel,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    List<String>? whereIn,
+    List<String>? whereNotIn,
+    bool? isNull,
+  }) {
+    return _$ShoppingListQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.where(
+        _$ShoppingListFieldMap['name']!,
+        isEqualTo: isEqualTo != _sentinel
+            ? _$ShoppingListPerFieldToJson.name(isEqualTo as String)
+            : null,
+        isNotEqualTo: isNotEqualTo != _sentinel
+            ? _$ShoppingListPerFieldToJson.name(isNotEqualTo as String)
+            : null,
+        isLessThan: isLessThan != null
+            ? _$ShoppingListPerFieldToJson.name(isLessThan as String)
+            : null,
+        isLessThanOrEqualTo: isLessThanOrEqualTo != null
+            ? _$ShoppingListPerFieldToJson.name(isLessThanOrEqualTo as String)
+            : null,
+        isGreaterThan: isGreaterThan != null
+            ? _$ShoppingListPerFieldToJson.name(isGreaterThan as String)
+            : null,
+        isGreaterThanOrEqualTo: isGreaterThanOrEqualTo != null
+            ? _$ShoppingListPerFieldToJson
+                .name(isGreaterThanOrEqualTo as String)
+            : null,
+        whereIn: whereIn?.map((e) => _$ShoppingListPerFieldToJson.name(e)),
+        whereNotIn:
+            whereNotIn?.map((e) => _$ShoppingListPerFieldToJson.name(e)),
+        isNull: isNull ??
+            (isEqualTo == null ? false : null) ??
+            (isNotEqualTo == null ? true : null),
+      ),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListQuery orderByFieldPath(
+    Object fieldPath, {
+    bool descending = false,
+    Object? startAt = _sentinel,
+    Object? startAfter = _sentinel,
+    Object? endAt = _sentinel,
+    Object? endBefore = _sentinel,
+    ShoppingListDocumentSnapshot? startAtDocument,
+    ShoppingListDocumentSnapshot? endAtDocument,
+    ShoppingListDocumentSnapshot? endBeforeDocument,
+    ShoppingListDocumentSnapshot? startAfterDocument,
+  }) {
+    final query =
+        $referenceWithoutCursor.orderBy(fieldPath, descending: descending);
+    var queryCursor = $queryCursor;
+
+    if (startAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAt: const [],
+        startAtDocumentSnapshot: startAtDocument.snapshot,
+      );
+    }
+    if (startAfterDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: const [],
+        startAfterDocumentSnapshot: startAfterDocument.snapshot,
+      );
+    }
+    if (endAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endAt: const [],
+        endAtDocumentSnapshot: endAtDocument.snapshot,
+      );
+    }
+    if (endBeforeDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: const [],
+        endBeforeDocumentSnapshot: endBeforeDocument.snapshot,
+      );
+    }
+
+    if (startAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAt: [...queryCursor.startAt, startAt],
+        startAtDocumentSnapshot: null,
+      );
+    }
+    if (startAfter != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: [...queryCursor.startAfter, startAfter],
+        startAfterDocumentSnapshot: null,
+      );
+    }
+    if (endAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endAt: [...queryCursor.endAt, endAt],
+        endAtDocumentSnapshot: null,
+      );
+    }
+    if (endBefore != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: [...queryCursor.endBefore, endBefore],
+        endBeforeDocumentSnapshot: null,
+      );
+    }
+
+    return _$ShoppingListQuery(
+      _collection,
+      $referenceWithoutCursor: query,
+      $queryCursor: queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListQuery orderByDocumentId({
+    bool descending = false,
+    Object? startAt = _sentinel,
+    Object? startAfter = _sentinel,
+    Object? endAt = _sentinel,
+    Object? endBefore = _sentinel,
+    ShoppingListDocumentSnapshot? startAtDocument,
+    ShoppingListDocumentSnapshot? endAtDocument,
+    ShoppingListDocumentSnapshot? endBeforeDocument,
+    ShoppingListDocumentSnapshot? startAfterDocument,
+  }) {
+    final query = $referenceWithoutCursor.orderBy(FieldPath.documentId,
+        descending: descending);
+    var queryCursor = $queryCursor;
+
+    if (startAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAt: const [],
+        startAtDocumentSnapshot: startAtDocument.snapshot,
+      );
+    }
+    if (startAfterDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: const [],
+        startAfterDocumentSnapshot: startAfterDocument.snapshot,
+      );
+    }
+    if (endAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endAt: const [],
+        endAtDocumentSnapshot: endAtDocument.snapshot,
+      );
+    }
+    if (endBeforeDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: const [],
+        endBeforeDocumentSnapshot: endBeforeDocument.snapshot,
+      );
+    }
+
+    if (startAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAt: [...queryCursor.startAt, startAt],
+        startAtDocumentSnapshot: null,
+      );
+    }
+    if (startAfter != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: [...queryCursor.startAfter, startAfter],
+        startAfterDocumentSnapshot: null,
+      );
+    }
+    if (endAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endAt: [...queryCursor.endAt, endAt],
+        endAtDocumentSnapshot: null,
+      );
+    }
+    if (endBefore != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: [...queryCursor.endBefore, endBefore],
+        endBeforeDocumentSnapshot: null,
+      );
+    }
+
+    return _$ShoppingListQuery(
+      _collection,
+      $referenceWithoutCursor: query,
+      $queryCursor: queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListQuery orderByName({
+    bool descending = false,
+    Object? startAt = _sentinel,
+    Object? startAfter = _sentinel,
+    Object? endAt = _sentinel,
+    Object? endBefore = _sentinel,
+    ShoppingListDocumentSnapshot? startAtDocument,
+    ShoppingListDocumentSnapshot? endAtDocument,
+    ShoppingListDocumentSnapshot? endBeforeDocument,
+    ShoppingListDocumentSnapshot? startAfterDocument,
+  }) {
+    final query = $referenceWithoutCursor
+        .orderBy(_$ShoppingListFieldMap['name']!, descending: descending);
+    var queryCursor = $queryCursor;
+
+    if (startAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAt: const [],
+        startAtDocumentSnapshot: startAtDocument.snapshot,
+      );
+    }
+    if (startAfterDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: const [],
+        startAfterDocumentSnapshot: startAfterDocument.snapshot,
+      );
+    }
+    if (endAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endAt: const [],
+        endAtDocumentSnapshot: endAtDocument.snapshot,
+      );
+    }
+    if (endBeforeDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: const [],
+        endBeforeDocumentSnapshot: endBeforeDocument.snapshot,
+      );
+    }
+
+    if (startAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAt: [...queryCursor.startAt, startAt],
+        startAtDocumentSnapshot: null,
+      );
+    }
+    if (startAfter != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: [...queryCursor.startAfter, startAfter],
+        startAfterDocumentSnapshot: null,
+      );
+    }
+    if (endAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endAt: [...queryCursor.endAt, endAt],
+        endAtDocumentSnapshot: null,
+      );
+    }
+    if (endBefore != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: [...queryCursor.endBefore, endBefore],
+        endBeforeDocumentSnapshot: null,
+      );
+    }
+
+    return _$ShoppingListQuery(
+      _collection,
+      $referenceWithoutCursor: query,
+      $queryCursor: queryCursor,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is _$ShoppingListQuery &&
+        other.runtimeType == runtimeType &&
+        other.reference == reference;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, reference);
+}
+
+class ShoppingListDocumentSnapshot
+    extends FirestoreDocumentSnapshot<ShoppingList> {
+  ShoppingListDocumentSnapshot._(this.snapshot) : data = snapshot.data();
+
+  @override
+  final DocumentSnapshot<ShoppingList> snapshot;
+
+  @override
+  ShoppingListDocumentReference get reference {
+    return ShoppingListDocumentReference(
+      snapshot.reference,
+    );
+  }
+
+  @override
+  final ShoppingList? data;
+}
+
+class ShoppingListQuerySnapshot extends FirestoreQuerySnapshot<ShoppingList,
+    ShoppingListQueryDocumentSnapshot> {
+  ShoppingListQuerySnapshot._(
+    this.snapshot,
+    this.docs,
+    this.docChanges,
+  );
+
+  factory ShoppingListQuerySnapshot._fromQuerySnapshot(
+    QuerySnapshot<ShoppingList> snapshot,
+  ) {
+    final docs =
+        snapshot.docs.map(ShoppingListQueryDocumentSnapshot._).toList();
+
+    final docChanges = snapshot.docChanges.map((change) {
+      return _decodeDocumentChange(
+        change,
+        ShoppingListDocumentSnapshot._,
+      );
+    }).toList();
+
+    return ShoppingListQuerySnapshot._(
+      snapshot,
+      docs,
+      docChanges,
+    );
+  }
+
+  static FirestoreDocumentChange<ShoppingListDocumentSnapshot>
+      _decodeDocumentChange<T>(
+    DocumentChange<T> docChange,
+    ShoppingListDocumentSnapshot Function(DocumentSnapshot<T> doc) decodeDoc,
+  ) {
+    return FirestoreDocumentChange<ShoppingListDocumentSnapshot>(
+      type: docChange.type,
+      oldIndex: docChange.oldIndex,
+      newIndex: docChange.newIndex,
+      doc: decodeDoc(docChange.doc),
+    );
+  }
+
+  final QuerySnapshot<ShoppingList> snapshot;
+
+  @override
+  final List<ShoppingListQueryDocumentSnapshot> docs;
+
+  @override
+  final List<FirestoreDocumentChange<ShoppingListDocumentSnapshot>> docChanges;
+}
+
+class ShoppingListQueryDocumentSnapshot
+    extends FirestoreQueryDocumentSnapshot<ShoppingList>
+    implements ShoppingListDocumentSnapshot {
+  ShoppingListQueryDocumentSnapshot._(this.snapshot) : data = snapshot.data();
+
+  @override
+  final QueryDocumentSnapshot<ShoppingList> snapshot;
+
+  @override
+  final ShoppingList data;
+
+  @override
+  ShoppingListDocumentReference get reference {
+    return ShoppingListDocumentReference(snapshot.reference);
+  }
+}
+
+/// A collection reference object can be used for adding documents,
+/// getting document references, and querying for documents
+/// (using the methods inherited from Query).
+abstract class ShoppingListItemCollectionReference
+    implements
+        ShoppingListItemQuery,
+        FirestoreCollectionReference<ShoppingListItem,
+            ShoppingListItemQuerySnapshot> {
+  factory ShoppingListItemCollectionReference(
+    DocumentReference<ShoppingList> parent,
+  ) = _$ShoppingListItemCollectionReference;
+
+  static ShoppingListItem fromFirestore(
+    DocumentSnapshot<Map<String, Object?>> snapshot,
+    SnapshotOptions? options,
+  ) {
+    return _$ShoppingListItemFromJson({'id': snapshot.id, ...?snapshot.data()});
+  }
+
+  static Map<String, Object?> toFirestore(
+    ShoppingListItem value,
+    SetOptions? options,
+  ) {
+    return {..._$ShoppingListItemToJson(value)}..remove('id');
+  }
+
+  @override
+  CollectionReference<ShoppingListItem> get reference;
+
+  /// A reference to the containing [ShoppingListDocumentReference] if this is a subcollection.
+  ShoppingListDocumentReference get parent;
+
+  @override
+  ShoppingListItemDocumentReference doc([String? id]);
+
+  /// Add a new document to this collection with the specified data,
+  /// assigning it a document ID automatically.
+  Future<ShoppingListItemDocumentReference> add(ShoppingListItem value);
+}
+
+class _$ShoppingListItemCollectionReference extends _$ShoppingListItemQuery
+    implements ShoppingListItemCollectionReference {
+  factory _$ShoppingListItemCollectionReference(
+    DocumentReference<ShoppingList> parent,
+  ) {
+    return _$ShoppingListItemCollectionReference._(
+      ShoppingListDocumentReference(parent),
+      parent.collection('shoppinglistitems').withConverter(
+            fromFirestore: ShoppingListItemCollectionReference.fromFirestore,
+            toFirestore: ShoppingListItemCollectionReference.toFirestore,
+          ),
+    );
+  }
+
+  _$ShoppingListItemCollectionReference._(
+    this.parent,
+    CollectionReference<ShoppingListItem> reference,
+  ) : super(reference, $referenceWithoutCursor: reference);
+
+  @override
+  final ShoppingListDocumentReference parent;
+
+  String get path => reference.path;
+
+  @override
+  CollectionReference<ShoppingListItem> get reference =>
+      super.reference as CollectionReference<ShoppingListItem>;
+
+  @override
+  ShoppingListItemDocumentReference doc([String? id]) {
+    assert(
+      id == null || id.split('/').length == 1,
+      'The document ID cannot be from a different collection',
+    );
+    return ShoppingListItemDocumentReference(
+      reference.doc(id),
+    );
+  }
+
+  @override
+  Future<ShoppingListItemDocumentReference> add(ShoppingListItem value) {
+    return reference
+        .add(value)
+        .then((ref) => ShoppingListItemDocumentReference(ref));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is _$ShoppingListItemCollectionReference &&
+        other.runtimeType == runtimeType &&
+        other.reference == reference;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, reference);
+}
+
+abstract class ShoppingListItemDocumentReference
+    extends FirestoreDocumentReference<ShoppingListItem,
+        ShoppingListItemDocumentSnapshot> {
+  factory ShoppingListItemDocumentReference(
+          DocumentReference<ShoppingListItem> reference) =
+      _$ShoppingListItemDocumentReference;
+
+  DocumentReference<ShoppingListItem> get reference;
+
+  /// A reference to the [ShoppingListItemCollectionReference] containing this document.
+  ShoppingListItemCollectionReference get parent {
+    return _$ShoppingListItemCollectionReference(
+      reference.parent.parent!.withConverter<ShoppingList>(
+        fromFirestore: ShoppingListCollectionReference.fromFirestore,
+        toFirestore: ShoppingListCollectionReference.toFirestore,
+      ),
+    );
+  }
+
+  @override
+  Stream<ShoppingListItemDocumentSnapshot> snapshots();
+
+  @override
+  Future<ShoppingListItemDocumentSnapshot> get([GetOptions? options]);
+
+  @override
+  Future<void> delete();
+
+  /// Updates data on the document. Data will be merged with any existing
+  /// document data.
+  ///
+  /// If no document exists yet, the update will fail.
+  Future<void> update({
+    String item,
+    FieldValue itemFieldValue,
+    String? quantity,
+    FieldValue quantityFieldValue,
+    bool isSelected,
+    FieldValue isSelectedFieldValue,
+  });
+
+  /// Updates fields in the current document using the transaction API.
+  ///
+  /// The update will fail if applied to a document that does not exist.
+  void transactionUpdate(
+    Transaction transaction, {
+    String item,
+    FieldValue itemFieldValue,
+    String? quantity,
+    FieldValue quantityFieldValue,
+    bool isSelected,
+    FieldValue isSelectedFieldValue,
+  });
+}
+
+class _$ShoppingListItemDocumentReference extends FirestoreDocumentReference<
+        ShoppingListItem, ShoppingListItemDocumentSnapshot>
+    implements ShoppingListItemDocumentReference {
+  _$ShoppingListItemDocumentReference(this.reference);
+
+  @override
+  final DocumentReference<ShoppingListItem> reference;
+
+  /// A reference to the [ShoppingListItemCollectionReference] containing this document.
+  ShoppingListItemCollectionReference get parent {
+    return _$ShoppingListItemCollectionReference(
+      reference.parent.parent!.withConverter<ShoppingList>(
+        fromFirestore: ShoppingListCollectionReference.fromFirestore,
+        toFirestore: ShoppingListCollectionReference.toFirestore,
+      ),
+    );
+  }
+
+  @override
+  Stream<ShoppingListItemDocumentSnapshot> snapshots() {
+    return reference.snapshots().map(ShoppingListItemDocumentSnapshot._);
+  }
+
+  @override
+  Future<ShoppingListItemDocumentSnapshot> get([GetOptions? options]) {
+    return reference.get(options).then(ShoppingListItemDocumentSnapshot._);
+  }
+
+  @override
+  Future<ShoppingListItemDocumentSnapshot> transactionGet(
+      Transaction transaction) {
+    return transaction.get(reference).then(ShoppingListItemDocumentSnapshot._);
+  }
+
+  Future<void> update({
+    Object? item = _sentinel,
+    FieldValue? itemFieldValue,
+    Object? quantity = _sentinel,
+    FieldValue? quantityFieldValue,
+    Object? isSelected = _sentinel,
+    FieldValue? isSelectedFieldValue,
+  }) async {
+    assert(
+      item == _sentinel || itemFieldValue == null,
+      "Cannot specify both item and itemFieldValue",
+    );
+    assert(
+      quantity == _sentinel || quantityFieldValue == null,
+      "Cannot specify both quantity and quantityFieldValue",
+    );
+    assert(
+      isSelected == _sentinel || isSelectedFieldValue == null,
+      "Cannot specify both isSelected and isSelectedFieldValue",
+    );
+    final json = {
+      if (item != _sentinel)
+        _$ShoppingListItemFieldMap['item']!:
+            _$ShoppingListItemPerFieldToJson.item(item as String),
+      if (itemFieldValue != null)
+        _$ShoppingListItemFieldMap['item']!: itemFieldValue,
+      if (quantity != _sentinel)
+        _$ShoppingListItemFieldMap['quantity']!:
+            _$ShoppingListItemPerFieldToJson.quantity(quantity as String?),
+      if (quantityFieldValue != null)
+        _$ShoppingListItemFieldMap['quantity']!: quantityFieldValue,
+      if (isSelected != _sentinel)
+        _$ShoppingListItemFieldMap['isSelected']!:
+            _$ShoppingListItemPerFieldToJson.isSelected(isSelected as bool),
+      if (isSelectedFieldValue != null)
+        _$ShoppingListItemFieldMap['isSelected']!: isSelectedFieldValue,
+    };
+
+    return reference.update(json);
+  }
+
+  void transactionUpdate(
+    Transaction transaction, {
+    Object? item = _sentinel,
+    FieldValue? itemFieldValue,
+    Object? quantity = _sentinel,
+    FieldValue? quantityFieldValue,
+    Object? isSelected = _sentinel,
+    FieldValue? isSelectedFieldValue,
+  }) {
+    assert(
+      item == _sentinel || itemFieldValue == null,
+      "Cannot specify both item and itemFieldValue",
+    );
+    assert(
+      quantity == _sentinel || quantityFieldValue == null,
+      "Cannot specify both quantity and quantityFieldValue",
+    );
+    assert(
+      isSelected == _sentinel || isSelectedFieldValue == null,
+      "Cannot specify both isSelected and isSelectedFieldValue",
+    );
+    final json = {
+      if (item != _sentinel)
+        _$ShoppingListItemFieldMap['item']!:
+            _$ShoppingListItemPerFieldToJson.item(item as String),
+      if (itemFieldValue != null)
+        _$ShoppingListItemFieldMap['item']!: itemFieldValue,
+      if (quantity != _sentinel)
+        _$ShoppingListItemFieldMap['quantity']!:
+            _$ShoppingListItemPerFieldToJson.quantity(quantity as String?),
+      if (quantityFieldValue != null)
+        _$ShoppingListItemFieldMap['quantity']!: quantityFieldValue,
+      if (isSelected != _sentinel)
+        _$ShoppingListItemFieldMap['isSelected']!:
+            _$ShoppingListItemPerFieldToJson.isSelected(isSelected as bool),
+      if (isSelectedFieldValue != null)
+        _$ShoppingListItemFieldMap['isSelected']!: isSelectedFieldValue,
+    };
+
+    transaction.update(reference, json);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ShoppingListItemDocumentReference &&
+        other.runtimeType == runtimeType &&
+        other.parent == parent &&
+        other.id == id;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, parent, id);
+}
+
+abstract class ShoppingListItemQuery
+    implements QueryReference<ShoppingListItem, ShoppingListItemQuerySnapshot> {
+  @override
+  ShoppingListItemQuery limit(int limit);
+
+  @override
+  ShoppingListItemQuery limitToLast(int limit);
+
+  /// Perform a where query based on a [FieldPath].
+  ///
+  /// This method is considered unsafe as it does check that the field path
+  /// maps to a valid property or that parameters such as [isEqualTo] receive
+  /// a value of the correct type.
+  ///
+  /// If possible, instead use the more explicit variant of where queries:
+  ///
+  /// **AVOID**:
+  /// ```dart
+  /// collection.whereFieldPath(FieldPath.fromString('title'), isEqualTo: 'title');
+  /// ```
+  ///
+  /// **PREFER**:
+  /// ```dart
+  /// collection.whereTitle(isEqualTo: 'title');
+  /// ```
+  ShoppingListItemQuery whereFieldPath(
+    Object fieldPath, {
+    Object? isEqualTo,
+    Object? isNotEqualTo,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    Object? arrayContains,
+    List<Object?>? arrayContainsAny,
+    List<Object?>? whereIn,
+    List<Object?>? whereNotIn,
+    bool? isNull,
+  });
+
+  ShoppingListItemQuery whereDocumentId({
+    String? isEqualTo,
+    String? isNotEqualTo,
+    String? isLessThan,
+    String? isLessThanOrEqualTo,
+    String? isGreaterThan,
+    String? isGreaterThanOrEqualTo,
+    List<String>? whereIn,
+    List<String>? whereNotIn,
+    bool? isNull,
+  });
+
+  ShoppingListItemQuery whereItem({
+    String? isEqualTo,
+    String? isNotEqualTo,
+    String? isLessThan,
+    String? isLessThanOrEqualTo,
+    String? isGreaterThan,
+    String? isGreaterThanOrEqualTo,
+    List<String>? whereIn,
+    List<String>? whereNotIn,
+    bool? isNull,
+  });
+
+  ShoppingListItemQuery whereQuantity({
+    String? isEqualTo,
+    String? isNotEqualTo,
+    String? isLessThan,
+    String? isLessThanOrEqualTo,
+    String? isGreaterThan,
+    String? isGreaterThanOrEqualTo,
+    List<String?>? whereIn,
+    List<String?>? whereNotIn,
+    bool? isNull,
+  });
+
+  ShoppingListItemQuery whereIsSelected({
+    bool? isEqualTo,
+    bool? isNotEqualTo,
+    bool? isLessThan,
+    bool? isLessThanOrEqualTo,
+    bool? isGreaterThan,
+    bool? isGreaterThanOrEqualTo,
+    List<bool>? whereIn,
+    List<bool>? whereNotIn,
+    bool? isNull,
+  });
+
+  /// Perform an order query based on a [FieldPath].
+  ///
+  /// This method is considered unsafe as it does check that the field path
+  /// maps to a valid property or that parameters such as [isEqualTo] receive
+  /// a value of the correct type.
+  ///
+  /// If possible, instead use the more explicit variant of order queries:
+  ///
+  /// **AVOID**:
+  /// ```dart
+  /// collection.orderByFieldPath(
+  ///   FieldPath.fromString('title'),
+  ///   startAt: 'title',
+  /// );
+  /// ```
+  ///
+  /// **PREFER**:
+  /// ```dart
+  /// collection.orderByTitle(startAt: 'title');
+  /// ```
+  ShoppingListItemQuery orderByFieldPath(
+    Object fieldPath, {
+    bool descending = false,
+    Object startAt,
+    Object startAfter,
+    Object endAt,
+    Object endBefore,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  });
+
+  ShoppingListItemQuery orderByDocumentId({
+    bool descending = false,
+    String startAt,
+    String startAfter,
+    String endAt,
+    String endBefore,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  });
+
+  ShoppingListItemQuery orderByItem({
+    bool descending = false,
+    String startAt,
+    String startAfter,
+    String endAt,
+    String endBefore,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  });
+
+  ShoppingListItemQuery orderByQuantity({
+    bool descending = false,
+    String? startAt,
+    String? startAfter,
+    String? endAt,
+    String? endBefore,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  });
+
+  ShoppingListItemQuery orderByIsSelected({
+    bool descending = false,
+    bool startAt,
+    bool startAfter,
+    bool endAt,
+    bool endBefore,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  });
+}
+
+class _$ShoppingListItemQuery
+    extends QueryReference<ShoppingListItem, ShoppingListItemQuerySnapshot>
+    implements ShoppingListItemQuery {
+  _$ShoppingListItemQuery(
+    this._collection, {
+    required Query<ShoppingListItem> $referenceWithoutCursor,
+    $QueryCursor $queryCursor = const $QueryCursor(),
+  }) : super(
+          $referenceWithoutCursor: $referenceWithoutCursor,
+          $queryCursor: $queryCursor,
+        );
+
+  final CollectionReference<Object?> _collection;
+
+  @override
+  Stream<ShoppingListItemQuerySnapshot> snapshots([SnapshotOptions? options]) {
+    return reference
+        .snapshots()
+        .map(ShoppingListItemQuerySnapshot._fromQuerySnapshot);
+  }
+
+  @override
+  Future<ShoppingListItemQuerySnapshot> get([GetOptions? options]) {
+    return reference
+        .get(options)
+        .then(ShoppingListItemQuerySnapshot._fromQuerySnapshot);
+  }
+
+  @override
+  ShoppingListItemQuery limit(int limit) {
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.limit(limit),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery limitToLast(int limit) {
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.limitToLast(limit),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery whereFieldPath(
+    Object fieldPath, {
+    Object? isEqualTo = _sentinel,
+    Object? isNotEqualTo = _sentinel,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    Object? arrayContains,
+    List<Object?>? arrayContainsAny,
+    List<Object?>? whereIn,
+    List<Object?>? whereNotIn,
+    bool? isNull,
+  }) {
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.where(
+        fieldPath,
+        isEqualTo: isEqualTo != _sentinel ? isEqualTo : null,
+        isNotEqualTo: isNotEqualTo != _sentinel ? isNotEqualTo : null,
+        isLessThan: isLessThan,
+        isLessThanOrEqualTo: isLessThanOrEqualTo,
+        isGreaterThan: isGreaterThan,
+        isGreaterThanOrEqualTo: isGreaterThanOrEqualTo,
+        arrayContains: arrayContains,
+        arrayContainsAny: arrayContainsAny,
+        whereIn: whereIn,
+        whereNotIn: whereNotIn,
+        isNull: isNull ??
+            (isEqualTo == null ? false : null) ??
+            (isNotEqualTo == null ? true : null),
+      ),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery whereDocumentId({
+    Object? isEqualTo = _sentinel,
+    Object? isNotEqualTo = _sentinel,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    List<String>? whereIn,
+    List<String>? whereNotIn,
+    bool? isNull,
+  }) {
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.where(
+        FieldPath.documentId,
+        isEqualTo: isEqualTo != _sentinel ? isEqualTo : null,
+        isNotEqualTo: isNotEqualTo != _sentinel ? isNotEqualTo : null,
+        isLessThan: isLessThan,
+        isLessThanOrEqualTo: isLessThanOrEqualTo,
+        isGreaterThan: isGreaterThan,
+        isGreaterThanOrEqualTo: isGreaterThanOrEqualTo,
+        whereIn: whereIn,
+        whereNotIn: whereNotIn,
+        isNull: isNull ??
+            (isEqualTo == null ? false : null) ??
+            (isNotEqualTo == null ? true : null),
+      ),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery whereItem({
+    Object? isEqualTo = _sentinel,
+    Object? isNotEqualTo = _sentinel,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    List<String>? whereIn,
+    List<String>? whereNotIn,
+    bool? isNull,
+  }) {
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.where(
+        _$ShoppingListItemFieldMap['item']!,
+        isEqualTo: isEqualTo != _sentinel
+            ? _$ShoppingListItemPerFieldToJson.item(isEqualTo as String)
+            : null,
+        isNotEqualTo: isNotEqualTo != _sentinel
+            ? _$ShoppingListItemPerFieldToJson.item(isNotEqualTo as String)
+            : null,
+        isLessThan: isLessThan != null
+            ? _$ShoppingListItemPerFieldToJson.item(isLessThan as String)
+            : null,
+        isLessThanOrEqualTo: isLessThanOrEqualTo != null
+            ? _$ShoppingListItemPerFieldToJson
+                .item(isLessThanOrEqualTo as String)
+            : null,
+        isGreaterThan: isGreaterThan != null
+            ? _$ShoppingListItemPerFieldToJson.item(isGreaterThan as String)
+            : null,
+        isGreaterThanOrEqualTo: isGreaterThanOrEqualTo != null
+            ? _$ShoppingListItemPerFieldToJson
+                .item(isGreaterThanOrEqualTo as String)
+            : null,
+        whereIn: whereIn?.map((e) => _$ShoppingListItemPerFieldToJson.item(e)),
+        whereNotIn:
+            whereNotIn?.map((e) => _$ShoppingListItemPerFieldToJson.item(e)),
+        isNull: isNull ??
+            (isEqualTo == null ? false : null) ??
+            (isNotEqualTo == null ? true : null),
+      ),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery whereQuantity({
+    Object? isEqualTo = _sentinel,
+    Object? isNotEqualTo = _sentinel,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    List<String?>? whereIn,
+    List<String?>? whereNotIn,
+    bool? isNull,
+  }) {
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.where(
+        _$ShoppingListItemFieldMap['quantity']!,
+        isEqualTo: isEqualTo != _sentinel
+            ? _$ShoppingListItemPerFieldToJson.quantity(isEqualTo as String?)
+            : null,
+        isNotEqualTo: isNotEqualTo != _sentinel
+            ? _$ShoppingListItemPerFieldToJson.quantity(isNotEqualTo as String?)
+            : null,
+        isLessThan: isLessThan != null
+            ? _$ShoppingListItemPerFieldToJson.quantity(isLessThan as String?)
+            : null,
+        isLessThanOrEqualTo: isLessThanOrEqualTo != null
+            ? _$ShoppingListItemPerFieldToJson
+                .quantity(isLessThanOrEqualTo as String?)
+            : null,
+        isGreaterThan: isGreaterThan != null
+            ? _$ShoppingListItemPerFieldToJson
+                .quantity(isGreaterThan as String?)
+            : null,
+        isGreaterThanOrEqualTo: isGreaterThanOrEqualTo != null
+            ? _$ShoppingListItemPerFieldToJson
+                .quantity(isGreaterThanOrEqualTo as String?)
+            : null,
+        whereIn:
+            whereIn?.map((e) => _$ShoppingListItemPerFieldToJson.quantity(e)),
+        whereNotIn: whereNotIn
+            ?.map((e) => _$ShoppingListItemPerFieldToJson.quantity(e)),
+        isNull: isNull ??
+            (isEqualTo == null ? false : null) ??
+            (isNotEqualTo == null ? true : null),
+      ),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery whereIsSelected({
+    Object? isEqualTo = _sentinel,
+    Object? isNotEqualTo = _sentinel,
+    Object? isLessThan,
+    Object? isLessThanOrEqualTo,
+    Object? isGreaterThan,
+    Object? isGreaterThanOrEqualTo,
+    List<bool>? whereIn,
+    List<bool>? whereNotIn,
+    bool? isNull,
+  }) {
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: $referenceWithoutCursor.where(
+        _$ShoppingListItemFieldMap['isSelected']!,
+        isEqualTo: isEqualTo != _sentinel
+            ? _$ShoppingListItemPerFieldToJson.isSelected(isEqualTo as bool)
+            : null,
+        isNotEqualTo: isNotEqualTo != _sentinel
+            ? _$ShoppingListItemPerFieldToJson.isSelected(isNotEqualTo as bool)
+            : null,
+        isLessThan: isLessThan != null
+            ? _$ShoppingListItemPerFieldToJson.isSelected(isLessThan as bool)
+            : null,
+        isLessThanOrEqualTo: isLessThanOrEqualTo != null
+            ? _$ShoppingListItemPerFieldToJson
+                .isSelected(isLessThanOrEqualTo as bool)
+            : null,
+        isGreaterThan: isGreaterThan != null
+            ? _$ShoppingListItemPerFieldToJson.isSelected(isGreaterThan as bool)
+            : null,
+        isGreaterThanOrEqualTo: isGreaterThanOrEqualTo != null
+            ? _$ShoppingListItemPerFieldToJson
+                .isSelected(isGreaterThanOrEqualTo as bool)
+            : null,
+        whereIn:
+            whereIn?.map((e) => _$ShoppingListItemPerFieldToJson.isSelected(e)),
+        whereNotIn: whereNotIn
+            ?.map((e) => _$ShoppingListItemPerFieldToJson.isSelected(e)),
+        isNull: isNull ??
+            (isEqualTo == null ? false : null) ??
+            (isNotEqualTo == null ? true : null),
+      ),
+      $queryCursor: $queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery orderByFieldPath(
+    Object fieldPath, {
+    bool descending = false,
+    Object? startAt = _sentinel,
+    Object? startAfter = _sentinel,
+    Object? endAt = _sentinel,
+    Object? endBefore = _sentinel,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  }) {
+    final query =
+        $referenceWithoutCursor.orderBy(fieldPath, descending: descending);
+    var queryCursor = $queryCursor;
+
+    if (startAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAt: const [],
+        startAtDocumentSnapshot: startAtDocument.snapshot,
+      );
+    }
+    if (startAfterDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: const [],
+        startAfterDocumentSnapshot: startAfterDocument.snapshot,
+      );
+    }
+    if (endAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endAt: const [],
+        endAtDocumentSnapshot: endAtDocument.snapshot,
+      );
+    }
+    if (endBeforeDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: const [],
+        endBeforeDocumentSnapshot: endBeforeDocument.snapshot,
+      );
+    }
+
+    if (startAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAt: [...queryCursor.startAt, startAt],
+        startAtDocumentSnapshot: null,
+      );
+    }
+    if (startAfter != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: [...queryCursor.startAfter, startAfter],
+        startAfterDocumentSnapshot: null,
+      );
+    }
+    if (endAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endAt: [...queryCursor.endAt, endAt],
+        endAtDocumentSnapshot: null,
+      );
+    }
+    if (endBefore != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: [...queryCursor.endBefore, endBefore],
+        endBeforeDocumentSnapshot: null,
+      );
+    }
+
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: query,
+      $queryCursor: queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery orderByDocumentId({
+    bool descending = false,
+    Object? startAt = _sentinel,
+    Object? startAfter = _sentinel,
+    Object? endAt = _sentinel,
+    Object? endBefore = _sentinel,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  }) {
+    final query = $referenceWithoutCursor.orderBy(FieldPath.documentId,
+        descending: descending);
+    var queryCursor = $queryCursor;
+
+    if (startAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAt: const [],
+        startAtDocumentSnapshot: startAtDocument.snapshot,
+      );
+    }
+    if (startAfterDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: const [],
+        startAfterDocumentSnapshot: startAfterDocument.snapshot,
+      );
+    }
+    if (endAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endAt: const [],
+        endAtDocumentSnapshot: endAtDocument.snapshot,
+      );
+    }
+    if (endBeforeDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: const [],
+        endBeforeDocumentSnapshot: endBeforeDocument.snapshot,
+      );
+    }
+
+    if (startAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAt: [...queryCursor.startAt, startAt],
+        startAtDocumentSnapshot: null,
+      );
+    }
+    if (startAfter != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: [...queryCursor.startAfter, startAfter],
+        startAfterDocumentSnapshot: null,
+      );
+    }
+    if (endAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endAt: [...queryCursor.endAt, endAt],
+        endAtDocumentSnapshot: null,
+      );
+    }
+    if (endBefore != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: [...queryCursor.endBefore, endBefore],
+        endBeforeDocumentSnapshot: null,
+      );
+    }
+
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: query,
+      $queryCursor: queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery orderByItem({
+    bool descending = false,
+    Object? startAt = _sentinel,
+    Object? startAfter = _sentinel,
+    Object? endAt = _sentinel,
+    Object? endBefore = _sentinel,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  }) {
+    final query = $referenceWithoutCursor
+        .orderBy(_$ShoppingListItemFieldMap['item']!, descending: descending);
+    var queryCursor = $queryCursor;
+
+    if (startAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAt: const [],
+        startAtDocumentSnapshot: startAtDocument.snapshot,
+      );
+    }
+    if (startAfterDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: const [],
+        startAfterDocumentSnapshot: startAfterDocument.snapshot,
+      );
+    }
+    if (endAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endAt: const [],
+        endAtDocumentSnapshot: endAtDocument.snapshot,
+      );
+    }
+    if (endBeforeDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: const [],
+        endBeforeDocumentSnapshot: endBeforeDocument.snapshot,
+      );
+    }
+
+    if (startAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAt: [...queryCursor.startAt, startAt],
+        startAtDocumentSnapshot: null,
+      );
+    }
+    if (startAfter != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: [...queryCursor.startAfter, startAfter],
+        startAfterDocumentSnapshot: null,
+      );
+    }
+    if (endAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endAt: [...queryCursor.endAt, endAt],
+        endAtDocumentSnapshot: null,
+      );
+    }
+    if (endBefore != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: [...queryCursor.endBefore, endBefore],
+        endBeforeDocumentSnapshot: null,
+      );
+    }
+
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: query,
+      $queryCursor: queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery orderByQuantity({
+    bool descending = false,
+    Object? startAt = _sentinel,
+    Object? startAfter = _sentinel,
+    Object? endAt = _sentinel,
+    Object? endBefore = _sentinel,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  }) {
+    final query = $referenceWithoutCursor.orderBy(
+        _$ShoppingListItemFieldMap['quantity']!,
+        descending: descending);
+    var queryCursor = $queryCursor;
+
+    if (startAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAt: const [],
+        startAtDocumentSnapshot: startAtDocument.snapshot,
+      );
+    }
+    if (startAfterDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: const [],
+        startAfterDocumentSnapshot: startAfterDocument.snapshot,
+      );
+    }
+    if (endAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endAt: const [],
+        endAtDocumentSnapshot: endAtDocument.snapshot,
+      );
+    }
+    if (endBeforeDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: const [],
+        endBeforeDocumentSnapshot: endBeforeDocument.snapshot,
+      );
+    }
+
+    if (startAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAt: [...queryCursor.startAt, startAt],
+        startAtDocumentSnapshot: null,
+      );
+    }
+    if (startAfter != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: [...queryCursor.startAfter, startAfter],
+        startAfterDocumentSnapshot: null,
+      );
+    }
+    if (endAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endAt: [...queryCursor.endAt, endAt],
+        endAtDocumentSnapshot: null,
+      );
+    }
+    if (endBefore != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: [...queryCursor.endBefore, endBefore],
+        endBeforeDocumentSnapshot: null,
+      );
+    }
+
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: query,
+      $queryCursor: queryCursor,
+    );
+  }
+
+  @override
+  ShoppingListItemQuery orderByIsSelected({
+    bool descending = false,
+    Object? startAt = _sentinel,
+    Object? startAfter = _sentinel,
+    Object? endAt = _sentinel,
+    Object? endBefore = _sentinel,
+    ShoppingListItemDocumentSnapshot? startAtDocument,
+    ShoppingListItemDocumentSnapshot? endAtDocument,
+    ShoppingListItemDocumentSnapshot? endBeforeDocument,
+    ShoppingListItemDocumentSnapshot? startAfterDocument,
+  }) {
+    final query = $referenceWithoutCursor.orderBy(
+        _$ShoppingListItemFieldMap['isSelected']!,
+        descending: descending);
+    var queryCursor = $queryCursor;
+
+    if (startAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAt: const [],
+        startAtDocumentSnapshot: startAtDocument.snapshot,
+      );
+    }
+    if (startAfterDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: const [],
+        startAfterDocumentSnapshot: startAfterDocument.snapshot,
+      );
+    }
+    if (endAtDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endAt: const [],
+        endAtDocumentSnapshot: endAtDocument.snapshot,
+      );
+    }
+    if (endBeforeDocument != null) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: const [],
+        endBeforeDocumentSnapshot: endBeforeDocument.snapshot,
+      );
+    }
+
+    if (startAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAt: [...queryCursor.startAt, startAt],
+        startAtDocumentSnapshot: null,
+      );
+    }
+    if (startAfter != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        startAfter: [...queryCursor.startAfter, startAfter],
+        startAfterDocumentSnapshot: null,
+      );
+    }
+    if (endAt != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endAt: [...queryCursor.endAt, endAt],
+        endAtDocumentSnapshot: null,
+      );
+    }
+    if (endBefore != _sentinel) {
+      queryCursor = queryCursor.copyWith(
+        endBefore: [...queryCursor.endBefore, endBefore],
+        endBeforeDocumentSnapshot: null,
+      );
+    }
+
+    return _$ShoppingListItemQuery(
+      _collection,
+      $referenceWithoutCursor: query,
+      $queryCursor: queryCursor,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is _$ShoppingListItemQuery &&
+        other.runtimeType == runtimeType &&
+        other.reference == reference;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, reference);
+}
+
+class ShoppingListItemDocumentSnapshot
+    extends FirestoreDocumentSnapshot<ShoppingListItem> {
+  ShoppingListItemDocumentSnapshot._(this.snapshot) : data = snapshot.data();
+
+  @override
+  final DocumentSnapshot<ShoppingListItem> snapshot;
+
+  @override
+  ShoppingListItemDocumentReference get reference {
+    return ShoppingListItemDocumentReference(
+      snapshot.reference,
+    );
+  }
+
+  @override
+  final ShoppingListItem? data;
+}
+
+class ShoppingListItemQuerySnapshot extends FirestoreQuerySnapshot<
+    ShoppingListItem, ShoppingListItemQueryDocumentSnapshot> {
+  ShoppingListItemQuerySnapshot._(
+    this.snapshot,
+    this.docs,
+    this.docChanges,
+  );
+
+  factory ShoppingListItemQuerySnapshot._fromQuerySnapshot(
+    QuerySnapshot<ShoppingListItem> snapshot,
+  ) {
+    final docs =
+        snapshot.docs.map(ShoppingListItemQueryDocumentSnapshot._).toList();
+
+    final docChanges = snapshot.docChanges.map((change) {
+      return _decodeDocumentChange(
+        change,
+        ShoppingListItemDocumentSnapshot._,
+      );
+    }).toList();
+
+    return ShoppingListItemQuerySnapshot._(
+      snapshot,
+      docs,
+      docChanges,
+    );
+  }
+
+  static FirestoreDocumentChange<ShoppingListItemDocumentSnapshot>
+      _decodeDocumentChange<T>(
+    DocumentChange<T> docChange,
+    ShoppingListItemDocumentSnapshot Function(DocumentSnapshot<T> doc)
+        decodeDoc,
+  ) {
+    return FirestoreDocumentChange<ShoppingListItemDocumentSnapshot>(
+      type: docChange.type,
+      oldIndex: docChange.oldIndex,
+      newIndex: docChange.newIndex,
+      doc: decodeDoc(docChange.doc),
+    );
+  }
+
+  final QuerySnapshot<ShoppingListItem> snapshot;
+
+  @override
+  final List<ShoppingListItemQueryDocumentSnapshot> docs;
+
+  @override
+  final List<FirestoreDocumentChange<ShoppingListItemDocumentSnapshot>>
+      docChanges;
+}
+
+class ShoppingListItemQueryDocumentSnapshot
+    extends FirestoreQueryDocumentSnapshot<ShoppingListItem>
+    implements ShoppingListItemDocumentSnapshot {
+  ShoppingListItemQueryDocumentSnapshot._(this.snapshot)
+      : data = snapshot.data();
+
+  @override
+  final QueryDocumentSnapshot<ShoppingListItem> snapshot;
+
+  @override
+  final ShoppingListItem data;
+
+  @override
+  ShoppingListItemDocumentReference get reference {
+    return ShoppingListItemDocumentReference(snapshot.reference);
+  }
+}
+
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
@@ -4588,4 +6610,63 @@ Map<String, dynamic> _$WeekToJson(Week instance) => <String, dynamic>{
           const FirestoreDateTimeConverter().toJson(instance.beginDate),
       'endDate': const FirestoreDateTimeConverter().toJson(instance.endDate),
       'days': instance.days.map((k, e) => MapEntry(k.toIso8601String(), e)),
+    };
+
+ShoppingList _$ShoppingListFromJson(Map<String, dynamic> json) => ShoppingList(
+      id: json['id'] as String?,
+      name: json['name'] as String,
+    );
+
+const _$ShoppingListFieldMap = <String, String>{
+  'id': 'id',
+  'name': 'name',
+};
+
+// ignore: unused_element
+abstract class _$ShoppingListPerFieldToJson {
+  // ignore: unused_element
+  static Object? id(String instance) => instance;
+  // ignore: unused_element
+  static Object? name(String instance) => instance;
+}
+
+Map<String, dynamic> _$ShoppingListToJson(ShoppingList instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+    };
+
+ShoppingListItem _$ShoppingListItemFromJson(Map<String, dynamic> json) =>
+    ShoppingListItem(
+      id: json['id'] as String?,
+      isSelected: json['isSelected'] as bool?,
+      item: json['item'] as String,
+      quantity: json['quantity'] as String?,
+    );
+
+const _$ShoppingListItemFieldMap = <String, String>{
+  'id': 'id',
+  'item': 'item',
+  'quantity': 'quantity',
+  'isSelected': 'isSelected',
+};
+
+// ignore: unused_element
+abstract class _$ShoppingListItemPerFieldToJson {
+  // ignore: unused_element
+  static Object? id(String instance) => instance;
+  // ignore: unused_element
+  static Object? item(String instance) => instance;
+  // ignore: unused_element
+  static Object? quantity(String? instance) => instance;
+  // ignore: unused_element
+  static Object? isSelected(bool instance) => instance;
+}
+
+Map<String, dynamic> _$ShoppingListItemToJson(ShoppingListItem instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'item': instance.item,
+      'quantity': instance.quantity,
+      'isSelected': instance.isSelected,
     };
