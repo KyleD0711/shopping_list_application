@@ -27,6 +27,14 @@ class AuthController {
     return _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
+  Future<String?> signInWithGoogle(){
+    return _auth.signInwithGoogle();
+  }
+
+  Future<void> signOutFromGoogle(){
+    return _auth.signOutFromGoogle();
+  }
+
   void signOut() => _auth.signOut();
 
   bool signedIn() => userId != null;

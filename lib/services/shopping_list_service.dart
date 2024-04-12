@@ -21,7 +21,7 @@ class ShoppingListService {
     return shoppingLists.doc(id);
   }
 
-  Future<String?> generateShoppingList(String weekId) async {
+  Future<String?> generateShoppingList(String weekId, String? name) async {
     WeekDocumentSnapshot weekRef = await WeekService().getWeek(weekId).get();
     Week? week = weekRef.data;
 
@@ -71,7 +71,8 @@ class ShoppingListService {
         // Create new shopping list and add it to Firebase
         ShoppingList newShoppingList = ShoppingList(
             name:
-                "${formatDate(week.beginDate)} - ${formatDate(week.endDate)}");
+                name ?? "${formatDate(week.beginDate)} - ${formatDate(week.endDate)}",
+                beginDate: week.beginDate, endDate: week.endDate);
 
         shoppingLists = ShoppingListService().getShoppingLists();
         ShoppingListDocumentSnapshot shoppingListRef =

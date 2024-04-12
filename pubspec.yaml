@@ -48,6 +48,7 @@ dependencies:
   json_annotation: ^4.8.1
   fraction: ^5.0.2
   google_sign_in: ^6.2.1
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:

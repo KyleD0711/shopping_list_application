@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shopping_list_application/controllers/auth_controller.dart';
 import 'package:shopping_list_application/pages/home_page.dart';
 import 'package:shopping_list_application/utils/authentication_validators.dart';
@@ -19,6 +20,10 @@ class OpeningPage extends StatelessWidget {
   Future<String?> _authUser(LoginData data) async {
     return await AuthController()
         .signIn(email: data.name, password: data.password);
+  }
+
+  Future<String?> _signInWithGoogle() async {
+    return await AuthController().signInWithGoogle();
   }
 
   @override
@@ -61,6 +66,14 @@ class OpeningPage extends StatelessWidget {
             debugPrint("I shouldn't be here");
           },
           loginAfterSignUp: false,
+          loginProviders: [LoginProvider(callback: () async {
+            try {
+              await _signInWithGoogle();
+            }
+            on Exception catch(e) {
+              return e.toString();
+            }
+          }, icon: FontAwesomeIcons.google, label: 'Google')],
         ));
   }
 }

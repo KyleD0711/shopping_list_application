@@ -15,14 +15,14 @@ bool validateQuantity(String? value) {
       return false;
     } else if (!splitValues[0].isFraction) {
       return false;
-    } else if (!measurements.contains(splitValues[2])) {
+    } else if (!(dryMeasurements + liquidMeasurements).contains(splitValues[2])) {
      return false;
     }
   } else if (splitValues.length == 2) {
     print("In length 2");
     if (int.tryParse(splitValues[0]) == null && !splitValues[0].isFraction) {
       return false;
-    } else if (!measurements.contains(splitValues[1])) {
+    } else if (!(dryMeasurements + liquidMeasurements).contains(splitValues[1])) {
       return false;
     }
   } else {

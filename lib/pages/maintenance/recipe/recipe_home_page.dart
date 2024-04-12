@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/view_recipe.dart';
+import 'package:shopping_list_application/pages/maintenance/shoppinglist/shopping_list_home.dart';
 import 'package:shopping_list_application/pages/maintenance/weeks/week_home_page.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
 
@@ -16,16 +17,17 @@ class RecipeHomePage extends StatefulWidget {
 class _RecipeHomePageState extends State<RecipeHomePage> {
   // final Stream<List<Recipe>> _stream = RecipeController().getStream();
   final RecipeCollectionReference recipeRef = RecipeService().recipes;
-  
-  @override 
-  Widget build(BuildContext context){
+
+  @override
+  Widget build(BuildContext context) {
     return FirestoreBuilder<RecipeQuerySnapshot>(
         ref: recipeRef,
-        builder: ((context, AsyncSnapshot<RecipeQuerySnapshot> snapshot, Widget? child) {
+        builder: ((context, AsyncSnapshot<RecipeQuerySnapshot> snapshot,
+            Widget? child) {
           if (snapshot.hasError) return const Text('Something went wrong!');
 
           RecipeQuerySnapshot? querySnapshot = snapshot.data;
-           
+
           return Scaffold(
             appBar: AppBar(
               centerTitle: true,
@@ -35,18 +37,19 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
             body: Column(
               children: [
                 Expanded(
-                    child:
-                          querySnapshot != null
-                         ?
-                         ListView.separated(
+                    child: querySnapshot != null
+                        ? ListView.separated(
                             padding: const EdgeInsets.all(10.0),
                             itemBuilder: (_, index) {
                               Recipe recipe = querySnapshot.docs[index].data;
                               return _toWidget(recipe);
                             },
-                            separatorBuilder: (_, __) => const Divider(color: Colors.transparent,),
+                            separatorBuilder: (_, __) => const Divider(
+                              color: Colors.transparent,
+                            ),
                             itemCount: querySnapshot.docs.length,
-                          ) : const Text("Loading Data..")),
+                          )
+                        : const Text("Loading Data..")),
                 Align(
                     alignment: Alignment.bottomCenter,
                     child: ElevatedButton(
@@ -56,7 +59,8 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                             fixedSize: MaterialStateProperty.all(Size.fromWidth(
                                 MediaQuery.of(context).size.width))),
                         onPressed: () {
-                           Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddRecipePage()));
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const AddRecipePage()));
                         },
                         child: const Text("Add Recipe",
                             style: TextStyle(color: Colors.white))))
@@ -64,18 +68,22 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
             ),
             bottomNavigationBar: BottomNavigationBar(
               backgroundColor: Theme.of(context).colorScheme.tertiary,
-              items:  [
-                const BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.set_meal, color: Theme.of(context).colorScheme.primary), label: "Meal Planning")
+                    icon: Icon(Icons.set_meal), label: "Meal Planning"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.list_alt), label: "Shopping Lists")
               ],
               onTap: (value) {
                 if (value == 0) {
                   Navigator.of(context).pop();
-                }
-                else if (value == 1){
-                  Navigator.of(context).pop();
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const WeekHomePage()));
+                } else if (value == 1) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (context) => const WeekHomePage()));
+                } else if (value == 2) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (context) => const ShoppingListHomePage()));
                 }
               },
             ),
@@ -95,13 +103,14 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Prep Time: ${recipe.prepTime}\nCook Time: ${recipe.cookTime}"),
+            Text(
+                "Prep Time: ${recipe.prepTime}\nCook Time: ${recipe.cookTime}"),
           ],
         )),
       ),
       onTap: () => {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ViewRecipePage(id :recipe.id)))
+            builder: (context) => ViewRecipePage(id: recipe.id)))
       },
     );
   }

@@ -1,8 +1,10 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/user.dart';
-import 'package:shopping_list_application/pages/maintenance/shoppinglist/shopping_list_main.dart';
-import 'package:shopping_list_application/pages/maintenance/weeks/view_week.dart';
+import 'package:shopping_list_application/pages/maintenance/recipe/recipe_home_page.dart';
+import 'package:shopping_list_application/pages/maintenance/shoppinglist/add_shopping_list.dart';
+import 'package:shopping_list_application/pages/maintenance/shoppinglist/view_shopping_list.dart';
+import 'package:shopping_list_application/pages/maintenance/weeks/week_home_page.dart';
 import 'package:shopping_list_application/services/shopping_list_service.dart';
 
 class ShoppingListHomePage extends StatefulWidget {
@@ -25,20 +27,28 @@ class _ShoppingListHomePageState extends State<ShoppingListHomePage> {
               automaticallyImplyLeading: false,
             ),
             body: Column(
-              children: [displayShoppingLists()],
+              children: [displayShoppingLists(), addButton()],
             ),
             bottomNavigationBar: BottomNavigationBar(
               backgroundColor: Theme.of(context).colorScheme.tertiary,
               items: [
-                const BottomNavigationBarItem(icon: Icon(Icons.tab_outlined), label: "Recipes"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.home, color: Theme.of(context).colorScheme.primary,), label: "Home")
+                const BottomNavigationBarItem(
+              icon: Icon(Icons.tab_outlined), label: "Recipes"),
+          const BottomNavigationBarItem(icon: Icon(Icons.set_meal), label: "Meal Planning"),
+          BottomNavigationBarItem(
+                    icon: Icon(Icons.home, color: Theme.of(context).colorScheme.primary,), label: "Home"),
+                
               ],
               onTap: (value) {
                 if (value == 0) {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (context) => const RecipeHomePage()));
                 }
                 else if (value == 1){
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (context) => const WeekHomePage()));
+                }
+                else if (value == 2){
                   Navigator.of(context).pop();
                 }
               },
@@ -70,22 +80,22 @@ class _ShoppingListHomePageState extends State<ShoppingListHomePage> {
       });
   }
 
-  // Widget addButton() {
-  //   return Align(
-  //       alignment: Alignment.bottomCenter,
-  //       child: ElevatedButton(
-  //           style: ButtonStyle(
-  //               backgroundColor: MaterialStateProperty.all(
-  //                   Theme.of(context).colorScheme.secondary),
-  //               fixedSize: MaterialStateProperty.all(
-  //                   Size.fromWidth(MediaQuery.of(context).size.width))),
-  //           onPressed: () {
-  //             Navigator.of(context).push(MaterialPageRoute(
-  //                 builder: (context) => const PlanWeekPage()));
-  //           },
-  //           child: const Text("Plan Week",
-  //               style: TextStyle(color: Colors.white))));
-  // }
+  Widget addButton() {
+    return Align(
+        alignment: Alignment.bottomCenter,
+        child: ElevatedButton(
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(
+                    Theme.of(context).colorScheme.secondary),
+                fixedSize: MaterialStateProperty.all(
+                    Size.fromWidth(MediaQuery.of(context).size.width))),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const AddShoppingListPage()));
+            },
+            child: const Text("Create Shopping List",
+                style: TextStyle(color: Colors.white))));
+  }
 
   Widget _toWidget(ShoppingList shoppingList) {
     return GestureDetector(
@@ -96,7 +106,7 @@ class _ShoppingListHomePageState extends State<ShoppingListHomePage> {
       ),
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ShoppingListMainPage(id: shoppingList.id,)));
+            builder: (context) => ViewShoppingListPage(id: shoppingList.id,)));
       },
     );
   }

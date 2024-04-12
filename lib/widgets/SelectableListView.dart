@@ -1,6 +1,5 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
 
 class SelectableListView extends StatefulWidget {
   SelectableListView(
@@ -51,7 +50,7 @@ class _SelectableListViewState extends State<SelectableListView> {
           items: widget.bottomActions,
           onTap: widget.actionTap),
       body: Center(
-        child: Column(children: [searchBar(), itemStreamBuilder()]),
+        child: Column(children: [searchBar(), itemBuilder()]),
       ),
     );
   }
@@ -85,7 +84,7 @@ class _SelectableListViewState extends State<SelectableListView> {
     );
   }
 
-  Widget itemStreamBuilder() {
+  Widget itemBuilder() {
     return FirestoreBuilder(
       ref: widget.itemRef,
       builder: (BuildContext context,
@@ -118,11 +117,12 @@ class _SelectableListViewState extends State<SelectableListView> {
         List<Map<String, String>>.empty(growable: true);
 
     for (dynamic element in snapshots!) {
+      
       dynamic item = element.data;
       if (searchFilter == "") {
         items.add({"name": item.name, "qty": ""});
       } else {
-        if (element.toString().contains(searchFilter)) {
+        if (item.toString().contains(searchFilter)) {
           items.add({"name": item.name, "qty": ""});
         }
       }
@@ -249,7 +249,7 @@ class _SelectableListViewState extends State<SelectableListView> {
                 ),
               ),
             ),
-            if (widget.dropDown)
+            if (widget.dropDown && item.keys.contains("type"))
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),

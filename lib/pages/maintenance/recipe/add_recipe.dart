@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/quantity.dart';
 import 'package:shopping_list_application/models/user.dart';
@@ -403,6 +404,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     alignment: Alignment.centerRight,
                     child: IconButton(
                         onPressed: () async {
+                          final measurements = dryMeasurements + liquidMeasurements;
                           await Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (context) => SelectableListView(
@@ -463,6 +465,9 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
   Widget addIngredientDialog() {
     final ingredientNameController = TextEditingController();
+    final ingredientTypeController = TextEditingController();
+    String? dropDownValue;
+    final key = GlobalKey<FormState>();
     return AlertDialog(
       backgroundColor: Colors.white,
       actions: [
@@ -471,7 +476,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
             if (ingredientNameController.text != "") {
               IngredientService()
                   .ingredientsRef
-                  .add(Ingredient(name: ingredientNameController.text));
+                  .add(Ingredient(name: ingredientNameController.text, type: ingredientTypeController.text));
               Navigator.of(context).pop();
             }
           },
@@ -483,15 +488,49 @@ class _AddRecipePageState extends State<AddRecipePage> {
         )
       ],
       title: const Text("Add Ingredient"),
-      content: TextField(
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.tertiary,
-          hintText: "Name:",
-          hintStyle: const TextStyle(color: Colors.white),
+      content: Form(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextFormField(
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.tertiary,
+                  hintText: "Name:",
+                  hintStyle: const TextStyle(color: Colors.white),
+                ),
+                controller: ingredientNameController,
+                validator: (value) => validateNonEmptyMessage(value),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DropdownButtonFormField<String>(
+                dropdownColor: Theme.of(context).colorScheme.tertiary,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.tertiary,
+                  hintText: "Type:",
+                  hintStyle: const TextStyle(color: Colors.white),
+                ),
+                validator: (value) {
+                  return validateNonEmptyMessage(value) ?? validateIngredientType(value!);
+                },
+                items: const [DropdownMenuItem(value: 'dry',child: Text('dry'),), DropdownMenuItem(value: 'liquid',child: Text('liquid'),)],
+                onChanged: (value) {
+                        setState(() {
+                          dropDownValue = value;
+                        });
+                      },
+                value: dropDownValue,
+              ),
+            ),
+          ],
         ),
-        controller: ingredientNameController,
       ),
     );
   }

@@ -17,3 +17,7 @@ String? validateFractionOrInteger(String input){
     return "This field must be an integer or fraction";
   }
 }
+
+String? validateIngredientType(String input){
+  return input == "dry" || input == "liquid" ? null : "Invalid input. Valid inputs are dry or liquid"; 
+}

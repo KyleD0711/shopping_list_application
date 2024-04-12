@@ -1,6 +1,7 @@
 import "package:fraction/fraction.dart";
 
-const measurements = ['tbsp', 'tsp', 'cup', 'quart', 'gallon', 'pound', 'gram'];
+const dryMeasurements = ['tbsp', 'tsp', 'cup', 'pound', 'gram', 'oz'];
+const liquidMeasurements = ['tbsp', 'tsp', 'cup', 'quart', 'gallon', 'ml', 'l', 'fl. oz.', 'pint'];
 
 class Quantity {
   Quantity({required this.amount, required this.measurement});

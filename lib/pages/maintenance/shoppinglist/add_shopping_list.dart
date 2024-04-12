@@ -1,25 +1,20 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/user.dart';
-import 'package:shopping_list_application/pages/maintenance/recipe/recipe_home_page.dart';
-import 'package:shopping_list_application/pages/maintenance/shoppinglist/shopping_list_home.dart';
-import 'package:shopping_list_application/pages/maintenance/weeks/view_week.dart';
+import 'package:shopping_list_application/services/shopping_list_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
-import './plan_week.dart';
 
-class WeekHomePage extends StatefulWidget {
-  const WeekHomePage({super.key});
+class AddShoppingListPage extends StatefulWidget {
+  const AddShoppingListPage({super.key});
 
   @override
-  State<WeekHomePage> createState() => _WeekHomePageState();
+  State<AddShoppingListPage> createState() => _AddShoppingListPageState();
 }
 
-class _WeekHomePageState extends State<WeekHomePage> {
-  // final Stream<List<Week>> _stream = WeekController().getStream();
-
+class _AddShoppingListPageState extends State<AddShoppingListPage> {
   final WeekCollectionReference weeksRef = WeekService().getWeeks();
-
+  final _nameController = TextEditingController();
   static const months = [
     1,
     2,
@@ -51,11 +46,11 @@ class _WeekHomePageState extends State<WeekHomePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Meal Planning"),
+        title: const Text("Create Shopping Lists"),
         automaticallyImplyLeading: false,
       ),
       body: Column(
-        children: [filters(), displayWeeks(), addButton()],
+        children: [filters(), potentialNameField(),displayWeeks()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -67,19 +62,13 @@ class _WeekHomePageState extends State<WeekHomePage> {
                 Icons.home,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              label: "Home"),
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.list_alt), label: "Shopping Lists")
+              label: "Home")
         ],
         onTap: (value) {
           if (value == 0) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (context) => const RecipeHomePage()));
+            Navigator.of(context).pop();
           } else if (value == 1) {
             Navigator.of(context).pop();
-          } else if (value == 2) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (context) => const ShoppingListHomePage()));
           }
         },
       ),
@@ -161,7 +150,7 @@ class _WeekHomePageState extends State<WeekHomePage> {
                       padding: const EdgeInsets.all(10.0),
                       itemBuilder: (_, index) => _toWidget(weeks[index].data),
                       separatorBuilder: (_, __) => const Divider(
-                        height: 3,
+                        height: 5,
                         color: Colors.transparent,
                       ),
                       itemCount: weeks.length,
@@ -172,21 +161,17 @@ class _WeekHomePageState extends State<WeekHomePage> {
         });
   }
 
-  Widget addButton() {
-    return Align(
-        alignment: Alignment.bottomCenter,
-        child: ElevatedButton(
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(
-                    Theme.of(context).colorScheme.secondary),
-                fixedSize: MaterialStateProperty.all(
-                    Size.fromWidth(MediaQuery.of(context).size.width))),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const PlanWeekPage()));
-            },
-            child: const Text("Plan Week",
-                style: TextStyle(color: Colors.white))));
+  Widget potentialNameField() {
+    return Row(
+      children: [
+        Card(
+          child: TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(hintText: "Optional Name"),
+          ),
+        )
+      ],
+    );
   }
 
   Widget _toWidget(Week week) {
@@ -209,9 +194,36 @@ class _WeekHomePageState extends State<WeekHomePage> {
           ],
         ),
       ),
-      onTap: () {
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => ViewWeekPage(id: week.id)));
+      onTap: () async {
+        showDialog(
+            context: context,
+            builder: (context) => const SimpleDialog(
+                  title: Text("Generating Shopping List"),
+                  children: [
+                    SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator())
+                  ],
+                ));
+        await Future.delayed(const Duration(seconds: 3));
+        ShoppingListService()
+            .generateShoppingList(week.id, null)
+            .then((value) async {
+          await Future.delayed(const Duration(seconds: 2));
+          Navigator.pop(context);
+          showDialog(
+              context: context,
+              builder: (context) => const SimpleDialog(
+                    title: Text(
+                      "List created successfully!",
+                      textAlign: TextAlign.center,
+                    ),
+                    titlePadding: EdgeInsets.all(16),
+                  ));
+          await Future.delayed(const Duration(seconds: 2));
+          Navigator.pop(context);
+        });
       },
     );
   }

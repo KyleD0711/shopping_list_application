@@ -4,6 +4,10 @@
     return "${date.month}/${date.day}/${date.year}";
   }
 
+  String formatMonthAndDay(DateTime date){
+    return "${getDayOfWeek(date)}";
+  }
+
   String getDayOfWeek(DateTime date) {
     // List of day names
     List<String> daysOfWeek = [
@@ -21,4 +25,23 @@
 
     // Return the day of the week
     return daysOfWeek[dayIndex];
+  }
+
+  String getMonth(int monthInt) {
+    List<String> monthsOfYear = [
+      "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+    ];
+
+    return monthsOfYear[monthInt - 1];
   }

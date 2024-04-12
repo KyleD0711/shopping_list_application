@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:shopping_list_application/models/quantity.dart';
+import 'package:shopping_list_application/utils/date_helpers.dart';
 import "package:uuid/uuid.dart";
 
 
@@ -33,13 +34,14 @@ class User {
 
 @firestoreSerializable
 class Ingredient {
-  Ingredient({required this.name, String? id}) : id = id ?? _uuid.v1();
+  Ingredient({required this.name, String? id, required this.type}) : id = id ?? _uuid.v1();
 
   static const _uuid = Uuid();
   
   @Id()
   final String id;
   final String name;
+  final String type;
 
 
   @override
@@ -93,17 +95,24 @@ class Week {
   final DateTime beginDate;
   final DateTime endDate;
   final Map<DateTime, List<Map<String, String>>> days;
+
+  @override
+  String toString() {
+    return "${formatDate(beginDate)} - ${formatDate(endDate)}";
+  }
 }
 
 @firestoreSerializable
 class ShoppingList {
-  ShoppingList({String? id, required this.name}) : id = id ?? _uuid.v1();
+  ShoppingList({String? id, required this.name, required this.beginDate, required this.endDate}) : id = id ?? _uuid.v1();
 
   static const _uuid = Uuid();
 
   @Id()
   final String id;
   final String name;
+  final DateTime beginDate;
+  final DateTime endDate;
 }
 
 @firestoreSerializable

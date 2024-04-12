@@ -53,7 +53,6 @@ class _ViewWeekPageState extends State<ViewWeekPage> {
               icon: Icon(Icons.delete),
               label: "Delete",
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Shopping"),
           ],
           onTap: (value) async {
             if (value == 0) {
@@ -62,9 +61,6 @@ class _ViewWeekPageState extends State<ViewWeekPage> {
             } else if (value == 1) {
               weekRef.delete();
               Navigator.of(context).pop();
-            }
-            else if (value == 2){
-              ShoppingListService().generateShoppingList(widget.id);
             }
           },
         ),
