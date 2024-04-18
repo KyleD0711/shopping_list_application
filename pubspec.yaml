@@ -49,6 +49,7 @@ dependencies:
   fraction: ^5.0.2
   google_sign_in: ^6.2.1
   font_awesome_flutter: ^10.7.0
+  dropdown_button2: ^2.3.9
 
 dev_dependencies:
   flutter_test:

@@ -6,6 +6,7 @@ import 'package:shopping_list_application/pages/maintenance/weeks/plan_week.dart
 import 'package:shopping_list_application/services/shopping_list_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class ViewWeekPage extends StatefulWidget {
   static const cardPadding =
@@ -23,7 +24,6 @@ class ViewWeekPage extends StatefulWidget {
 class _ViewWeekPageState extends State<ViewWeekPage> {
   late final WeekDocumentReference weekRef;
 
-
   @override
   void initState() {
     super.initState();
@@ -33,58 +33,62 @@ class _ViewWeekPageState extends State<ViewWeekPage> {
   @override
   Widget build(BuildContext context) {
     return FirestoreBuilder(
-      ref: weekRef,
-      builder: (BuildContext context, AsyncSnapshot<WeekDocumentSnapshot> snapshot, Widget? child) {
-        if (snapshot.hasError) return Text(snapshot.error.toString());
-        if (!snapshot.hasData) return const Text('Loading data...');
+        ref: weekRef,
+        builder: (BuildContext context,
+            AsyncSnapshot<WeekDocumentSnapshot> snapshot, Widget? child) {
+          if (snapshot.hasError) return Text(snapshot.error.toString());
+          if (!snapshot.hasData) return const Text('Loading data...');
 
-        Week? week = snapshot.requireData.data;
+          Week? week = snapshot.requireData.data;
 
-        return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: week != null ? Text("${formatDate(week.beginDate)} - ${formatDate(week.endDate)}") : const Text(""),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Theme.of(context).colorScheme.tertiary,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.delete),
-              label: "Delete",
+          return Scaffold(
+            appBar: AppBar(
+              centerTitle: true,
+              title: week != null
+                  ? Text(
+                      "${formatDate(week.beginDate)} - ${formatDate(week.endDate)}")
+                  : const Text(""),
+              actions: [ProfilePicture()],
             ),
-          ],
-          onTap: (value) async {
-            if (value == 0) {
-              await Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => PlanWeekPage(week :week)));
-            } else if (value == 1) {
-              weekRef.delete();
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-        body: ListView(children: [
-          Row(
-            children: [
-              dateCard(week!.beginDate, "Begin Date"),
-              dateCard(week.endDate, "End Date")
-            ],
-          ),
-          CarouselSlider(
-                  items: getAllDayCards(week),
-                  options: CarouselOptions(
-                      autoPlay: false,
-                      enableInfiniteScroll: week.days.entries.length > 1 ? true : false,
-                      enlargeCenterPage: true,
-                      height: 550,
-                      enlargeFactor: .2),
-                )
-              ,
-        ]),
-      );
-      } 
-    );
+            bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: Theme.of(context).colorScheme.tertiary,
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.delete),
+                  label: "Delete",
+                ),
+              ],
+              onTap: (value) async {
+                if (value == 0) {
+                  await Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => PlanWeekPage(week: week)));
+                } else if (value == 1) {
+                  weekRef.delete();
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+            body: ListView(children: [
+              Row(
+                children: [
+                  dateCard(week!.beginDate, "Begin Date"),
+                  dateCard(week.endDate, "End Date")
+                ],
+              ),
+              CarouselSlider(
+                items: getAllDayCards(week),
+                options: CarouselOptions(
+                    autoPlay: false,
+                    enableInfiniteScroll:
+                        week.days.entries.length > 1 ? true : false,
+                    enlargeCenterPage: true,
+                    height: 550,
+                    enlargeFactor: .2),
+              ),
+            ]),
+          );
+        });
   }
 
   String? validateDates(DateTime? date, String errorMessage) {
@@ -110,13 +114,13 @@ class _ViewWeekPageState extends State<ViewWeekPage> {
     );
   }
 
-  
   List<Widget> getAllDayCards(Week week) {
     List<Widget> dayCards = [];
     List<DateTime> keys = week.days.keys.toList();
     keys.sort((x, y) => x.compareTo(y));
     keys.forEach((element) {
-      dayCards.add(dayCard(getDayOfWeek(element), formatDate(element), week.days[element] ?? []));
+      dayCards.add(dayCard(getDayOfWeek(element), formatDate(element),
+          week.days[element] ?? []));
     });
     return dayCards;
   }

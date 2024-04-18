@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/services/shopping_list_service.dart';
 import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class ViewShoppingListPage extends StatefulWidget {
   const ViewShoppingListPage({Key? key, required this.id}) : super(key: key);
@@ -30,6 +31,7 @@ class _ViewShoppingListPageState extends State<ViewShoppingListPage> {
         centerTitle: true,
         title: const Text("Shopping Lists"),
         automaticallyImplyLeading: false,
+        actions: [ProfilePicture()],
       ),
       body: Column(
         children: [displayItems()],

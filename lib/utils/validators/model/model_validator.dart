@@ -1,5 +1,8 @@
 import 'package:fraction/fraction.dart';
-import 'package:shopping_list_application/models/quantity.dart';
+
+const dryMeasurements = ['tbsp', 'tsp', 'cup', 'pound', 'gram', 'oz'];
+const liquidMeasurements = ['tbsp', 'tsp', 'cup', 'quart', 'gallon', 'ml', 'l', 'fl. oz.', 'pint'];
+const produceMeasurements = ['package', 'whole'];
 
 bool validateQuantity(String? value) {
   if (value == "" || value == null) return false;

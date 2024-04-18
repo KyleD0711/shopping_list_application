@@ -6,6 +6,7 @@ import 'package:shopping_list_application/pages/maintenance/shoppinglist/shoppin
 import 'package:shopping_list_application/pages/maintenance/weeks/view_week.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 import './plan_week.dart';
 
 class WeekHomePage extends StatefulWidget {
@@ -53,6 +54,7 @@ class _WeekHomePageState extends State<WeekHomePage> {
         centerTitle: true,
         title: const Text("Meal Planning"),
         automaticallyImplyLeading: false,
+        actions: [ProfilePicture()],
       ),
       body: Column(
         children: [filters(), displayWeeks(), addButton()],

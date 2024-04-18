@@ -6,6 +6,7 @@ import 'package:shopping_list_application/pages/maintenance/recipe/view_recipe.d
 import 'package:shopping_list_application/pages/maintenance/shoppinglist/shopping_list_home.dart';
 import 'package:shopping_list_application/pages/maintenance/weeks/week_home_page.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class RecipeHomePage extends StatefulWidget {
   const RecipeHomePage({super.key});
@@ -33,6 +34,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
               centerTitle: true,
               title: const Text("Recipes"),
               automaticallyImplyLeading: false,
+              actions: [ProfilePicture()],
             ),
             body: Column(
               children: [

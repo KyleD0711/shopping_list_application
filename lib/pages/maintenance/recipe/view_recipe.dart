@@ -4,6 +4,7 @@ import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/services/shopping_list_service.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class ViewRecipePage extends StatefulWidget {
   ViewRecipePage({super.key, required this.id});
@@ -44,6 +45,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
           appBar: AppBar(
             centerTitle: true,
             title: Text(recipe?.name ?? ""),
+            actions: [ProfilePicture()],
           ),
           bottomNavigationBar: BottomNavigationBar(
             backgroundColor: Theme.of(context).colorScheme.tertiary,

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
+import 'package:shopping_list_application/models/user.dart';
+import 'package:shopping_list_application/utils/validators/model/model_validator.dart';
 
 class SelectableListView extends StatefulWidget {
   SelectableListView(
@@ -10,7 +12,6 @@ class SelectableListView extends StatefulWidget {
       required this.bottomActions,
       required this.itemValidator,
       this.dropDown = false,
-      this.dropDownItems,
       this.actionTap});
 
   // final Stream<List<dynamic>> itemStream;
@@ -20,7 +21,6 @@ class SelectableListView extends StatefulWidget {
   final List<BottomNavigationBarItem> bottomActions;
   final String? Function(String value) itemValidator;
   final bool dropDown;
-  final List<DropdownMenuItem>? dropDownItems;
 
   void Function(int value)? actionTap;
 
@@ -32,6 +32,7 @@ class _SelectableListViewState extends State<SelectableListView> {
   final _searchController = TextEditingController();
   String pageName = "";
   String searchFilter = "";
+  dynamic dropDownValue;
   @override
   void initState() {
     super.initState();
@@ -120,10 +121,10 @@ class _SelectableListViewState extends State<SelectableListView> {
       
       dynamic item = element.data;
       if (searchFilter == "") {
-        items.add({"name": item.name, "qty": ""});
+        items.add({"name": item.name, "qty": "", "type": item.runtimeType == Ingredient ? item.type : ""});
       } else {
         if (item.toString().contains(searchFilter)) {
-          items.add({"name": item.name, "qty": ""});
+          items.add({"name": item.name, "qty": "", "type":item.runtimeType == Ingredient ? item.type : ""});
         }
       }
     }
@@ -208,12 +209,13 @@ class _SelectableListViewState extends State<SelectableListView> {
                     Padding(
                       padding: const EdgeInsets.only(left: 10),
                       child: Text(
-                        item['qty'] == ""
+                        item['qty'] == "" || item['qty'] == null
                             ? itemName
                             : "$itemName: ${item['qty']}",
                         style:
                             const TextStyle(color: Colors.white, fontSize: 20),
                         overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                     )
                   ],
@@ -228,7 +230,6 @@ class _SelectableListViewState extends State<SelectableListView> {
 
   Widget toWidgetDialog(Map<String, String> item) {
     TextEditingController widgetTextController = TextEditingController();
-    dynamic dropDownValue;
     final key = GlobalKey<FormState>();
     return AlertDialog(
       backgroundColor: Colors.white,
@@ -249,13 +250,13 @@ class _SelectableListViewState extends State<SelectableListView> {
                 ),
               ),
             ),
-            if (widget.dropDown && item.keys.contains("type"))
+            if (widget.dropDown && item['type'] != "")
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: DropdownButtonFormField(
                    decoration: InputDecoration(hintText: "Measure", border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))), 
-                    items: widget.dropDownItems,
+                    items: getDropDownItems(item['type']),
                     onChanged: (value) {
                       setState(() {
                         dropDownValue = value;
@@ -278,7 +279,7 @@ class _SelectableListViewState extends State<SelectableListView> {
           ),
           onPressed: () {
             if (key.currentState!.validate()) {
-              if (widget.dropDown) {
+              if (widget.dropDown && item['type'] != "") {
                 item['qty'] = "${widgetTextController.text} $dropDownValue";
                 
               } else {
@@ -293,6 +294,21 @@ class _SelectableListViewState extends State<SelectableListView> {
         )
       ],
     );
+  }
+
+  List<DropdownMenuItem> getDropDownItems(String? type){
+    if (type == "dry"){
+      return dryMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList();
+    }
+    else if (type == "liquid") {
+      return liquidMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList();
+    }
+    else if (type == "produce"){
+      return  produceMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList();
+    }
+    else {
+      return [...dryMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList(), ...liquidMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList(), ...produceMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList()];
+    }
   }
 
   @override

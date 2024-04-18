@@ -7,6 +7,7 @@ import 'package:shopping_list_application/services/ingredient_service.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class AddRecipePage extends StatefulWidget {
   const AddRecipePage({super.key, this.recipe});
@@ -55,6 +56,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
           centerTitle: true,
           title: const Text("New Recipe"),
           automaticallyImplyLeading: false,
+          actions: [ProfilePicture()],
         ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -404,7 +406,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     alignment: Alignment.centerRight,
                     child: IconButton(
                         onPressed: () async {
-                          final measurements = dryMeasurements + liquidMeasurements;
                           await Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (context) => SelectableListView(
@@ -435,10 +436,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                         return validateFractionOrInteger(value);
                                       },
                                       dropDown: true,
-                                      dropDownItems: measurements
-                                          .map((e) => DropdownMenuItem(
-                                              value: e, child: Text(e)))
-                                          .toList(),
                                     )),
                           );
                           setState(() {});
@@ -465,7 +462,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
   Widget addIngredientDialog() {
     final ingredientNameController = TextEditingController();
-    final ingredientTypeController = TextEditingController();
     String? dropDownValue;
     final key = GlobalKey<FormState>();
     return AlertDialog(
@@ -473,10 +469,10 @@ class _AddRecipePageState extends State<AddRecipePage> {
       actions: [
         ElevatedButton(
           onPressed: () {
-            if (ingredientNameController.text != "") {
-              IngredientService()
-                  .ingredientsRef
-                  .add(Ingredient(name: ingredientNameController.text, type: ingredientTypeController.text));
+            if (key.currentState!.validate()) {
+              IngredientService().ingredientsRef.add(Ingredient(
+                  name: ingredientNameController.text,
+                  type: dropDownValue!));
               Navigator.of(context).pop();
             }
           },
@@ -489,6 +485,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
       ],
       title: const Text("Add Ingredient"),
       content: Form(
+        key: key,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -518,14 +515,28 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   hintStyle: const TextStyle(color: Colors.white),
                 ),
                 validator: (value) {
-                  return validateNonEmptyMessage(value) ?? validateIngredientType(value!);
+                  return validateNonEmptyMessage(value) ??
+                      validateIngredientType(value!);
                 },
-                items: const [DropdownMenuItem(value: 'dry',child: Text('dry'),), DropdownMenuItem(value: 'liquid',child: Text('liquid'),)],
+                items: const [
+                  DropdownMenuItem(
+                    value: 'dry',
+                    child: Text('dry'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'liquid',
+                    child: Text('liquid'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'produce',
+                    child: Text('produce'),
+                  )
+                ],
                 onChanged: (value) {
-                        setState(() {
-                          dropDownValue = value;
-                        });
-                      },
+                  setState(() {
+                    dropDownValue = value;
+                  });
+                },
                 value: dropDownValue,
               ),
             ),

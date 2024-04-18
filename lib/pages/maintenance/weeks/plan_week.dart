@@ -6,6 +6,7 @@ import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
 import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class PlanWeekPage extends StatefulWidget {
   static const cardPadding =
@@ -41,6 +42,7 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
         centerTitle: true,
         title: const Text("Plan Week"),
         automaticallyImplyLeading: false,
+        actions: [ProfilePicture()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).colorScheme.tertiary,

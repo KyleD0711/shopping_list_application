@@ -6,6 +6,7 @@ import 'package:shopping_list_application/pages/maintenance/shoppinglist/add_sho
 import 'package:shopping_list_application/pages/maintenance/shoppinglist/view_shopping_list.dart';
 import 'package:shopping_list_application/pages/maintenance/weeks/week_home_page.dart';
 import 'package:shopping_list_application/services/shopping_list_service.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class ShoppingListHomePage extends StatefulWidget {
   const ShoppingListHomePage({super.key});
@@ -25,6 +26,7 @@ class _ShoppingListHomePageState extends State<ShoppingListHomePage> {
               centerTitle: true,
               title: const Text("Shopping Lists"),
               automaticallyImplyLeading: false,
+              actions: [ProfilePicture()],
             ),
             body: Column(
               children: [displayShoppingLists(), addButton()],

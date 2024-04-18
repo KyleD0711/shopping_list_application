@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class InstructionsPage extends StatefulWidget {
   const InstructionsPage({super.key, this.instructions});
@@ -24,6 +25,7 @@ class _InstructionsPageState extends State<InstructionsPage> {
           centerTitle: true,
           title: const Text("Instructions"),
           automaticallyImplyLeading: false,
+          actions: [ProfilePicture()],
         ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -39,17 +41,6 @@ class _InstructionsPageState extends State<InstructionsPage> {
             }
           },
         ),
-        // body: Form(
-        //   child: Column(
-        //     children: [
-        //       descriptionCard(),
-        //       ingredientsCard(),
-        //       instructionsCard(),
-        //       cookAndPrepTimeCards(),
-        //       recipesCard()
-        //     ],
-        //   ),
-        // )
         body: Column(
           children: [
             Expanded(

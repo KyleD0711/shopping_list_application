@@ -1,8 +1,5 @@
 import "package:fraction/fraction.dart";
 
-const dryMeasurements = ['tbsp', 'tsp', 'cup', 'pound', 'gram', 'oz'];
-const liquidMeasurements = ['tbsp', 'tsp', 'cup', 'quart', 'gallon', 'ml', 'l', 'fl. oz.', 'pint'];
-
 class Quantity {
   Quantity({required this.amount, required this.measurement});
 
@@ -26,7 +23,11 @@ class Quantity {
 
    static Quantity parseFromString(String qty){
     List<String> splitInput = qty.split(' ');
-    if (splitInput.length == 2) {
+    if (splitInput.length == 1){
+      final amount = splitInput[0].toFraction();
+      return Quantity(amount: amount, measurement: "");
+    }
+    else if (splitInput.length == 2) {
       final amount =  splitInput[0].toFraction(); 
       final measurement =  splitInput[1];
       return Quantity(amount: amount, measurement:measurement);
@@ -37,7 +38,7 @@ class Quantity {
       return Quantity(amount: amount, measurement:measurement);
     }
     else {
-      throw Exception("Invalid data");
+      throw Exception("Invalid data: $qty");
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/recipe_home_page.dart';
 import 'package:shopping_list_application/pages/maintenance/shoppinglist/shopping_list_home.dart';
 import 'package:shopping_list_application/pages/maintenance/weeks/week_home_page.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,6 +19,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text("Home Page"),
         centerTitle: true,
         automaticallyImplyLeading: false,
+        actions: [ProfilePicture()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).colorScheme.tertiary,

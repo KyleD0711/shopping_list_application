@@ -4,6 +4,7 @@ import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/services/shopping_list_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
+import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class AddShoppingListPage extends StatefulWidget {
   const AddShoppingListPage({super.key});
@@ -48,9 +49,10 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
         centerTitle: true,
         title: const Text("Create Shopping Lists"),
         automaticallyImplyLeading: false,
+        actions: [ProfilePicture()],
       ),
       body: Column(
-        children: [filters(), potentialNameField(),displayWeeks()],
+        children: [potentialNameField(), filters(),  displayWeeks()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -162,14 +164,24 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
   }
 
   Widget potentialNameField() {
-    return Row(
+    return Stack(
       children: [
-        Card(
-          child: TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(hintText: "Optional Name"),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: TextField(
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  filled: true,
+                  hintText: "Optional Name:",
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0)),
+                ),
+                controller: _nameController,
+                textAlign: TextAlign.left),
           ),
-        )
+        ),
       ],
     );
   }
@@ -206,7 +218,9 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
                         child: CircularProgressIndicator())
                   ],
                 ));
-        await Future.delayed(const Duration(seconds: 3));
+
+        if (_nameController.text == ""){
+          await Future.delayed(const Duration(seconds: 3));
         ShoppingListService()
             .generateShoppingList(week.id, null)
             .then((value) async {
@@ -224,6 +238,28 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
           await Future.delayed(const Duration(seconds: 2));
           Navigator.pop(context);
         });
+        }
+        else {
+          await Future.delayed(const Duration(seconds: 3));
+        ShoppingListService()
+            .generateShoppingList(week.id, _nameController.text)
+            .then((value) async {
+          await Future.delayed(const Duration(seconds: 2));
+          Navigator.pop(context);
+          showDialog(
+              context: context,
+              builder: (context) => const SimpleDialog(
+                    title: Text(
+                      "List created successfully!",
+                      textAlign: TextAlign.center,
+                    ),
+                    titlePadding: EdgeInsets.all(16),
+                  ));
+          await Future.delayed(const Duration(seconds: 2));
+          Navigator.pop(context);
+        });
+        }
+        
       },
     );
   }
