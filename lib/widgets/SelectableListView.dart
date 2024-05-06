@@ -206,16 +206,18 @@ class _SelectableListViewState extends State<SelectableListView> {
                             padding: EdgeInsets.only(left: 10.0),
                             child: Icon(Icons.remove, color: Colors.white),
                           ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Text(
-                        item['qty'] == "" || item['qty'] == null
-                            ? itemName
-                            : "$itemName: ${item['qty']}",
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 20),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text(
+                          item['qty'] == "" || item['qty'] == null
+                              ? itemName
+                              : "$itemName: ${item['qty']}",
+                          style:
+                              const TextStyle(color: Colors.white, fontSize: 20),
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                        ),
                       ),
                     )
                   ],

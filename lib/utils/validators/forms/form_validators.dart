@@ -19,5 +19,5 @@ String? validateFractionOrInteger(String input){
 }
 
 String? validateIngredientType(String input){
-  return input == "dry" || input == "liquid" ? null : "Invalid input. Valid inputs are dry or liquid"; 
+  return input == "dry" || input == "liquid" || input == "produce" ? null : "Invalid input. Valid inputs are dry, liquid, or produce"; 
 }

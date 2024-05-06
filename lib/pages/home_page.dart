@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text("Home Page"),
         centerTitle: true,
         automaticallyImplyLeading: false,
-        actions: [ProfilePicture()],
+        actions: const [ProfilePicture()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).colorScheme.tertiary,

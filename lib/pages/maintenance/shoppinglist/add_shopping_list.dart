@@ -15,6 +15,7 @@ class AddShoppingListPage extends StatefulWidget {
 
 class _AddShoppingListPageState extends State<AddShoppingListPage> {
   final WeekCollectionReference weeksRef = WeekService().getWeeks();
+  final List<String> selectedWeeks = List.empty(growable: true);
   final _nameController = TextEditingController();
   static const months = [
     1,
@@ -49,10 +50,15 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
         centerTitle: true,
         title: const Text("Create Shopping Lists"),
         automaticallyImplyLeading: false,
-        actions: [ProfilePicture()],
+        actions: const [ProfilePicture()],
       ),
       body: Column(
-        children: [potentialNameField(), filters(),  displayWeeks()],
+        children: [
+          potentialNameField(),
+          filters(),
+          displayWeeks(),
+          generateShoppingListsButton()
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -75,6 +81,73 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
         },
       ),
     );
+  }
+
+  Widget generateShoppingListsButton() {
+    return Align(
+        alignment: Alignment.bottomCenter,
+        child: ElevatedButton(
+            style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(
+                    Theme.of(context).colorScheme.secondary),
+                fixedSize: MaterialStateProperty.all(
+                    Size.fromWidth(MediaQuery.of(context).size.width))),
+            onPressed: () async {
+              if (selectedWeeks.isEmpty) {
+                errorDialog("No Weeks Selected!");
+              } else {
+                await Future.delayed(const Duration(seconds: 3));
+                ShoppingListService()
+                    .generateShoppingList(selectedWeeks, _nameController.text)
+                    .then((value) async {
+                  await Future.delayed(const Duration(seconds: 2));
+                  Navigator.pop(context);
+                  successDialog("Shopping list generated successfully!");
+                  await Future.delayed(const Duration(seconds: 2));
+                  Navigator.pop(context);
+                });
+              }
+            },
+            child: const Text("Generate Shopping Lists",
+                style: TextStyle(color: Colors.white))));
+  }
+
+  void successDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (context) => SimpleDialog(
+              title: Text(
+                message,
+                textAlign: TextAlign.center,
+              ),
+              titlePadding: const EdgeInsets.all(16),
+            ));
+  }
+
+  void errorDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (context) => SimpleDialog(
+              backgroundColor: Colors.white,
+              title: const Text("Error", style: TextStyle(color: Colors.red)),
+              children: [
+                Align(
+                    alignment: Alignment.center,
+                    child: Text(message, style: const TextStyle(fontSize: 25)))
+              ],
+            ));
+  }
+
+  void loadingDialog() {
+    showDialog(
+        context: context,
+        builder: (context) => const SimpleDialog(
+              title: Text("Generating Shopping List"),
+              children: [
+                SizedBox(
+                    height: 20, width: 20, child: CircularProgressIndicator())
+              ],
+            ));
   }
 
   Widget filters() {
@@ -189,7 +262,9 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
   Widget _toWidget(Week week) {
     return GestureDetector(
       child: Card(
-        color: Colors.white,
+        color: selectedWeeks.contains(week.id)
+            ? Theme.of(context).colorScheme.primary
+            : Colors.white,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -207,59 +282,13 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
         ),
       ),
       onTap: () async {
-        showDialog(
-            context: context,
-            builder: (context) => const SimpleDialog(
-                  title: Text("Generating Shopping List"),
-                  children: [
-                    SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator())
-                  ],
-                ));
+        if (selectedWeeks.contains(week.id)) {
+          selectedWeeks.remove(week.id);
+        } else {
+          selectedWeeks.add(week.id);
+        }
 
-        if (_nameController.text == ""){
-          await Future.delayed(const Duration(seconds: 3));
-        ShoppingListService()
-            .generateShoppingList(week.id, null)
-            .then((value) async {
-          await Future.delayed(const Duration(seconds: 2));
-          Navigator.pop(context);
-          showDialog(
-              context: context,
-              builder: (context) => const SimpleDialog(
-                    title: Text(
-                      "List created successfully!",
-                      textAlign: TextAlign.center,
-                    ),
-                    titlePadding: EdgeInsets.all(16),
-                  ));
-          await Future.delayed(const Duration(seconds: 2));
-          Navigator.pop(context);
-        });
-        }
-        else {
-          await Future.delayed(const Duration(seconds: 3));
-        ShoppingListService()
-            .generateShoppingList(week.id, _nameController.text)
-            .then((value) async {
-          await Future.delayed(const Duration(seconds: 2));
-          Navigator.pop(context);
-          showDialog(
-              context: context,
-              builder: (context) => const SimpleDialog(
-                    title: Text(
-                      "List created successfully!",
-                      textAlign: TextAlign.center,
-                    ),
-                    titlePadding: EdgeInsets.all(16),
-                  ));
-          await Future.delayed(const Duration(seconds: 2));
-          Navigator.pop(context);
-        });
-        }
-        
+        setState(() {});
       },
     );
   }

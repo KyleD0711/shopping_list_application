@@ -21,58 +21,61 @@ class ViewRecipePage extends StatefulWidget {
 class _ViewRecipePageState extends State<ViewRecipePage> {
   late final RecipeDocumentReference recipeRef;
 
-  
   @override
   void initState() {
     super.initState();
-    print(widget.id);
     recipeRef = RecipeService().getRecipe(widget.id);
   }
-
 
   @override
   Widget build(BuildContext context) {
     return FirestoreBuilder(
       ref: recipeRef,
-      builder: (BuildContext context, AsyncSnapshot<RecipeDocumentSnapshot> snapshot, Widget? child) {  
+      builder: (BuildContext context,
+          AsyncSnapshot<RecipeDocumentSnapshot> snapshot, Widget? child) {
         if (snapshot.hasError) return const Text('Something went wrong!');
-        if (!snapshot.hasData) return const Text('Loading data...');
 
-        RecipeDocumentSnapshot querySnapshot = snapshot.requireData;
-        Recipe? recipe = querySnapshot.data;
+        Recipe? recipe;
+        if (snapshot.hasData) {
+          RecipeDocumentSnapshot querySnapshot = snapshot.requireData;
+          recipe = querySnapshot.data;
+        }
 
         return Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            title: Text(recipe?.name ?? ""),
-            actions: [ProfilePicture()],
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: Theme.of(context).colorScheme.tertiary,
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
-              BottomNavigationBarItem(icon: Icon(Icons.delete), label: "Delete"),
-            ],
-            onTap: (value) async {
-              if (value == 0) {
-                await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                  return AddRecipePage(recipe: recipe);
-                }));
-              } else if (value == 1) {
-                recipeRef.delete();
-                Navigator.of(context).pop();
-              }
-
-            },
-          ),
-          body: Column(
-            children: [
-              descriptionWidget(recipe),
-              ingredientsWidget(recipe),
-              instructionsWidget(context, recipe),
-              recipesWidget(recipe)
-            ],
-          ));
+            appBar: AppBar(
+              centerTitle: true,
+              title: Text(recipe?.name ?? ""),
+              actions: const [ProfilePicture()],
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: Theme.of(context).colorScheme.tertiary,
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.delete), label: "Delete"),
+              ],
+              onTap: (value) async {
+                if (value == 0) {
+                  await Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return AddRecipePage(recipe: recipe);
+                  }));
+                } else if (value == 1) {
+                  recipeRef.delete();
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+            body: !snapshot.hasData
+                ? const Text("Loading Data")
+                : Column(
+                    children: [
+                      descriptionWidget(recipe),
+                      ingredientsWidget(recipe),
+                      instructionsWidget(context, recipe),
+                      recipesWidget(recipe)
+                    ],
+                  ));
       },
     );
   }
@@ -117,8 +120,8 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
               const Divider(height: 15.0, color: Colors.black),
               Expanded(
                 child: ListView.separated(
-                  itemBuilder: (_, index) =>
-                      _toIngredientWidget(recipe?.ingredients[index] ?? <String, String>{}),
+                  itemBuilder: (_, index) => _toIngredientWidget(
+                      recipe?.ingredients[index] ?? <String, String>{}),
                   separatorBuilder: (_, __) => const Divider(
                     color: Colors.transparent,
                   ),
@@ -170,7 +173,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                     recipe?.instructions ?? "",
+                      recipe?.instructions ?? "",
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12),
                       maxLines: 3,
@@ -205,8 +208,8 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
               Expanded(
                 child: ListView.separated(
                   padding: const EdgeInsets.all(10.0),
-                  itemBuilder: (_, index) =>
-                      _toRecipeWidget(recipe?.recipes[index] ?? <String, String>{}),
+                  itemBuilder: (_, index) => _toRecipeWidget(
+                      recipe?.recipes[index] ?? <String, String>{}),
                   separatorBuilder: (_, __) => const Divider(),
                   itemCount: recipe?.recipes.length ?? 0,
                 ),

@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/user.dart';
+import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
@@ -42,7 +43,7 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
         centerTitle: true,
         title: const Text("Plan Week"),
         automaticallyImplyLeading: false,
-        actions: [ProfilePicture()],
+        actions: const [ProfilePicture()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).colorScheme.tertiary,
@@ -211,13 +212,13 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                               BottomNavigationBarItem(
                                   icon: Icon(Icons.arrow_back), label: "Back"),
                               BottomNavigationBarItem(
-                                  icon: Icon(Icons.add), label: "Something")
+                                  icon: Icon(Icons.add), label: "Add recipe")
                             ],
                             actionTap: (int value) {
                               if (value == 0) {
                                 Navigator.of(context).pop();
                               } else if (value == 1) {
-                                Navigator.of(context).pop();
+                                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddRecipePage()));
                               }
                             },
                             itemValidator: (value) {
