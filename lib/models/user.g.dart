@@ -774,8 +774,6 @@ abstract class IngredientDocumentReference
   Future<void> update({
     String name,
     FieldValue nameFieldValue,
-    String type,
-    FieldValue typeFieldValue,
   });
 
   /// Updates fields in the current document using the transaction API.
@@ -785,8 +783,6 @@ abstract class IngredientDocumentReference
     Transaction transaction, {
     String name,
     FieldValue nameFieldValue,
-    String type,
-    FieldValue typeFieldValue,
   });
 }
 
@@ -826,26 +822,16 @@ class _$IngredientDocumentReference
   Future<void> update({
     Object? name = _sentinel,
     FieldValue? nameFieldValue,
-    Object? type = _sentinel,
-    FieldValue? typeFieldValue,
   }) async {
     assert(
       name == _sentinel || nameFieldValue == null,
       "Cannot specify both name and nameFieldValue",
-    );
-    assert(
-      type == _sentinel || typeFieldValue == null,
-      "Cannot specify both type and typeFieldValue",
     );
     final json = {
       if (name != _sentinel)
         _$IngredientFieldMap['name']!:
             _$IngredientPerFieldToJson.name(name as String),
       if (nameFieldValue != null) _$IngredientFieldMap['name']!: nameFieldValue,
-      if (type != _sentinel)
-        _$IngredientFieldMap['type']!:
-            _$IngredientPerFieldToJson.type(type as String),
-      if (typeFieldValue != null) _$IngredientFieldMap['type']!: typeFieldValue,
     };
 
     return reference.update(json);
@@ -855,26 +841,16 @@ class _$IngredientDocumentReference
     Transaction transaction, {
     Object? name = _sentinel,
     FieldValue? nameFieldValue,
-    Object? type = _sentinel,
-    FieldValue? typeFieldValue,
   }) {
     assert(
       name == _sentinel || nameFieldValue == null,
       "Cannot specify both name and nameFieldValue",
-    );
-    assert(
-      type == _sentinel || typeFieldValue == null,
-      "Cannot specify both type and typeFieldValue",
     );
     final json = {
       if (name != _sentinel)
         _$IngredientFieldMap['name']!:
             _$IngredientPerFieldToJson.name(name as String),
       if (nameFieldValue != null) _$IngredientFieldMap['name']!: nameFieldValue,
-      if (type != _sentinel)
-        _$IngredientFieldMap['type']!:
-            _$IngredientPerFieldToJson.type(type as String),
-      if (typeFieldValue != null) _$IngredientFieldMap['type']!: typeFieldValue,
     };
 
     transaction.update(reference, json);
@@ -956,18 +932,6 @@ abstract class IngredientQuery
     bool? isNull,
   });
 
-  IngredientQuery whereType({
-    String? isEqualTo,
-    String? isNotEqualTo,
-    String? isLessThan,
-    String? isLessThanOrEqualTo,
-    String? isGreaterThan,
-    String? isGreaterThanOrEqualTo,
-    List<String>? whereIn,
-    List<String>? whereNotIn,
-    bool? isNull,
-  });
-
   /// Perform an order query based on a [FieldPath].
   ///
   /// This method is considered unsafe as it does check that the field path
@@ -1014,18 +978,6 @@ abstract class IngredientQuery
   });
 
   IngredientQuery orderByName({
-    bool descending = false,
-    String startAt,
-    String startAfter,
-    String endAt,
-    String endBefore,
-    IngredientDocumentSnapshot? startAtDocument,
-    IngredientDocumentSnapshot? endAtDocument,
-    IngredientDocumentSnapshot? endBeforeDocument,
-    IngredientDocumentSnapshot? startAfterDocument,
-  });
-
-  IngredientQuery orderByType({
     bool descending = false,
     String startAt,
     String startAfter,
@@ -1198,50 +1150,6 @@ class _$IngredientQuery
   }
 
   @override
-  IngredientQuery whereType({
-    Object? isEqualTo = _sentinel,
-    Object? isNotEqualTo = _sentinel,
-    Object? isLessThan,
-    Object? isLessThanOrEqualTo,
-    Object? isGreaterThan,
-    Object? isGreaterThanOrEqualTo,
-    List<String>? whereIn,
-    List<String>? whereNotIn,
-    bool? isNull,
-  }) {
-    return _$IngredientQuery(
-      _collection,
-      $referenceWithoutCursor: $referenceWithoutCursor.where(
-        _$IngredientFieldMap['type']!,
-        isEqualTo: isEqualTo != _sentinel
-            ? _$IngredientPerFieldToJson.type(isEqualTo as String)
-            : null,
-        isNotEqualTo: isNotEqualTo != _sentinel
-            ? _$IngredientPerFieldToJson.type(isNotEqualTo as String)
-            : null,
-        isLessThan: isLessThan != null
-            ? _$IngredientPerFieldToJson.type(isLessThan as String)
-            : null,
-        isLessThanOrEqualTo: isLessThanOrEqualTo != null
-            ? _$IngredientPerFieldToJson.type(isLessThanOrEqualTo as String)
-            : null,
-        isGreaterThan: isGreaterThan != null
-            ? _$IngredientPerFieldToJson.type(isGreaterThan as String)
-            : null,
-        isGreaterThanOrEqualTo: isGreaterThanOrEqualTo != null
-            ? _$IngredientPerFieldToJson.type(isGreaterThanOrEqualTo as String)
-            : null,
-        whereIn: whereIn?.map((e) => _$IngredientPerFieldToJson.type(e)),
-        whereNotIn: whereNotIn?.map((e) => _$IngredientPerFieldToJson.type(e)),
-        isNull: isNull ??
-            (isEqualTo == null ? false : null) ??
-            (isNotEqualTo == null ? true : null),
-      ),
-      $queryCursor: $queryCursor,
-    );
-  }
-
-  @override
   IngredientQuery orderByFieldPath(
     Object fieldPath, {
     bool descending = false,
@@ -1401,79 +1309,6 @@ class _$IngredientQuery
     IngredientDocumentSnapshot? startAfterDocument,
   }) {
     final query = $referenceWithoutCursor.orderBy(_$IngredientFieldMap['name']!,
-        descending: descending);
-    var queryCursor = $queryCursor;
-
-    if (startAtDocument != null) {
-      queryCursor = queryCursor.copyWith(
-        startAt: const [],
-        startAtDocumentSnapshot: startAtDocument.snapshot,
-      );
-    }
-    if (startAfterDocument != null) {
-      queryCursor = queryCursor.copyWith(
-        startAfter: const [],
-        startAfterDocumentSnapshot: startAfterDocument.snapshot,
-      );
-    }
-    if (endAtDocument != null) {
-      queryCursor = queryCursor.copyWith(
-        endAt: const [],
-        endAtDocumentSnapshot: endAtDocument.snapshot,
-      );
-    }
-    if (endBeforeDocument != null) {
-      queryCursor = queryCursor.copyWith(
-        endBefore: const [],
-        endBeforeDocumentSnapshot: endBeforeDocument.snapshot,
-      );
-    }
-
-    if (startAt != _sentinel) {
-      queryCursor = queryCursor.copyWith(
-        startAt: [...queryCursor.startAt, startAt],
-        startAtDocumentSnapshot: null,
-      );
-    }
-    if (startAfter != _sentinel) {
-      queryCursor = queryCursor.copyWith(
-        startAfter: [...queryCursor.startAfter, startAfter],
-        startAfterDocumentSnapshot: null,
-      );
-    }
-    if (endAt != _sentinel) {
-      queryCursor = queryCursor.copyWith(
-        endAt: [...queryCursor.endAt, endAt],
-        endAtDocumentSnapshot: null,
-      );
-    }
-    if (endBefore != _sentinel) {
-      queryCursor = queryCursor.copyWith(
-        endBefore: [...queryCursor.endBefore, endBefore],
-        endBeforeDocumentSnapshot: null,
-      );
-    }
-
-    return _$IngredientQuery(
-      _collection,
-      $referenceWithoutCursor: query,
-      $queryCursor: queryCursor,
-    );
-  }
-
-  @override
-  IngredientQuery orderByType({
-    bool descending = false,
-    Object? startAt = _sentinel,
-    Object? startAfter = _sentinel,
-    Object? endAt = _sentinel,
-    Object? endBefore = _sentinel,
-    IngredientDocumentSnapshot? startAtDocument,
-    IngredientDocumentSnapshot? endAtDocument,
-    IngredientDocumentSnapshot? endBeforeDocument,
-    IngredientDocumentSnapshot? startAfterDocument,
-  }) {
-    final query = $referenceWithoutCursor.orderBy(_$IngredientFieldMap['type']!,
         descending: descending);
     var queryCursor = $queryCursor;
 
@@ -5992,13 +5827,11 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
 Ingredient _$IngredientFromJson(Map<String, dynamic> json) => Ingredient(
       name: json['name'] as String,
       id: json['id'] as String?,
-      type: json['type'] as String,
     );
 
 const _$IngredientFieldMap = <String, String>{
   'id': 'id',
   'name': 'name',
-  'type': 'type',
 };
 
 // ignore: unused_element
@@ -6007,15 +5840,12 @@ abstract class _$IngredientPerFieldToJson {
   static Object? id(String instance) => instance;
   // ignore: unused_element
   static Object? name(String instance) => instance;
-  // ignore: unused_element
-  static Object? type(String instance) => instance;
 }
 
 Map<String, dynamic> _$IngredientToJson(Ingredient instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
-      'type': instance.type,
     };
 
 Recipe _$RecipeFromJson(Map<String, dynamic> json) => Recipe(

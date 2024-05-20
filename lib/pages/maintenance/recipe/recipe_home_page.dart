@@ -25,50 +25,80 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
         ref: recipeRef,
         builder: ((context, AsyncSnapshot<RecipeQuerySnapshot> snapshot,
             Widget? child) {
-          if (snapshot.hasError) return const Text('Something went wrong!');
-
-          RecipeQuerySnapshot? querySnapshot = snapshot.data;
+          
+          bool hasError = snapshot.hasError;
+          bool hasData = snapshot.hasData;
+          List<RecipeQueryDocumentSnapshot>? querySnapshot = snapshot.data?.docs;
 
           return Scaffold(
-            appBar: AppBar(
+            appBar: getAppBar(),
+            body: getBody(querySnapshot, hasError, hasData),
+            bottomNavigationBar: getBottomNavigationBar(),
+          );
+        }));
+  }
+
+  PreferredSizeWidget getAppBar(){
+    return AppBar(
               centerTitle: true,
               title: const Text("Recipes"),
               automaticallyImplyLeading: false,
               actions: [ProfilePicture()],
-            ),
-            body: Column(
-              children: [
-                Expanded(
-                    child: querySnapshot != null
-                        ? ListView.separated(
-                            padding: const EdgeInsets.all(10.0),
-                            itemBuilder: (_, index) {
-                              Recipe recipe = querySnapshot.docs[index].data;
-                              return _toWidget(recipe);
-                            },
-                            separatorBuilder: (_, __) => const Divider(
-                              color: Colors.transparent,
-                            ),
-                            itemCount: querySnapshot.docs.length,
-                          )
-                        : const Text("Loading Data..")),
-                Align(
-                    alignment: Alignment.bottomCenter,
-                    child: ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                                Theme.of(context).colorScheme.secondary),
-                            fixedSize: MaterialStateProperty.all(Size.fromWidth(
-                                MediaQuery.of(context).size.width))),
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const AddRecipePage()));
-                        },
-                        child: const Text("Add Recipe",
-                            style: TextStyle(color: Colors.white))))
-              ],
-            ),
-            bottomNavigationBar: BottomNavigationBar(
+            );
+  }
+
+  Widget getBody( List<RecipeQueryDocumentSnapshot>? snapshot, bool hasError, bool hasData) {
+    if (hasError) {
+      return const Column(
+        children: [
+          Text("An error has occurred when trying to retrieve your data.")
+        ],
+      );
+    } else if (!hasData) {
+      return const Column(
+        children: [Text("Loading Data...")],
+      );
+    } else if (snapshot == null) {
+      return const Column(
+        children: [Text("No data available")],
+      );
+    }
+    return Column(
+      children: [
+        Expanded(
+            child: 
+                  ListView.separated(
+                    padding: const EdgeInsets.all(10.0),
+                    itemBuilder: (_, index) {
+                      Recipe recipe = snapshot[index].data;
+                      return _toWidget(recipe);
+                    },
+                    separatorBuilder: (_, __) => const Divider(
+                      color: Colors.transparent,
+                    ),
+                    itemCount: snapshot.length,
+                  )),
+        Align(
+            alignment: Alignment.bottomCenter,
+            child: ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(
+                        Theme.of(context).colorScheme.secondary),
+                    fixedSize: MaterialStateProperty.all(Size.fromWidth(
+                        MediaQuery.of(context).size.width))),
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const AddRecipePage()));
+                },
+                child: const Text("Add Recipe",
+                    style: TextStyle(color: Colors.white))))
+      ],
+    );
+
+  } 
+
+  Widget getBottomNavigationBar() {
+    return BottomNavigationBar(
               backgroundColor: Theme.of(context).colorScheme.tertiary,
               items: const [
                 BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
@@ -88,9 +118,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
                       builder: (context) => const ShoppingListHomePage()));
                 }
               },
-            ),
-          );
-        }));
+            );
   }
 
   Widget _toWidget(Recipe recipe) {

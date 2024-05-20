@@ -25,17 +25,22 @@ class ShoppingListItemValidator implements Validator {
   void validate(Object? value, String propertyName) {
     if (value == null) {
       throw Exception("Can't add null list to shopping list");
-    } else if (value.runtimeType != List<Map<String, dynamic>>) {
-      throw Exception("Invalid type ${value.runtimeType}");
-    }
-    value.every((element) {
+    } 
+
+    if (value is List<Map<String, String>>){
+      value.every((element) {
       if (element['name'] == null ||
           element['qty'] == null ||
-          element['isSelected'] == null) {
-        throw Exception("Incorrect fields in map ${value}");
+          element['isSelected'] == null || element['isSelected'] != "true" || element['isSelected'] != "false") {
+        throw Exception("Incorrect fields in map $value");
       }
       return false;
     });
+    }
+    else {
+      throw Exception("Incorrect type encountered. Expected List<Map<String, String>> but got ${value.runtimeType}");
+    }
+    
   }
 }
 
@@ -53,7 +58,7 @@ class User {
 
 @firestoreSerializable
 class Ingredient {
-  Ingredient({required this.name, String? id, required this.type})
+  Ingredient({required this.name, String? id})
       : id = id ?? _uuid.v1();
 
   static const _uuid = Uuid();
@@ -61,7 +66,6 @@ class Ingredient {
   @Id()
   final String id;
   final String name;
-  final String type;
 
   @override
   String toString() {
@@ -146,7 +150,7 @@ class ShoppingList {
   final String name;
   final DateTime beginDate;
   final DateTime endDate;
-  final List<Map<String, String>> shoppingListItems;
+  final List<Map<String, String>> shoppingListItems; // Once Firestore ODM figures out nested subcollection, use that
 }
 
 @Collection<User>('users')

@@ -7,6 +7,7 @@ import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/services/user_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
+import 'package:shopping_list_application/utils/measurement_helpers.dart';
 import 'package:shopping_list_application/utils/validators/model/model_validator.dart';
 
 class ShoppingListService {
@@ -30,11 +31,12 @@ class ShoppingListService {
 
       WeekDocumentSnapshot weekRef =
           await WeekService().getWeek(weekIds.first).get();
-      if (!weekRef.exists)
+      if (!weekRef.exists) {
         throw Exception("Can't find week with id: ${weekIds.first}");
+      }
       DateTime startDate = weekRef.data!.beginDate;
       DateTime endDate = weekRef.data!.endDate;
-
+      
       for (String id in weekIds) {
         WeekDocumentSnapshot weekRef = await WeekService().getWeek(id).get();
         if (!weekRef.exists) throw Exception("Can't find week with id: $id");
@@ -45,28 +47,27 @@ class ShoppingListService {
 
         Map<String, int> recipeMap = getNumberOfRecipes(week);
 
-        recipeMap.forEach((recipeName, multiplier) async {
-          Recipe recipe = await RecipeService().getRecipeByName(recipeName);
+        for (int i = 0; i < recipeMap.length; i++){
+          Recipe recipe = await RecipeService().getRecipeByName(recipeMap.keys.toList()[i]);
+          int multiplier = recipeMap.values.toList()[i];
+
           for (var ingredient in recipe.ingredients) {
             String? ingredientName = ingredient['name'];
             String? ingredientQty = ingredient['qty'];
 
             if (ingredientName == null ||
-                !validateQuantity(ingredientQty) ||
+                validateQuantity(ingredientQty) != null ||
                 ingredientQty == null /**Redundant*/) {
               throw Exception(
                   "Data is invalid for $ingredient in recipe $recipe");
             }
 
+            
+
             if (ingredientMap[ingredientName] != null) {
-              ingredientMap[ingredientName]!.amount =
-                  (ingredientMap[ingredientName]!.amount.toDouble() +
-                          Quantity.parseFromString(ingredientQty)
-                              .multiply(multiplier)
-                              .amount
-                              .toDouble())
-                      .toFraction()
-                      .reduce();
+              Rational newAmount = getNewAmount(ingredientMap[ingredientName]!, Quantity.parseFromString(ingredientQty));
+              
+              ingredientMap[ingredientName]!.amount = newAmount;
             } else {
               ingredientMap.addEntries([
                 MapEntry(
@@ -76,19 +77,45 @@ class ShoppingListService {
               ]);
             }
           }
-        });
+        }
       }
+
       ShoppingList newList = ShoppingList(
-          name: name ?? "${formatDate(startDate)} - ${formatDate(endDate)}",
+          name: name == "" || name == null ? "${formatDate(startDate)} - ${formatDate(endDate)}" : name,
           beginDate: startDate,
           endDate: endDate);
       
-      ingredientMap.forEach((key, value) => newList.shoppingListItems.add({"name": key, "qty": value.toString(), "isSelected": false}),);
 
-      await shoppingLists.add(newList);
+
+      ingredientMap.forEach((key, value) => newList.shoppingListItems.add({"name": key, "qty": value.toString(), "isSelected": "false"}),);
+      print("Created list: ${newList.shoppingListItems}");
+      // await shoppingLists.add(newList);
     } on Exception catch (e) {
       return e.toString();
     }
+  }
+
+  Rational getNewAmount(Quantity ingredient1, Quantity ingredient2) {
+    Rational amount1 = ingredient1.amount;
+    String measurement1 = ingredient1.measurement;
+    Rational amount2 = ingredient2.amount;
+    String measurement2 = ingredient2.measurement;
+    Rational newAmount;
+
+
+    measurement1 = getStandardMeasurement(measurement1);
+    measurement2 = getStandardMeasurement(measurement2);
+    
+    
+    if (measurement1 == measurement2) {
+      newAmount =  (amount1.toDouble() + amount2.toDouble()).toFraction().reduce();
+    }
+    else {
+      
+    }
+    
+
+    return "1/2".toFraction();
   }
 
   Map<String, int> getNumberOfRecipes(Week? week) {
@@ -102,7 +129,7 @@ class ShoppingListService {
         String? qty = recipe['qty'];
 
         if (name == null) continue;
-        if (!validateQuantity(qty) || qty == null) {
+        if (validateQuantity(qty) != null || qty == null) {
           throw Exception("Qty data is invalid in recipe $recipe:$qty");
         }
 

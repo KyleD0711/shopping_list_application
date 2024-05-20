@@ -6,6 +6,7 @@ import 'package:shopping_list_application/pages/maintenance/recipe/instructions_
 import 'package:shopping_list_application/services/ingredient_service.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
 import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
+import 'package:shopping_list_application/utils/validators/model/model_validator.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
 import 'package:shopping_list_application/widgets/profile_picture.dart';
 
@@ -433,9 +434,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                         }
                                       },
                                       itemValidator: (value) {
-                                        return validateFractionOrInteger(value);
-                                      },
-                                      dropDown: true,
+                                        return validateQuantity(value);
+                                      }
                                     )),
                           );
                           setState(() {});
@@ -462,7 +462,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
   Widget addIngredientDialog() {
     final ingredientNameController = TextEditingController();
-    String? dropDownValue;
     final key = GlobalKey<FormState>();
     return AlertDialog(
       backgroundColor: Colors.white,
@@ -471,8 +470,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
           onPressed: () {
             if (key.currentState!.validate()) {
               IngredientService().ingredientsRef.add(Ingredient(
-                  name: ingredientNameController.text,
-                  type: dropDownValue!));
+                  name: ingredientNameController.text));
               Navigator.of(context).pop();
             }
           },
@@ -501,43 +499,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
                 controller: ingredientNameController,
                 validator: (value) => validateNonEmptyMessage(value),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: DropdownButtonFormField<String>(
-                dropdownColor: Theme.of(context).colorScheme.tertiary,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.tertiary,
-                  hintText: "Type:",
-                  hintStyle: const TextStyle(color: Colors.white),
-                ),
-                validator: (value) {
-                  return validateNonEmptyMessage(value) ??
-                      validateIngredientType(value!);
-                },
-                items: const [
-                  DropdownMenuItem(
-                    value: 'dry',
-                    child: Text('dry'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'liquid',
-                    child: Text('liquid'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'produce',
-                    child: Text('produce'),
-                  )
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    dropDownValue = value;
-                  });
-                },
-                value: dropDownValue,
               ),
             ),
           ],

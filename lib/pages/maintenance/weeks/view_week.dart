@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/weeks/plan_week.dart';
 import 'package:shopping_list_application/services/shopping_list_service.dart';
@@ -36,21 +37,34 @@ class _ViewWeekPageState extends State<ViewWeekPage> {
         ref: weekRef,
         builder: (BuildContext context,
             AsyncSnapshot<WeekDocumentSnapshot> snapshot, Widget? child) {
-          if (snapshot.hasError) return Text(snapshot.error.toString());
-          if (!snapshot.hasData) return const Text('Loading data...');
 
-          Week? week = snapshot.requireData.data;
+          bool hasError = snapshot.hasError;
+          bool hasData = snapshot.hasData;
+          Week? week = snapshot.data?.data;
+
 
           return Scaffold(
-            appBar: AppBar(
-              centerTitle: true,
-              title: week != null
-                  ? Text(
-                      "${formatDate(week.beginDate)} - ${formatDate(week.endDate)}")
-                  : const Text(""),
-              actions: [ProfilePicture()],
-            ),
-            bottomNavigationBar: BottomNavigationBar(
+            appBar: getAppBar(week),
+            bottomNavigationBar: getBottomNavigationBar(week, hasError, hasData),
+            body: getBody(week, hasError, hasData),
+          );
+        });
+  }
+
+  PreferredSizeWidget getAppBar(Week? week){
+    return AppBar(
+      centerTitle: true,
+      title: week != null
+          ? Text(
+              "${formatDate(week.beginDate)} - ${formatDate(week.endDate)}")
+          : const Text(""),
+      actions: const [ProfilePicture()],
+    );
+  }
+
+  Widget getBottomNavigationBar(Week? week, bool hasError, bool hasData){
+
+    return BottomNavigationBar(
               backgroundColor: Theme.of(context).colorScheme.tertiary,
               items: const [
                 BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
@@ -61,34 +75,53 @@ class _ViewWeekPageState extends State<ViewWeekPage> {
               ],
               onTap: (value) async {
                 if (value == 0) {
-                  await Navigator.of(context).push(MaterialPageRoute(
+                  if (!hasError && hasData && week != null) {
+                    await Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => PlanWeekPage(week: week)));
+                  }
                 } else if (value == 1) {
                   weekRef.delete();
                   Navigator.of(context).pop();
                 }
               },
-            ),
-            body: ListView(children: [
-              Row(
-                children: [
-                  dateCard(week!.beginDate, "Begin Date"),
-                  dateCard(week.endDate, "End Date")
-                ],
-              ),
-              CarouselSlider(
-                items: getAllDayCards(week),
-                options: CarouselOptions(
-                    autoPlay: false,
-                    enableInfiniteScroll:
-                        week.days.entries.length > 1 ? true : false,
-                    enlargeCenterPage: true,
-                    height: 550,
-                    enlargeFactor: .2),
-              ),
-            ]),
-          );
-        });
+            );
+  }
+
+  Widget getBody(Week? week, bool hasError, bool hasData){
+    if (hasError) {
+      return const Column(
+        children: [
+          Text("An error has occurred when trying to retrieve your data.")
+        ],
+      );
+    } else if (!hasData) {
+      return const Column(
+        children: [Text("Loading Data...")],
+      );
+    } else if (week == null) {
+      return const Column(
+        children: [Text("No data available")],
+      );
+    }
+
+    return ListView(children: [
+      Row(
+        children: [
+          dateCard(week!.beginDate, "Begin Date"),
+          dateCard(week.endDate, "End Date")
+        ],
+      ),
+      CarouselSlider(
+        items: getAllDayCards(week),
+        options: CarouselOptions(
+            autoPlay: false,
+            enableInfiniteScroll:
+                week.days.entries.length > 1 ? true : false,
+            enlargeCenterPage: true,
+            height: 550,
+            enlargeFactor: .2),
+      ),
+    ]);
   }
 
   String? validateDates(DateTime? date, String errorMessage) {

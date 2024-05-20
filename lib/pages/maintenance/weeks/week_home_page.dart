@@ -1,5 +1,6 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/recipe_home_page.dart';
 import 'package:shopping_list_application/pages/maintenance/shoppinglist/shopping_list_home.dart';
@@ -49,43 +50,83 @@ class _WeekHomePageState extends State<WeekHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Meal Planning"),
-        automaticallyImplyLeading: false,
-        actions: [ProfilePicture()],
-      ),
-      body: Column(
-        children: [filters(), displayWeeks(), addButton()],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
-        items: [
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.tab_outlined), label: "Recipes"),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              label: "Home"),
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.list_alt), label: "Shopping Lists")
-        ],
-        onTap: (value) {
-          if (value == 0) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (context) => const RecipeHomePage()));
-          } else if (value == 1) {
-            Navigator.of(context).pop();
-          } else if (value == 2) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (context) => const ShoppingListHomePage()));
-          }
-        },
-      ),
+    return FirestoreBuilder(
+      ref: weeksRef,
+      builder: (BuildContext context, AsyncSnapshot<WeekQuerySnapshot> snapshot, Widget? child) {  
+        bool hasError = snapshot.hasError;
+        bool hasData = snapshot.hasData;
+        List<WeekQueryDocumentSnapshot>? weeks = snapshot.data?.docs;
+
+        return Scaffold(
+        appBar: getAppBar(),
+        body: getBody(weeks, hasError, hasData),
+        bottomNavigationBar: getBottomNavigationBar()
+      );
+      });
+    
+  }
+
+  PreferredSizeWidget getAppBar() {
+    return AppBar(
+      centerTitle: true,
+      title: const Text("Meal Planning"),
+      automaticallyImplyLeading: false,
+      actions: const [ProfilePicture()],
     );
+  }
+
+  Widget getBody(List<WeekQueryDocumentSnapshot>? snapshot, bool hasError, bool hasData) {
+    if (hasError) {
+      return const Column(
+        children: [
+          Text("An error has occurred when trying to retrieve your data.")
+        ],
+      );
+    } else if (!hasData) {
+      return const Column(
+        children: [Text("Loading Data...")],
+      );
+    } else if (snapshot == null) {
+      return const Column(
+        children: [Text("No data available")],
+      );
+    }
+
+    List<WeekQueryDocumentSnapshot> weeks = snapshot
+              .where((element) =>
+                  element.data.beginDate.month == monthFilterValue &&
+                  element.data.beginDate.year == yearFilterValue)
+              .toList();
+  return Column(children: [filters(), displayWeeks(weeks), addButton()]);
+  }
+
+  Widget getBottomNavigationBar(){
+    return BottomNavigationBar(
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
+          items: [
+            const BottomNavigationBarItem(
+                icon: Icon(Icons.tab_outlined), label: "Recipes"),
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.home,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                label: "Home"),
+            const BottomNavigationBarItem(
+                icon: Icon(Icons.list_alt), label: "Shopping Lists")
+          ],
+          onTap: (value) {
+            if (value == 0) {
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) => const RecipeHomePage()));
+            } else if (value == 1) {
+              Navigator.of(context).pop();
+            } else if (value == 2) {
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) => const ShoppingListHomePage()));
+            }
+          },
+        );
   }
 
   Widget filters() {
@@ -143,35 +184,16 @@ class _WeekHomePageState extends State<WeekHomePage> {
     );
   }
 
-  Widget displayWeeks() {
-    return FirestoreBuilder(
-        ref: weeksRef,
-        builder: (BuildContext context,
-            AsyncSnapshot<WeekQuerySnapshot> snapshot, Widget? child) {
-          if (snapshot.hasError) return Text(snapshot.error.toString());
-          if (!snapshot.hasData) return const Text('Loading data...');
-
-          List<WeekQueryDocumentSnapshot> weeks = snapshot.requireData.docs
-              .where((element) =>
-                  element.data.beginDate.month == monthFilterValue &&
-                  element.data.beginDate.year == yearFilterValue)
-              .toList();
-
-          return Expanded(
-              child: snapshot.hasData
-                  ? ListView.separated(
-                      padding: const EdgeInsets.all(10.0),
-                      itemBuilder: (_, index) => _toWidget(weeks[index].data),
-                      separatorBuilder: (_, __) => const Divider(
-                        height: 3,
-                        color: Colors.transparent,
-                      ),
-                      itemCount: weeks.length,
-                    )
-                  : const Center(
-                      child: Text("No results"),
-                    ));
-        });
+  Widget displayWeeks(List<WeekQueryDocumentSnapshot> weeks) {
+    return Expanded(
+      child: ListView.separated(
+        padding: const EdgeInsets.all(10.0),
+        itemBuilder: (_, index) => _toWidget(weeks[index].data),
+        separatorBuilder: (_, __) => const Divider(
+          height: 3,
+          color: Colors.transparent,
+        ),
+        itemCount: weeks.length,));
   }
 
   Widget addButton() {

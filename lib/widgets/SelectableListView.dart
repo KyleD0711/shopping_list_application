@@ -11,7 +11,6 @@ class SelectableListView extends StatefulWidget {
       required this.selectedItems,
       required this.bottomActions,
       required this.itemValidator,
-      this.dropDown = false,
       this.actionTap});
 
   // final Stream<List<dynamic>> itemStream;
@@ -20,7 +19,6 @@ class SelectableListView extends StatefulWidget {
   final List<Map<String, String>> selectedItems;
   final List<BottomNavigationBarItem> bottomActions;
   final String? Function(String value) itemValidator;
-  final bool dropDown;
 
   void Function(int value)? actionTap;
 
@@ -121,10 +119,10 @@ class _SelectableListViewState extends State<SelectableListView> {
       
       dynamic item = element.data;
       if (searchFilter == "") {
-        items.add({"name": item.name, "qty": "", "type": item.runtimeType == Ingredient ? item.type : ""});
+        items.add({"name": item.name, "qty": ""});
       } else {
         if (item.toString().contains(searchFilter)) {
-          items.add({"name": item.name, "qty": "", "type":item.runtimeType == Ingredient ? item.type : ""});
+          items.add({"name": item.name, "qty": ""});
         }
       }
     }
@@ -245,31 +243,12 @@ class _SelectableListViewState extends State<SelectableListView> {
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: TextFormField(
-                  keyboardType: !widget.dropDown ? TextInputType.number : null,
-                  decoration: InputDecoration(hintText: "Amount", border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                  decoration: InputDecoration(hintText: "Quantity", border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                   controller: widgetTextController,
                   validator: (value) => widget.itemValidator(value ?? ""),
                 ),
               ),
             ),
-            if (widget.dropDown && item['type'] != "")
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: DropdownButtonFormField(
-                   decoration: InputDecoration(hintText: "Measure", border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))), 
-                    items: getDropDownItems(item['type']),
-                    onChanged: (value) {
-                      setState(() {
-                        dropDownValue = value;
-                      });
-                    },
-                    value: dropDownValue,
-                    validator: (value) =>
-                        value == null ? "This field can't be null" : null,
-                  ),
-                ),
-              )
           ],
         ),
       ),
@@ -281,14 +260,8 @@ class _SelectableListViewState extends State<SelectableListView> {
           ),
           onPressed: () {
             if (key.currentState!.validate()) {
-              if (widget.dropDown && item['type'] != "") {
-                item['qty'] = "${widgetTextController.text} $dropDownValue";
-                
-              } else {
-                item['qty'] = widgetTextController.text;
-            }
-
-             widget.selectedItems.add(item);
+              item['qty'] = widgetTextController.text;
+              widget.selectedItems.add(item);
                 setState(() {});
                 Navigator.of(context).pop();
               }
@@ -296,21 +269,6 @@ class _SelectableListViewState extends State<SelectableListView> {
         )
       ],
     );
-  }
-
-  List<DropdownMenuItem> getDropDownItems(String? type){
-    if (type == "dry"){
-      return dryMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList();
-    }
-    else if (type == "liquid") {
-      return liquidMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList();
-    }
-    else if (type == "produce"){
-      return  produceMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList();
-    }
-    else {
-      return [...dryMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList(), ...liquidMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList(), ...produceMeasurements.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList()];
-    }
   }
 
   @override

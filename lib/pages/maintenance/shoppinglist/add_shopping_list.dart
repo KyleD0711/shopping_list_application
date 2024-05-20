@@ -101,9 +101,9 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
                     .generateShoppingList(selectedWeeks, _nameController.text)
                     .then((value) async {
                   await Future.delayed(const Duration(seconds: 2));
-                  Navigator.pop(context);
                   successDialog("Shopping list generated successfully!");
                   await Future.delayed(const Duration(seconds: 2));
+                  Navigator.pop(context);
                   Navigator.pop(context);
                 });
               }

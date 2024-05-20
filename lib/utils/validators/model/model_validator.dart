@@ -1,36 +1,34 @@
 import 'package:fraction/fraction.dart';
+import 'package:shopping_list_application/utils/measurement_helpers.dart';
 
-const dryMeasurements = ['tbsp', 'tsp', 'cup', 'pound', 'gram', 'oz'];
-const liquidMeasurements = ['tbsp', 'tsp', 'cup', 'quart', 'gallon', 'ml', 'l', 'fl. oz.', 'pint'];
-const produceMeasurements = ['package', 'whole'];
 
-bool validateQuantity(String? value) {
-  if (value == "" || value == null) return false;
-
+String? validateQuantity(String? value) {
+  if (value == "" || value == null) return "Error";
   List<String> splitValues = value.split(' ');
-  print(splitValues);
 
-  if (splitValues.length > 3 || splitValues.isEmpty) {
-    return false;
+  if (splitValues.length > 4 || splitValues.isEmpty) {
+    return "Error: Measurement format not supported";
+  } else if (splitValues.length == 4) {
+    if (!measurements.contains('${splitValues[3]} ${splitValues[4]}')) {
+      return "Error: Incorrect measurement.";
+    }
   } else if (splitValues.length == 3) {
-    print("In Length 3");
     if (int.tryParse(splitValues[0]) == null) {
-      return false;
+      return "Error: Please enter an integer or a fraction";
     } else if (!splitValues[0].isFraction) {
-      return false;
-    } else if (!(dryMeasurements + liquidMeasurements).contains(splitValues[2])) {
-     return false;
+      return "Error: Please enter an integer or a fraction";
+    } else if (!measurements.contains(splitValues[2])) {
+      return "Error: Incorrect measurement.";
     }
   } else if (splitValues.length == 2) {
-    print("In length 2");
     if (int.tryParse(splitValues[0]) == null && !splitValues[0].isFraction) {
-      return false;
-    } else if (!(dryMeasurements + liquidMeasurements).contains(splitValues[1])) {
-      return false;
+      return "Error: Please enter an integer or a fraction";
+    } else if (!measurements.contains(splitValues[1])) {
+      return "Error: Incorrect measurement";
     }
   } else {
-    if (int.tryParse(splitValues[0]) == null) return false;
-}
+    if (int.tryParse(splitValues[0]) == null && !splitValues[0].isFraction && !splitValues[0].isMixedFraction) return "Error: Please enter an integer or a fraction";
+  }
 
-  return true;
+  return null;
 }

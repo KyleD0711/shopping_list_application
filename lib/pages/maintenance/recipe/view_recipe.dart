@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
-import 'package:shopping_list_application/services/shopping_list_service.dart';
 import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class ViewRecipePage extends StatefulWidget {
@@ -33,21 +32,55 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
       ref: recipeRef,
       builder: (BuildContext context,
           AsyncSnapshot<RecipeDocumentSnapshot> snapshot, Widget? child) {
-        if (snapshot.hasError) return const Text('Something went wrong!');
-
-        Recipe? recipe;
-        if (snapshot.hasData) {
-          RecipeDocumentSnapshot querySnapshot = snapshot.requireData;
-          recipe = querySnapshot.data;
-        }
+        bool hasError = snapshot.hasError;
+        bool hasData = snapshot.hasData;
+        Recipe? recipe = snapshot.data?.data;
 
         return Scaffold(
-            appBar: AppBar(
+            appBar: getAppBar(recipe),
+            bottomNavigationBar: getBottomNavigationBar(recipe, hasError, hasData),
+            body: getBody(recipe, hasError, hasData));
+      },
+    );
+  }
+
+  PreferredSizeWidget getAppBar(Recipe? recipe) {
+    return AppBar(
               centerTitle: true,
               title: Text(recipe?.name ?? ""),
               actions: const [ProfilePicture()],
-            ),
-            bottomNavigationBar: BottomNavigationBar(
+            );
+  }
+
+  Widget getBody(Recipe? recipe, bool hasError, bool hasData) {
+    if (hasError) {
+      return const Column(
+        children: [
+          Text("An error has occurred when trying to retrieve your data.")
+        ],
+      );
+    } else if (!hasData) {
+      return const Column(
+        children: [Text("Loading Data...")],
+      );
+    } else if (recipe == null) {
+      return const Column(
+        children: [Text("No data available")],
+      );
+    }
+    return Column(
+        children: [
+          descriptionWidget(recipe),
+          ingredientsWidget(recipe),
+          instructionsWidget(context, recipe),
+          recipesWidget(recipe)
+        ],
+      );
+
+  }
+
+  Widget getBottomNavigationBar(Recipe? recipe, bool hasError, bool hasData) {
+  return BottomNavigationBar(
               backgroundColor: Theme.of(context).colorScheme.tertiary,
               items: const [
                 BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
@@ -56,28 +89,18 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
               ],
               onTap: (value) async {
                 if (value == 0) {
-                  await Navigator.of(context)
+                  if (!hasError && hasData && recipe != null) {
+                    await Navigator.of(context)
                       .push(MaterialPageRoute(builder: (context) {
                     return AddRecipePage(recipe: recipe);
                   }));
+                  }
                 } else if (value == 1) {
                   recipeRef.delete();
                   Navigator.of(context).pop();
                 }
               },
-            ),
-            body: !snapshot.hasData
-                ? const Text("Loading Data")
-                : Column(
-                    children: [
-                      descriptionWidget(recipe),
-                      ingredientsWidget(recipe),
-                      instructionsWidget(context, recipe),
-                      recipesWidget(recipe)
-                    ],
-                  ));
-      },
-    );
+            );
   }
 
   Widget descriptionWidget(Recipe? recipe) {

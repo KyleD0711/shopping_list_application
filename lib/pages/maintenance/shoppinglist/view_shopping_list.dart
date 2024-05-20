@@ -15,108 +15,139 @@ class ViewShoppingListPage extends StatefulWidget {
 }
 
 class _ViewShoppingListPageState extends State<ViewShoppingListPage> {
-  late ShoppingListItemCollectionReference shoppingListItemsRef;
-
+  late ShoppingListDocumentReference shoppingListReference;
   @override
   void initState() {
     super.initState();
-    shoppingListItemsRef =
-        ShoppingListService().getShoppingList(widget.id).shoppinglistitems;
+    shoppingListReference = ShoppingListService().getShoppingList(widget.id);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Shopping Lists"),
-        automaticallyImplyLeading: false,
-        actions: [ProfilePicture()],
-      ),
-      body: Column(
-        children: [displayItems()],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(
-          Icons.add,
-          color: Colors.black,
-        ),
-        onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return toWidgetDialog();
-              });
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
-        items: [
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.arrow_back), label: "Back"),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.delete,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            label: "Delete List",
-          )
-        ],
-        onTap: (value) {
-          if (value == 0) {
-            Navigator.of(context).pop();
-          } else if (value == 1) {
-            ShoppingListService().getShoppingList(widget.id).delete();
-            Navigator.of(context).pop();
-          }
-        },
-      ),
+    return FirestoreBuilder(
+      ref: shoppingListReference,
+      builder: (BuildContext context,
+          AsyncSnapshot<ShoppingListDocumentSnapshot> snapshot, Widget? child) {
+          
+          bool hasError = snapshot.hasError;
+          bool hasData = snapshot.hasData;
+          ShoppingList? shoppingList = snapshot.data?.data;
+
+        return Scaffold(
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text("Shopping Lists"),
+            automaticallyImplyLeading: false,
+            actions: const [ProfilePicture()],
+          ),
+          body: Column(
+            children: [getBody(shoppingList, hasError, hasData)],
+          ),
+          floatingActionButton: getFloatingAcionButton(shoppingList, hasError, hasData),
+          bottomNavigationBar: getBottomNavigationBar(shoppingList, hasError, hasData)
+        );
+      },
     );
   }
 
-  Widget displayItems() {
-    return FirestoreBuilder(
-      ref: shoppingListItemsRef,
-      builder: ((BuildContext context,
-          AsyncSnapshot<ShoppingListItemQuerySnapshot> snapshot,
-          Widget? child) {
-        if (snapshot.hasError) return Text(snapshot.error.toString());
-        if (!snapshot.hasData) return const Text("No data available");
+  Widget getBody(ShoppingList? shoppingList, bool hasError, bool hasData){
+    if (hasError) {
+      return const Column(children: [Text("An error has occurred when trying to retrieve your data.")],);
+    }
+    else if (!hasData) {
+      return const Column(children: [Text("Loading Data...")],);
+    }
+    else {
+      if (shoppingList == null) {
+        return const Column(children: [Text("No data available")],); 
+      }
 
-        List<ShoppingListItemQueryDocumentSnapshot> shoppingListItems =
-            snapshot.requireData.docs;
-        shoppingListItems = sortSelectedNotSelected(shoppingListItems);
+      shoppingList.shoppingListItems.replaceRange(
+            0,
+            shoppingList.shoppingListItems.length,
+            sortSelectedNotSelected(shoppingList.shoppingListItems));
 
         return Expanded(
-            child: snapshot.hasData
+            child: shoppingList.shoppingListItems.isNotEmpty
                 ? ListView.separated(
                     padding: const EdgeInsets.all(10.0),
-                    itemBuilder: (_, index) =>
-                        _toWidget(shoppingListItems[index]),
+                    itemBuilder: (_, index) => _toWidget(
+                        shoppingList.shoppingListItems[index],
+                        shoppingList),
                     separatorBuilder: (_, __) => const Divider(
                       height: 5,
                       color: Colors.transparent,
                     ),
-                    itemCount: shoppingListItems.length,
+                    itemCount: shoppingList.shoppingListItems.length,
                   )
                 : const Center(
-                    child: Text("No results"),
+                    child: Text("No shopping list items"),
                   ));
-      }),
-    );
+    }
   }
 
-  Widget _toWidget(ShoppingListItemQueryDocumentSnapshot itemSnapshot) {
-    ShoppingListItem item = itemSnapshot.data;
+  Widget? getFloatingAcionButton(ShoppingList? shoppingList, bool hasError, bool hasData){
+    if (hasError || !hasData || shoppingList == null) {
+      return null;
+    }
+    else {
+      return FloatingActionButton(
+            child: const Icon(
+              Icons.add,
+              color: Colors.black,
+            ),
+            onPressed: () async {
+              
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return toWidgetDialog(shoppingList);
+                  });
+            },
+          );
+    }
+  }
+
+  Widget getBottomNavigationBar(ShoppingList? shoppingList, bool hasError, bool hasData) {
+    return BottomNavigationBar(
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
+            items: [
+              const BottomNavigationBarItem(
+                  icon: Icon(Icons.arrow_back), label: "Back"),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.delete,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                label: "Delete List",
+              )
+            ],
+            onTap: (value) {
+              if (value == 0) {
+                if (hasData && !hasError && shoppingList != null) {
+                  shoppingListReference.set(shoppingList);
+                }
+                Navigator.of(context).pop();
+              } else if (value == 1) {
+                ShoppingListService().getShoppingList(widget.id).delete();
+                Navigator.of(context).pop();
+              }
+            },
+          );
+  }
+
+  Widget _toWidget(
+      Map<String, String> shoppingListItem, ShoppingList shoppingList) {
     return GestureDetector(
       onTap: () {
-        item.isSelected = !item.isSelected;
         setState(() {
-          itemSnapshot.reference.set(item);
+          shoppingListItem["isSelected"] == "false"
+              ? shoppingListItem["isSelected"] = "true"
+              : shoppingListItem["isSelected"] = "false";
         });
       },
       child: Card(
-        color: item.isSelected
+        color: shoppingListItem["isSelected"] == "true"
             ? Theme.of(context).colorScheme.secondary
             : Theme.of(context).colorScheme.tertiary,
         child: Stack(children: [
@@ -126,7 +157,7 @@ class _ViewShoppingListPageState extends State<ViewShoppingListPage> {
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Row(
                 children: [
-                  !item.isSelected
+                  shoppingListItem["isSelected"] != "true"
                       ? const Padding(
                           padding: EdgeInsets.only(left: 10.0),
                           child: Icon(
@@ -141,7 +172,7 @@ class _ViewShoppingListPageState extends State<ViewShoppingListPage> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
                     child: Text(
-                      "${item.item} - Qty: ${item.quantity}",
+                      "${shoppingListItem['name']} - Qty: ${shoppingListItem['qty']}",
                       style: const TextStyle(color: Colors.white, fontSize: 20),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -150,14 +181,15 @@ class _ViewShoppingListPageState extends State<ViewShoppingListPage> {
               ),
             ),
           ),
-          if (item.isSelected)
+          if (shoppingListItem["isSelected"] == "true")
             Align(
               alignment: Alignment.centerRight,
               child: IconButton(
                 icon: const Icon(
                   Icons.delete,
                 ),
-                onPressed: () => shoppingListItemsRef.doc(item.id).delete(),
+                onPressed: () =>
+                    setState(() => shoppingList.shoppingListItems.remove(shoppingListItem)),
               ),
             )
         ]),
@@ -165,10 +197,9 @@ class _ViewShoppingListPageState extends State<ViewShoppingListPage> {
     );
   }
 
-  Widget toWidgetDialog() {
+  Widget toWidgetDialog(ShoppingList shoppingList) {
     TextEditingController itemNameController = TextEditingController();
     TextEditingController quantityController = TextEditingController();
-    dynamic dropDownValue;
     final key = GlobalKey<FormState>();
     return AlertDialog(
       backgroundColor: Colors.white,
@@ -212,9 +243,12 @@ class _ViewShoppingListPageState extends State<ViewShoppingListPage> {
           ),
           onPressed: () {
             if (key.currentState!.validate()) {
-              shoppingListItemsRef.add(ShoppingListItem(
-                  item: itemNameController.text,
-                  quantity: quantityController.text));
+              shoppingList.shoppingListItems.add(<String, String>{
+                "name": itemNameController.text,
+                "qty": quantityController.text,
+                "isSelected": "false"
+              });
+              setState(() {});
               Navigator.of(context).pop();
             }
           },
@@ -223,12 +257,12 @@ class _ViewShoppingListPageState extends State<ViewShoppingListPage> {
     );
   }
 
-  List<ShoppingListItemQueryDocumentSnapshot> sortSelectedNotSelected(
-      List<ShoppingListItemQueryDocumentSnapshot> numbers) {
+  List<Map<String, String>> sortSelectedNotSelected(
+      List<Map<String, String>> numbers) {
     var isSelected =
-        numbers.where((element) => element.data.isSelected).toList();
+        numbers.where((element) => element["isSelected"] == "true").toList();
     var isNotSelected =
-        numbers.where((element) => !element.data.isSelected).toList();
+        numbers.where((element) => element["isSelected"] != "true").toList();
     return isNotSelected + isSelected;
   }
 }
