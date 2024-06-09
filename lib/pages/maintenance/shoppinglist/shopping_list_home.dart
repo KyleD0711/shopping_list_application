@@ -30,11 +30,7 @@ class _ShoppingListHomePageState extends State<ShoppingListHomePage> {
         List<ShoppingListQueryDocumentSnapshot>? shoppingLists =
             snapshot.data?.docs;
 
-        return Scaffold(
-          appBar: getAppBar(),
-          body: getBody(shoppingLists, hasData, hasError),
-          bottomNavigationBar: getBottomNavigationBar(),
-        );
+        return getBody(shoppingLists, hasData, hasError);
       },
     );
   }
@@ -113,20 +109,24 @@ class _ShoppingListHomePageState extends State<ShoppingListHomePage> {
   }
 
   Widget addButton() {
+    //Style properties
+    MaterialStateProperty<Color?> backgroundColor =
+        MaterialStateProperty.all(Theme.of(context).colorScheme.secondary);
+    MaterialStateProperty<Size?> screenWidth = MaterialStateProperty.all(
+        Size.fromWidth(MediaQuery.of(context).size.width));
+    MaterialPageRoute addShoppingListRoute =
+        MaterialPageRoute(builder: (context) => const AddShoppingListPage());
+    TextStyle createButtonStyle = const TextStyle(color: Colors.white);
+
     return Align(
         alignment: Alignment.bottomCenter,
         child: ElevatedButton(
             style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(
-                    Theme.of(context).colorScheme.secondary),
-                fixedSize: MaterialStateProperty.all(
-                    Size.fromWidth(MediaQuery.of(context).size.width))),
+                backgroundColor: backgroundColor, fixedSize: screenWidth),
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const AddShoppingListPage()));
+              Navigator.of(context).push(addShoppingListRoute);
             },
-            child: const Text("Create Shopping List",
-                style: TextStyle(color: Colors.white))));
+            child: Text("Create Shopping List", style: createButtonStyle)));
   }
 
   Widget _toWidget(ShoppingList shoppingList) {

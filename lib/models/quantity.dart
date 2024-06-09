@@ -3,63 +3,60 @@ import "package:fraction/fraction.dart";
 class Quantity {
   Quantity({required this.amount, required this.measurement});
 
-  static Quantity parseFromMap(Map<String, String> qty){
+  static Quantity parseFromMap(Map<String, String> qty) {
     String preparseinput = qty['qty']!;
     List<String> splitInput = preparseinput.split(' ');
     if (splitInput.length == 2) {
-      final amount =  splitInput[0].toFraction(); 
-      final measurement =  splitInput[1];
-      return Quantity(amount: amount, measurement:measurement);
-    }
-    else if (splitInput.length == 3) {
-      final amount =  "${splitInput[0]} ${splitInput[1]}".toMixedFraction();
+      final amount = splitInput[0].toFraction();
+      final measurement = splitInput[1];
+      return Quantity(amount: amount, measurement: measurement);
+    } else if (splitInput.length == 3) {
+      final amount = "${splitInput[0]} ${splitInput[1]}".toMixedFraction();
       final measurement = splitInput[2];
-      return Quantity(amount: amount, measurement:measurement);
-    }
-    else {
+      return Quantity(amount: amount, measurement: measurement);
+    } else {
       throw Exception("Invalid data");
     }
   }
 
-   static Quantity parseFromString(String qty){
+  static Quantity parseFromString(String qty) {
     List<String> splitInput = qty.split(' ');
-    if (splitInput.length == 1){
+    if (splitInput.length == 1) {
       final amount = splitInput[0].toFraction();
       return Quantity(amount: amount, measurement: "");
-    }
-    else if (splitInput.length == 2) {
-      final amount =  splitInput[0].toFraction(); 
-      final measurement =  splitInput[1];
-      return Quantity(amount: amount, measurement:measurement);
-    }
-    else if (splitInput.length == 3) {
-      final amount =  "${splitInput[0]} ${splitInput[1]}".toMixedFraction();
+    } else if (splitInput.length == 2) {
+      final amount = splitInput[0].toFraction();
+      final measurement = splitInput[1];
+      return Quantity(amount: amount, measurement: measurement);
+    } else if (splitInput.length == 3) {
+      final amount = "${splitInput[0]} ${splitInput[1]}".toMixedFraction();
       final measurement = splitInput[2];
-      return Quantity(amount: amount, measurement:measurement);
-    }
-    else {
+      return Quantity(amount: amount, measurement: measurement);
+    } else {
       throw Exception("Invalid data: $qty");
     }
   }
 
-
   Rational amount;
   String measurement;
 
-  Quantity add(Quantity otherQty){
-    if (measurement != otherQty.measurement) throw Exception("Can't add two different measurements together");
+  Quantity add(Quantity otherQty) {
+    if (measurement != otherQty.measurement)
+      throw Exception("Can't add two different measurements together");
 
-    return Quantity(amount: (amount.toDouble() + otherQty.amount.toDouble()).toFraction(), measurement: measurement);
+    return Quantity(
+        amount: (amount.toDouble() + otherQty.amount.toDouble()).toFraction(),
+        measurement: measurement);
   }
 
-  Quantity multiply(int multiplier){
-
-    return Quantity(amount: (amount.toDouble() * multiplier).toFraction(), measurement: measurement);
+  Quantity multiply(int multiplier) {
+    return Quantity(
+        amount: (amount.toDouble() * multiplier).toFraction(),
+        measurement: measurement);
   }
 
   @override
-  String toString(){
-    return "$amount $measurement";
+  String toString() {
+    return "${amount.toDouble() % 1 != 0 ? amount.toDouble().toMixedFraction() : amount} $measurement";
   }
-
 }

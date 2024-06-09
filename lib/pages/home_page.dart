@@ -3,6 +3,7 @@ import 'package:shopping_list_application/pages/maintenance/recipe/recipe_home_p
 import 'package:shopping_list_application/pages/maintenance/shoppinglist/shopping_list_home.dart';
 import 'package:shopping_list_application/pages/maintenance/weeks/week_home_page.dart';
 import 'package:shopping_list_application/widgets/profile_picture.dart';
+import 'package:shopping_list_application/router/PageRouter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,34 +13,60 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int pageIndex = 0;
+
   @override
   Widget build(BuildContext context) {
+    List<Widget> destinations = const [
+      RecipeHomePage(),
+      ShoppingListHomePage(),
+      WeekHomePage()
+    ];
+
+    List<String> pageNames = ["Recipes", "Meal Planning", "Shopping Lists"];
+
+    NavigationDestinationLabelBehavior labelBehavior =
+        NavigationDestinationLabelBehavior.onlyShowSelected;
+
+    Color primary = Theme.of(context).colorScheme.primary;
+    Color tertiary = Theme.of(context).colorScheme.tertiary;
+
+    Icon recipesIcon = const Icon(
+      Icons.tab_outlined,
+    );
+    Icon mealPlanningIcon = const Icon(
+      Icons.set_meal,
+    );
+    Icon shoppingListIcon = const Icon(
+      Icons.list_alt,
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Home Page"),
+        title: Text(pageNames[pageIndex]),
         centerTitle: true,
         automaticallyImplyLeading: false,
         actions: const [ProfilePicture()],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
-        items: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.tab_outlined), label: "Recipes"),
-          BottomNavigationBarItem(icon: Icon(Icons.set_meal), label: "Meal Planning"),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: "Shopping Lists")
+      bottomNavigationBar: NavigationBar(
+        backgroundColor: primary,
+        indicatorColor: primary,
+        selectedIndex: pageIndex,
+        labelBehavior: labelBehavior,
+        destinations: [
+          NavigationDestination(icon: recipesIcon, label: "Recipes"),
+          NavigationDestination(icon: mealPlanningIcon, label: "Meal Planning"),
+          NavigationDestination(icon: shoppingListIcon, label: "Shopping Lists")
         ],
-        onTap: (value){
-          if (value == 0){
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const RecipeHomePage()));
-          }
-          else if (value == 1){
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const WeekHomePage()));
-          }
-          else if (value == 2){
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ShoppingListHomePage()));
-          }
+        onDestinationSelected: (selectedIndex) {
+          setState(() {
+            pageIndex = selectedIndex;
+          });
         },
+      ),
+      body: PageRouter(
+        destinationIndex: pageIndex,
+        destinations: destinations,
       ),
     );
   }

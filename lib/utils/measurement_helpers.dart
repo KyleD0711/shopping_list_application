@@ -1,4 +1,5 @@
 import 'package:fraction/fraction.dart';
+import 'package:shopping_list_application/models/quantity.dart';
 
 const measurements = [
   'tbsp',
@@ -41,32 +42,61 @@ const measurementSizeValues = {
   "quart": 8,
   "l": 9,
   "gallon": 10,
-  
   "gram": 11,
   "pound": 12
 };
 
+const conversionValues = {
+  "ml": ("tsp", 4.9289),
+  "tsp": ("tbsp", 3.0),
+  "tbsp": ("fl. oz.", 2.0),
+  "fl. oz.": ("cup", 8.11537),
+  "cup": ("pint", 2.0),
+  "pint": ("quart", 2.0),
+  "quart": ("l", 1.0),
+  "l": ("gallon", 4.0),
+  "gram": ("pound", 453.5)
+};
+
 String removePlural(String measurement) {
   if (measurement.endsWith("s")) {
-      return measurement.substring(0, measurement.length - 1);
-    }
+    return measurement.substring(0, measurement.length - 1);
+  }
   return measurement;
 }
 
-String fixFluidOunces(String measurement){
-  if (measurement == "fl. oz." || measurement == "floz"){
+String fixFluidOunces(String measurement) {
+  if (measurement == "fl. oz." || measurement == "floz") {
     return "fl oz";
   }
   return measurement;
 }
 
-String getStandardMeasurement(String measurement){
+String getStandardMeasurement(String measurement) {
   measurement = removePlural(measurement);
   return fixFluidOunces(measurement);
 }
 
-int getLargerMeasurement(String measurement1, String measurement2){
-  return measurementSizeValues[measurement1]! > measurementSizeValues[measurement2]! ? 0 : 1;
+int getLargerMeasurement(String measurement1, String measurement2) {
+  return measurementSizeValues[measurement1]! >
+          measurementSizeValues[measurement2]!
+      ? 0
+      : 1;
+}
+
+Rational addMeasurements(Quantity biggerQuantity, Quantity smallerQuantity) {
+  while (smallerQuantity.measurement != biggerQuantity.measurement) {
+    var (String newMeasure, double conversionRatio) =
+        conversionValues[smallerQuantity.measurement]!;
+
+    smallerQuantity.amount =
+        (smallerQuantity.amount.toDouble() / conversionRatio).toFraction();
+
+    smallerQuantity.measurement = newMeasure;
+  }
+
+  return (biggerQuantity.amount.toDouble() + smallerQuantity.amount.toDouble())
+      .toFraction();
 }
 
 Rational convertMLtoTSP(Rational quantity) {
@@ -100,4 +130,3 @@ Rational convertGramToPound(Rational quantity) {
 Rational convertLiterToGallon(Rational quantity) {
   return (quantity.toDouble() / 3.78541).toFraction();
 }
-

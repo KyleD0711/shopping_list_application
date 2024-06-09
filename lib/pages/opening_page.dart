@@ -66,14 +66,18 @@ class OpeningPage extends StatelessWidget {
             debugPrint("I shouldn't be here");
           },
           loginAfterSignUp: false,
-          loginProviders: [LoginProvider(callback: () async {
-            try {
-              await _signInWithGoogle();
-            }
-            on Exception catch(e) {
-              return e.toString();
-            }
-          }, icon: FontAwesomeIcons.google, label: 'Google')],
+          loginProviders: [
+            LoginProvider(
+                callback: () async {
+                  try {
+                    await _signInWithGoogle();
+                  } on Exception catch (e) {
+                    return e.toString();
+                  }
+                },
+                icon: FontAwesomeIcons.google,
+                label: 'Google')
+          ],
         ));
   }
 }

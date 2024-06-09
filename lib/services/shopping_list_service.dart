@@ -25,30 +25,42 @@ class ShoppingListService {
 
   Future<String?> generateShoppingList(
       List<String> weekIds, String? name) async {
-    Map<String, Quantity> ingredientMap = <String, Quantity>{};
     try {
       if (weekIds.isEmpty) throw Exception("List of ids can't be empty");
 
       WeekDocumentSnapshot weekRef =
           await WeekService().getWeek(weekIds.first).get();
+
       if (!weekRef.exists) {
         throw Exception("Can't find week with id: ${weekIds.first}");
       }
+
       DateTime startDate = weekRef.data!.beginDate;
       DateTime endDate = weekRef.data!.endDate;
-      
+
+      Map<String, Quantity> ingredientWithMeasureMap = <String, Quantity>{};
+      Map<String, Quantity> ingredientWithoutMeasureMap = <String, Quantity>{};
+
       for (String id in weekIds) {
         WeekDocumentSnapshot weekRef = await WeekService().getWeek(id).get();
         if (!weekRef.exists) throw Exception("Can't find week with id: $id");
 
+        // Get week data
         Week? week = weekRef.data;
+
         if (week!.beginDate.isBefore(startDate)) startDate = week.beginDate;
         if (week.endDate.isAfter(endDate)) endDate = week.endDate;
 
+        // Gets the multipliers of how many servings a recipe has
         Map<String, int> recipeMap = getNumberOfRecipes(week);
 
-        for (int i = 0; i < recipeMap.length; i++){
-          Recipe recipe = await RecipeService().getRecipeByName(recipeMap.keys.toList()[i]);
+        // Process week of recipes
+        for (int i = 0; i < recipeMap.length; i++) {
+          Recipe? recipe =
+              await RecipeService().getRecipeByName(recipeMap.keys.toList()[i]);
+
+          if (recipe == null) continue;
+
           int multiplier = recipeMap.values.toList()[i];
 
           for (var ingredient in recipe.ingredients) {
@@ -62,37 +74,72 @@ class ShoppingListService {
                   "Data is invalid for $ingredient in recipe $recipe");
             }
 
-            
+            Quantity quantity = Quantity.parseFromString(ingredientQty);
 
-            if (ingredientMap[ingredientName] != null) {
-              Rational newAmount = getNewAmount(ingredientMap[ingredientName]!, Quantity.parseFromString(ingredientQty));
-              
-              ingredientMap[ingredientName]!.amount = newAmount;
+            // If both quantities are not null, then they need to be added together
+            // If this is a new ingredient, then the ingredient should be added to the list
+            // If the ingredient exists in the list but the quantity trying to be added doesn't have a measurement,
+            //  then it should just be concatenated with the list
+
+            if (quantity.measurement == "") {
+              if (ingredientWithoutMeasureMap[ingredientName] != null) {
+                ingredientWithoutMeasureMap[ingredientName]!.amount =
+                    getNewAmount(
+                        ingredientWithMeasureMap[ingredientName]!, quantity);
+              } else {
+                ingredientWithoutMeasureMap.addEntries([
+                  MapEntry(
+                      ingredientName,
+                      Quantity.parseFromString(ingredientQty)
+                          .multiply(multiplier))
+                ]);
+              }
             } else {
-              ingredientMap.addEntries([
-                MapEntry(
-                    ingredientName,
-                    Quantity.parseFromString(ingredientQty)
-                        .multiply(multiplier))
-              ]);
+              if (ingredientWithMeasureMap[ingredientName] != null &&
+                  quantity.measurement != "") {
+                Rational newAmount = getNewAmount(
+                    ingredientWithMeasureMap[ingredientName]!, quantity);
+
+                ingredientWithMeasureMap[ingredientName]!.amount = newAmount;
+              } else {
+                ingredientWithMeasureMap.addEntries([
+                  MapEntry(
+                      ingredientName,
+                      Quantity.parseFromString(ingredientQty)
+                          .multiply(multiplier))
+                ]);
+              }
             }
           }
         }
       }
 
       ShoppingList newList = ShoppingList(
-          name: name == "" || name == null ? "${formatDate(startDate)} - ${formatDate(endDate)}" : name,
+          name: name == "" || name == null
+              ? "${formatDate(startDate)} - ${formatDate(endDate)}"
+              : name,
           beginDate: startDate,
           endDate: endDate);
-      
 
+      ingredientWithMeasureMap.forEach(
+        (key, value) => newList.shoppingListItems
+            .add({"name": key, "qty": value.toString(), "isSelected": "false"}),
+      );
 
-      ingredientMap.forEach((key, value) => newList.shoppingListItems.add({"name": key, "qty": value.toString(), "isSelected": "false"}),);
-      print("Created list: ${newList.shoppingListItems}");
-      // await shoppingLists.add(newList);
+      ingredientWithoutMeasureMap.forEach(
+        (key, value) => newList.shoppingListItems
+            .add({"name": key, "qty": value.toString(), "isSelected": "false"}),
+      );
+
+      newList.shoppingListItems
+          .sort((a, b) => a['name']!.compareTo(b['name']!));
+
+      await shoppingLists.add(newList);
     } on Exception catch (e) {
       return e.toString();
     }
+
+    return "Shopping list created successfully!";
   }
 
   Rational getNewAmount(Quantity ingredient1, Quantity ingredient2) {
@@ -102,20 +149,20 @@ class ShoppingListService {
     String measurement2 = ingredient2.measurement;
     Rational newAmount;
 
-
     measurement1 = getStandardMeasurement(measurement1);
     measurement2 = getStandardMeasurement(measurement2);
-    
-    
-    if (measurement1 == measurement2) {
-      newAmount =  (amount1.toDouble() + amount2.toDouble()).toFraction().reduce();
-    }
-    else {
-      
-    }
-    
 
-    return "1/2".toFraction();
+    if (measurement1 == measurement2) {
+      return (amount1.toDouble() + amount2.toDouble()).toFraction().reduce();
+    }
+
+    if (getLargerMeasurement(measurement1, measurement2) == 0) {
+      newAmount = addMeasurements(ingredient1, ingredient2);
+    } else {
+      newAmount = addMeasurements(ingredient2, ingredient1);
+    }
+
+    return newAmount;
   }
 
   Map<String, int> getNumberOfRecipes(Week? week) {

@@ -51,19 +51,15 @@ class _WeekHomePageState extends State<WeekHomePage> {
   @override
   Widget build(BuildContext context) {
     return FirestoreBuilder(
-      ref: weeksRef,
-      builder: (BuildContext context, AsyncSnapshot<WeekQuerySnapshot> snapshot, Widget? child) {  
-        bool hasError = snapshot.hasError;
-        bool hasData = snapshot.hasData;
-        List<WeekQueryDocumentSnapshot>? weeks = snapshot.data?.docs;
+        ref: weeksRef,
+        builder: (BuildContext context,
+            AsyncSnapshot<WeekQuerySnapshot> snapshot, Widget? child) {
+          bool hasError = snapshot.hasError;
+          bool hasData = snapshot.hasData;
+          List<WeekQueryDocumentSnapshot>? weeks = snapshot.data?.docs;
 
-        return Scaffold(
-        appBar: getAppBar(),
-        body: getBody(weeks, hasError, hasData),
-        bottomNavigationBar: getBottomNavigationBar()
-      );
-      });
-    
+          return getBody(weeks, hasError, hasData);
+        });
   }
 
   PreferredSizeWidget getAppBar() {
@@ -75,7 +71,8 @@ class _WeekHomePageState extends State<WeekHomePage> {
     );
   }
 
-  Widget getBody(List<WeekQueryDocumentSnapshot>? snapshot, bool hasError, bool hasData) {
+  Widget getBody(
+      List<WeekQueryDocumentSnapshot>? snapshot, bool hasError, bool hasData) {
     if (hasError) {
       return const Column(
         children: [
@@ -93,40 +90,40 @@ class _WeekHomePageState extends State<WeekHomePage> {
     }
 
     List<WeekQueryDocumentSnapshot> weeks = snapshot
-              .where((element) =>
-                  element.data.beginDate.month == monthFilterValue &&
-                  element.data.beginDate.year == yearFilterValue)
-              .toList();
-  return Column(children: [filters(), displayWeeks(weeks), addButton()]);
+        .where((element) =>
+            element.data.beginDate.month == monthFilterValue &&
+            element.data.beginDate.year == yearFilterValue)
+        .toList();
+    return Column(children: [filters(), displayWeeks(weeks), addButton()]);
   }
 
-  Widget getBottomNavigationBar(){
+  Widget getBottomNavigationBar() {
     return BottomNavigationBar(
-          backgroundColor: Theme.of(context).colorScheme.tertiary,
-          items: [
-            const BottomNavigationBarItem(
-                icon: Icon(Icons.tab_outlined), label: "Recipes"),
-            BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.home,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                label: "Home"),
-            const BottomNavigationBarItem(
-                icon: Icon(Icons.list_alt), label: "Shopping Lists")
-          ],
-          onTap: (value) {
-            if (value == 0) {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => const RecipeHomePage()));
-            } else if (value == 1) {
-              Navigator.of(context).pop();
-            } else if (value == 2) {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => const ShoppingListHomePage()));
-            }
-          },
-        );
+      backgroundColor: Theme.of(context).colorScheme.tertiary,
+      items: [
+        const BottomNavigationBarItem(
+            icon: Icon(Icons.tab_outlined), label: "Recipes"),
+        BottomNavigationBarItem(
+            icon: Icon(
+              Icons.home,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            label: "Home"),
+        const BottomNavigationBarItem(
+            icon: Icon(Icons.list_alt), label: "Shopping Lists")
+      ],
+      onTap: (value) {
+        if (value == 0) {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const RecipeHomePage()));
+        } else if (value == 1) {
+          Navigator.of(context).pop();
+        } else if (value == 2) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => const ShoppingListHomePage()));
+        }
+      },
+    );
   }
 
   Widget filters() {
@@ -186,14 +183,15 @@ class _WeekHomePageState extends State<WeekHomePage> {
 
   Widget displayWeeks(List<WeekQueryDocumentSnapshot> weeks) {
     return Expanded(
-      child: ListView.separated(
-        padding: const EdgeInsets.all(10.0),
-        itemBuilder: (_, index) => _toWidget(weeks[index].data),
-        separatorBuilder: (_, __) => const Divider(
-          height: 3,
-          color: Colors.transparent,
-        ),
-        itemCount: weeks.length,));
+        child: ListView.separated(
+      padding: const EdgeInsets.all(10.0),
+      itemBuilder: (_, index) => _toWidget(weeks[index].data),
+      separatorBuilder: (_, __) => const Divider(
+        height: 3,
+        color: Colors.transparent,
+      ),
+      itemCount: weeks.length,
+    ));
   }
 
   Widget addButton() {

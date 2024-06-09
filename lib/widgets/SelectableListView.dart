@@ -1,7 +1,5 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/models/user.dart';
-import 'package:shopping_list_application/utils/validators/model/model_validator.dart';
 
 class SelectableListView extends StatefulWidget {
   SelectableListView(
@@ -116,7 +114,6 @@ class _SelectableListViewState extends State<SelectableListView> {
         List<Map<String, String>>.empty(growable: true);
 
     for (dynamic element in snapshots!) {
-      
       dynamic item = element.data;
       if (searchFilter == "") {
         items.add({"name": item.name, "qty": ""});
@@ -211,8 +208,8 @@ class _SelectableListViewState extends State<SelectableListView> {
                           item['qty'] == "" || item['qty'] == null
                               ? itemName
                               : "$itemName: ${item['qty']}",
-                          style:
-                              const TextStyle(color: Colors.white, fontSize: 20),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 20),
                           overflow: TextOverflow.ellipsis,
                           softWrap: true,
                         ),
@@ -243,7 +240,10 @@ class _SelectableListViewState extends State<SelectableListView> {
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: TextFormField(
-                  decoration: InputDecoration(hintText: "Quantity", border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                  decoration: InputDecoration(
+                      hintText: "Quantity",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10))),
                   controller: widgetTextController,
                   validator: (value) => widget.itemValidator(value ?? ""),
                 ),
@@ -262,9 +262,9 @@ class _SelectableListViewState extends State<SelectableListView> {
             if (key.currentState!.validate()) {
               item['qty'] = widgetTextController.text;
               widget.selectedItems.add(item);
-                setState(() {});
-                Navigator.of(context).pop();
-              }
+              setState(() {});
+              Navigator.of(context).pop();
+            }
           },
         )
       ],
