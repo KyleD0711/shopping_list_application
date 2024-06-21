@@ -56,17 +56,19 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
         ],
         onTap: (value) async {
           if (value == 0) {
-            if (beginDate == null || endDate == null){
-              showDialog(context: context, builder: (context) => errorPopUp("Dates can't be null"));
-            }
-            else{
-              if (widget.week == null){
-                weekRef.add(Week(beginDate: beginDate!, endDate: endDate!, days: days));
+            if (beginDate == null || endDate == null) {
+              showDialog(
+                  context: context,
+                  builder: (context) => errorPopUp("Dates can't be null"));
+            } else {
+              if (widget.week == null) {
+                weekRef.add(
+                    Week(beginDate: beginDate!, endDate: endDate!, days: days));
+              } else {
+                weekRef.doc(widget.week!.id).set(
+                    Week(beginDate: beginDate!, endDate: endDate!, days: days));
               }
-              else {
-                weekRef.doc(widget.week!.id).set(Week(beginDate: beginDate!, endDate: endDate!, days: days));
-              }
-              
+
               Navigator.of(context).pop();
             }
           } else if (value == 1) {
@@ -86,7 +88,8 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                 items: getAllDayCards(days!),
                 options: CarouselOptions(
                     autoPlay: false,
-                    enableInfiniteScroll: days.entries.length > 1 ? true : false,
+                    enableInfiniteScroll:
+                        days.entries.length > 1 ? true : false,
                     enlargeCenterPage: true,
                     height: 550,
                     enlargeFactor: .2),
@@ -151,7 +154,8 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
     List<DateTime> keys = days.keys.toList();
     keys.sort((x, y) => x.compareTo(y));
     keys.forEach((element) {
-      dayCards.add(dayCard(getDayOfWeek(element), formatDate(element), days[element] ?? []));
+      dayCards.add(dayCard(
+          getDayOfWeek(element), formatDate(element), days[element] ?? []));
     });
     return dayCards;
   }
@@ -208,22 +212,25 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                             itemRef: RecipeService().getRecipes(),
                             screenName: name,
                             selectedItems: weeks,
-                            bottomActions: const [
-                              BottomNavigationBarItem(
-                                  icon: Icon(Icons.arrow_back), label: "Back"),
-                              BottomNavigationBarItem(
-                                  icon: Icon(Icons.add), label: "Add recipe")
+                            bottomActions: [
+                              IconButton(
+                                icon: Icon(Icons.arrow_back),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AddRecipePage()));
+                                },
+                              )
                             ],
-                            actionTap: (int value) {
-                              if (value == 0) {
-                                Navigator.of(context).pop();
-                              } else if (value == 1) {
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddRecipePage()));
-                              }
-                            },
                             itemValidator: (value) {
-                                      return validateNonEmptyMessage(value);
-                                    })));
+                              return validateNonEmptyMessage(value);
+                            })));
                     setState(() {});
                   },
                 ),

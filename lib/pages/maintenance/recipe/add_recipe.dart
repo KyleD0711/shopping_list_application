@@ -1,14 +1,12 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/models/quantity.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/instructions_page.dart';
 import 'package:shopping_list_application/services/ingredient_service.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
-import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
 import 'package:shopping_list_application/utils/validators/model/model_validator.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
-import 'package:shopping_list_application/widgets/profile_picture.dart';
+import 'package:shopping_list_application/widgets/saveCancelButtonRow.dart';
 
 class AddRecipePage extends StatefulWidget {
   const AddRecipePage({super.key, this.recipe});
@@ -19,7 +17,6 @@ class AddRecipePage extends StatefulWidget {
 }
 
 class _AddRecipePageState extends State<AddRecipePage> {
-  final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
   late TextEditingController _prepTimeController;
@@ -52,63 +49,15 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text("New Recipe"),
-          automaticallyImplyLeading: false,
-          actions: [ProfilePicture()],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Theme.of(context).colorScheme.tertiary,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.save), label: "Save"),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.cancel),
-              label: "Cancel",
-            )
-          ],
-          onTap: (value) async {
-            if (value == 1) {
-              Navigator.of(context).pop();
-            } else if (value == 0) {
-              if (_formKey.currentState!.validate()) {
-                if (widget.recipe == null) {
-                  _saveRecipe(
-                      ingredients,
-                      recipes,
-                      _prepTimeController.text,
-                      _cookTimeController.text,
-                      _nameController.text,
-                      instructions,
-                      _descriptionController.text);
-                  Navigator.of(context).pop();
-                } else {
-                  _updateRecipe(
-                      ingredients,
-                      recipes,
-                      _prepTimeController.text,
-                      _cookTimeController.text,
-                      _nameController.text,
-                      instructions,
-                      _descriptionController.text);
-                  Navigator.of(context).pop();
-                }
-              }
-            }
-          },
-        ),
-        body: Form(
-          key: _formKey,
-          child: ListView(children: [
-            nameCard(),
-            descriptionCard(),
-            ingredientsCard(),
-            instructionsCard(),
-            cookAndPrepTimeCards(),
-            recipesCard()
-          ]),
-        ));
+    return ListView(children: [
+      nameCard(),
+      descriptionCard(),
+      ingredientsCard(),
+      instructionsCard(),
+      cookAndPrepTimeCards(),
+      recipesCard(),
+      saveCancelRow()
+    ]);
   }
 
   Widget nameCard() {
@@ -259,7 +208,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     padding: EdgeInsets.all(13.0),
                     child: Align(
                         alignment: Alignment.center,
-                        child: Text("Recipes", style: TextStyle(fontSize: 16))),
+                        child: Text("Sub-Recipes",
+                            style: TextStyle(fontSize: 16))),
                   ),
                   Align(
                     alignment: Alignment.centerRight,
@@ -270,24 +220,23 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                     itemRef: RecipeService().recipes,
                                     screenName: "Select Recipes",
                                     selectedItems: recipes,
-                                    bottomActions: const [
-                                      BottomNavigationBarItem(
-                                          icon: Icon(Icons.arrow_back),
-                                          label: "Back"),
-                                      BottomNavigationBarItem(
-                                          icon: Icon(Icons.add),
-                                          label: "Add Recipe")
+                                    bottomActions: [
+                                      IconButton(
+                                        icon: Icon(Icons.arrow_back),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.add),
+                                        onPressed: () {
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const AddRecipePage()));
+                                        },
+                                      )
                                     ],
-                                    actionTap: (int value) {
-                                      if (value == 0) {
-                                        Navigator.of(context).pop();
-                                      } else if (value == 1) {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const AddRecipePage()));
-                                      }
-                                    },
                                     itemValidator: (value) {
                                       return validateNonEmptyMessage(value);
                                     },
@@ -312,6 +261,15 @@ class _AddRecipePageState extends State<AddRecipePage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _toRecipeWidget(Recipe recipe) {
+    return Row(
+      children: [
+        Text(recipe.name),
+        ElevatedButton(onPressed: () {}, child: const Text("Go To"))
+      ],
     );
   }
 
@@ -407,37 +365,35 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     alignment: Alignment.centerRight,
                     child: IconButton(
                         onPressed: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => SelectableListView(
-                                      itemRef:
-                                          IngredientService().ingredientsRef,
-                                      screenName: "Select Ingredients",
-                                      selectedItems: ingredients,
-                                      bottomActions: const [
-                                        BottomNavigationBarItem(
-                                            icon: Icon(Icons.arrow_back),
-                                            label: "Back"),
-                                        BottomNavigationBarItem(
-                                            icon: Icon(Icons.add),
-                                            label: "Add Ingredient")
-                                      ],
-                                      actionTap: (int value) {
-                                        if (value == 0) {
+                          await showDialog(
+                              context: context,
+                              builder: (context) {
+                                return SelectableListView(
+                                    itemRef: IngredientService().ingredientsRef,
+                                    screenName: "Select Ingredients",
+                                    selectedItems: ingredients,
+                                    bottomActions: [
+                                      IconButton(
+                                        icon: const Icon(Icons.arrow_back),
+                                        onPressed: () {
                                           Navigator.of(context).pop();
-                                        } else if (value == 1) {
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.add),
+                                        onPressed: () {
                                           showDialog(
                                               builder: (context) {
                                                 return addIngredientDialog();
                                               },
                                               context: context);
-                                        }
-                                      },
-                                      itemValidator: (value) {
-                                        return validateQuantity(value);
-                                      }
-                                    )),
-                          );
+                                        },
+                                      )
+                                    ],
+                                    itemValidator: (value) {
+                                      return validateQuantity(value);
+                                    });
+                              });
                           setState(() {});
                         },
                         icon: const Icon(Icons.add)),
@@ -469,8 +425,9 @@ class _AddRecipePageState extends State<AddRecipePage> {
         ElevatedButton(
           onPressed: () {
             if (key.currentState!.validate()) {
-              IngredientService().ingredientsRef.add(Ingredient(
-                  name: ingredientNameController.text));
+              IngredientService()
+                  .ingredientsRef
+                  .add(Ingredient(name: ingredientNameController.text));
               Navigator.of(context).pop();
             }
           },
@@ -511,18 +468,25 @@ class _AddRecipePageState extends State<AddRecipePage> {
     return Text("${ingredient['name']}: ${ingredient['qty']}");
   }
 
-  Widget _toRecipeWidget(Recipe recipe) {
-    return Row(
-      children: [
-        Text(recipe.name),
-        ElevatedButton(onPressed: () {}, child: const Text("Go To"))
-      ],
-    );
-  }
-
   String? validateNonEmptyMessage(String? input) {
     return input == null || input.isEmpty
         ? 'This field must not be empty'
         : null;
+  }
+
+  Widget saveCancelRow() {
+    return SaveCancelRow(handleSave: () {
+      _saveRecipe(
+          ingredients,
+          recipes,
+          _prepTimeController.text,
+          _cookTimeController.text,
+          _nameController.text,
+          instructions,
+          _descriptionController.text);
+      context.pop();
+    }, handleCancel: () {
+      context.pop();
+    });
   }
 }

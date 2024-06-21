@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shopping_list_application/widgets/profile_picture.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shopping_list_application/widgets/saveCancelButtonRow.dart';
 
 class InstructionsPage extends StatefulWidget {
   const InstructionsPage({super.key, this.instructions});
@@ -20,43 +21,32 @@ class _InstructionsPageState extends State<InstructionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text("Instructions"),
-          automaticallyImplyLeading: false,
-          actions: [ProfilePicture()],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Theme.of(context).colorScheme.tertiary,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.save), label: "Save"),
-            BottomNavigationBarItem(icon: Icon(Icons.cancel), label: "Cancel")
-          ],
-          onTap: (value) {
-            if (value == 1) {
-              Navigator.of(context).pop();
-            } else if (value == 0) {
-              Navigator.of(context).pop(_instructionsController.text);
-            }
-          },
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: Card(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                        controller: _instructionsController,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        style: const TextStyle(fontSize: 20),
-                        decoration: const InputDecoration(hintText: "Input")),
-                  )),
-            ),
-          ],
-        ));
+    return Column(
+      children: [instructionsInput(), saveCancelRow()],
+    );
+  }
+
+  Widget instructionsInput() {
+    return Expanded(
+      child: Card(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+                controller: _instructionsController,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                style: const TextStyle(fontSize: 20),
+                decoration: const InputDecoration(hintText: "Input")),
+          )),
+    );
+  }
+
+  Widget saveCancelRow() {
+    return SaveCancelRow(handleSave: () {
+      context.pop(_instructionsController.text);
+    }, handleCancel: () {
+      context.pop();
+    });
   }
 }

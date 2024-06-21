@@ -2,23 +2,21 @@ import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
 
 class SelectableListView extends StatefulWidget {
-  SelectableListView(
-      {super.key,
-      required this.itemRef,
-      required this.screenName,
-      required this.selectedItems,
-      required this.bottomActions,
-      required this.itemValidator,
-      this.actionTap});
+  SelectableListView({
+    super.key,
+    required this.itemRef,
+    required this.screenName,
+    required this.selectedItems,
+    required this.bottomActions,
+    required this.itemValidator,
+  });
 
   // final Stream<List<dynamic>> itemStream;
   final FirestoreCollectionReference itemRef;
   final String screenName;
   final List<Map<String, String>> selectedItems;
-  final List<BottomNavigationBarItem> bottomActions;
+  final List<Widget> bottomActions;
   final String? Function(String value) itemValidator;
-
-  void Function(int value)? actionTap;
 
   @override
   State<SelectableListView> createState() => _SelectableListViewState();
@@ -37,18 +35,29 @@ class _SelectableListViewState extends State<SelectableListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          centerTitle: true,
-          title: Text(pageName),
-          automaticallyImplyLeading: false),
-      bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Theme.of(context).colorScheme.tertiary,
-          items: widget.bottomActions,
-          onTap: widget.actionTap),
-      body: Center(
-        child: Column(children: [searchBar(), itemBuilder()]),
+    Color cardBackgroundColor = Theme.of(context).colorScheme.background;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10.0, 20, 10, 20),
+      child: Card(
+        color: cardBackgroundColor,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [titleRow(), searchBar(), itemBuilder(), buttonRow()],
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget titleRow() {
+    Color textColor = Theme.of(context).colorScheme.tertiary;
+    TextStyle titleStyle =
+        TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: textColor);
+
+    return Text(
+      pageName,
+      style: titleStyle,
     );
   }
 
@@ -158,12 +167,14 @@ class _SelectableListViewState extends State<SelectableListView> {
 
   Widget _toWidget(Map<String, String> item) {
     String itemName = item["name"] ?? "No Name";
-
+    Color tertiaryColor = Theme.of(context).colorScheme.tertiary;
+    Color white = Colors.white;
+    bool widgetIsSelected =
+        widget.selectedItems.any((element) => element['name'] == item['name']);
     return StatefulBuilder(
       builder: (context, setState) => GestureDetector(
         onTap: () {
-          if (widget.selectedItems
-              .any((element) => element['name'] == item['name'])) {
+          if (widgetIsSelected) {
             widget.selectedItems
                 .removeWhere((element) => element['name'] == item['name']);
             item['qty'] = "";
@@ -177,10 +188,7 @@ class _SelectableListViewState extends State<SelectableListView> {
           }
         },
         child: Card(
-          color: widget.selectedItems
-                  .any((element) => element['name'] == item['name'])
-              ? Theme.of(context).colorScheme.secondary
-              : Theme.of(context).colorScheme.tertiary,
+          color: !widgetIsSelected ? white : tertiaryColor,
           child: Stack(children: [
             Align(
               alignment: Alignment.centerLeft,
@@ -188,18 +196,17 @@ class _SelectableListViewState extends State<SelectableListView> {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Row(
                   children: [
-                    !widget.selectedItems
-                            .any((element) => element['name'] == item['name'])
-                        ? const Padding(
-                            padding: EdgeInsets.only(left: 10.0),
+                    !widgetIsSelected
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 10.0),
                             child: Icon(
                               Icons.add,
-                              color: Colors.white,
+                              color: tertiaryColor,
                             ),
                           )
-                        : const Padding(
-                            padding: EdgeInsets.only(left: 10.0),
-                            child: Icon(Icons.remove, color: Colors.white),
+                        : Padding(
+                            padding: const EdgeInsets.only(left: 10.0),
+                            child: Icon(Icons.remove, color: white),
                           ),
                     Expanded(
                       child: Padding(
@@ -208,8 +215,9 @@ class _SelectableListViewState extends State<SelectableListView> {
                           item['qty'] == "" || item['qty'] == null
                               ? itemName
                               : "$itemName: ${item['qty']}",
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 20),
+                          style: TextStyle(
+                              color: widgetIsSelected ? white : tertiaryColor,
+                              fontSize: 20),
                           overflow: TextOverflow.ellipsis,
                           softWrap: true,
                         ),
@@ -268,6 +276,13 @@ class _SelectableListViewState extends State<SelectableListView> {
           },
         )
       ],
+    );
+  }
+
+  Widget buttonRow() {
+    return ButtonBar(
+      alignment: MainAxisAlignment.spaceEvenly,
+      children: widget.bottomActions,
     );
   }
 

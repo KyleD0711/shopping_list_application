@@ -1,9 +1,9 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shopping_list_application/models/user.dart';
-import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
+import 'package:shopping_list_application/pages/maintenance/builderPages/isLoadingPage.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
-import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class ViewRecipePage extends StatefulWidget {
   ViewRecipePage({super.key, required this.id});
@@ -32,75 +32,34 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
       ref: recipeRef,
       builder: (BuildContext context,
           AsyncSnapshot<RecipeDocumentSnapshot> snapshot, Widget? child) {
-        bool hasError = snapshot.hasError;
-        bool hasData = snapshot.hasData;
-        Recipe? recipe = snapshot.data?.data;
-
-        return Scaffold(
-            appBar: getAppBar(recipe),
-            bottomNavigationBar: getBottomNavigationBar(recipe, hasError, hasData),
-            body: getBody(recipe, hasError, hasData));
+        return getBody(snapshot);
       },
     );
   }
 
-  PreferredSizeWidget getAppBar(Recipe? recipe) {
-    return AppBar(
-              centerTitle: true,
-              title: Text(recipe?.name ?? ""),
-              actions: const [ProfilePicture()],
-            );
-  }
-
-  Widget getBody(Recipe? recipe, bool hasError, bool hasData) {
-    if (hasError) {
-      return const Column(
-        children: [
-          Text("An error has occurred when trying to retrieve your data.")
-        ],
-      );
-    } else if (!hasData) {
-      return const Column(
-        children: [Text("Loading Data...")],
-      );
-    } else if (recipe == null) {
-      return const Column(
-        children: [Text("No data available")],
-      );
+  Widget getBody(AsyncSnapshot<RecipeDocumentSnapshot> snapshot) {
+    if (snapshot.hasError) {
+      throw GoException(
+          "An error has occurred while trying to retrieve your data");
+    } else if (!snapshot.hasData) {
+      return const IsLoadingPage();
     }
+
+    Recipe? recipe = snapshot.data?.data;
+
+    if (recipe == null) {
+      throw GoException("No data found");
+    }
+
     return Column(
-        children: [
-          descriptionWidget(recipe),
-          ingredientsWidget(recipe),
-          instructionsWidget(context, recipe),
-          recipesWidget(recipe)
-        ],
-      );
-
-  }
-
-  Widget getBottomNavigationBar(Recipe? recipe, bool hasError, bool hasData) {
-  return BottomNavigationBar(
-              backgroundColor: Theme.of(context).colorScheme.tertiary,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.delete), label: "Delete"),
-              ],
-              onTap: (value) async {
-                if (value == 0) {
-                  if (!hasError && hasData && recipe != null) {
-                    await Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    return AddRecipePage(recipe: recipe);
-                  }));
-                  }
-                } else if (value == 1) {
-                  recipeRef.delete();
-                  Navigator.of(context).pop();
-                }
-              },
-            );
+      children: [
+        descriptionWidget(recipe),
+        ingredientsWidget(recipe),
+        instructionsWidget(context, recipe),
+        recipesWidget(recipe),
+        buttonRow(recipe)
+      ],
+    );
   }
 
   Widget descriptionWidget(Recipe? recipe) {
@@ -271,6 +230,36 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
                   "Go To",
                   style: TextStyle(color: Colors.white),
                 )))
+      ],
+    );
+  }
+
+  Widget buttonRow(Recipe recipe) {
+    Color secondaryColor = Theme.of(context).colorScheme.secondary;
+    TextStyle buttonTextStyle = const TextStyle(color: Colors.white);
+    ButtonStyle deleteButtonStyle =
+        ButtonStyle(backgroundColor: MaterialStateProperty.all(secondaryColor));
+    return ButtonBar(
+      alignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        ElevatedButton(
+            onPressed: () {
+              context.go("/recipes/edit", extra: recipe);
+            },
+            child: Text(
+              "Edit",
+              style: buttonTextStyle,
+            )),
+        ElevatedButton(
+            style: deleteButtonStyle,
+            onPressed: () {
+              recipeRef.delete();
+              context.go("/recipes");
+            },
+            child: Text(
+              "Delete",
+              style: buttonTextStyle,
+            ))
       ],
     );
   }
