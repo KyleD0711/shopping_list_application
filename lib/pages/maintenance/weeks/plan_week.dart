@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shopping_list_application/models/user.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/add_recipe.dart';
 import 'package:shopping_list_application/services/recipe_service.dart';
@@ -7,7 +8,7 @@ import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
 import 'package:shopping_list_application/utils/validators/forms/form_validators.dart';
 import 'package:shopping_list_application/widgets/SelectableListView.dart';
-import 'package:shopping_list_application/widgets/profile_picture.dart';
+import 'package:shopping_list_application/widgets/saveCancelButtonRow.dart';
 
 class PlanWeekPage extends StatefulWidget {
   static const cardPadding =
@@ -38,68 +39,39 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Plan Week"),
-        automaticallyImplyLeading: false,
-        actions: const [ProfilePicture()],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.save), label: "Save"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.cancel),
-            label: "Cancel",
-          )
-        ],
-        onTap: (value) async {
-          if (value == 0) {
-            if (beginDate == null || endDate == null) {
-              showDialog(
-                  context: context,
-                  builder: (context) => errorPopUp("Dates can't be null"));
-            } else {
-              if (widget.week == null) {
-                weekRef.add(
-                    Week(beginDate: beginDate!, endDate: endDate!, days: days));
-              } else {
-                weekRef.doc(widget.week!.id).set(
-                    Week(beginDate: beginDate!, endDate: endDate!, days: days));
-              }
+    return getBody();
+  }
 
-              Navigator.of(context).pop();
-            }
-          } else if (value == 1) {
-            Navigator.of(context).pop();
-          }
-        },
-      ),
-      body: ListView(children: [
+  Widget getBody() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
         Row(
           children: [
             dateCard(beginDate, "Begin Date"),
             dateCard(endDate, "End Date")
           ],
         ),
-        beginDate != null && endDate != null
-            ? CarouselSlider(
-                items: getAllDayCards(days!),
-                options: CarouselOptions(
-                    autoPlay: false,
-                    enableInfiniteScroll:
-                        days.entries.length > 1 ? true : false,
-                    enlargeCenterPage: true,
-                    height: 550,
-                    enlargeFactor: .2),
-              )
-            : const Text(
-                "Please select dates",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-      ]),
+        Expanded(
+          child: beginDate != null && endDate != null
+              ? CarouselSlider(
+                  items: getAllDayCards(days!),
+                  options: CarouselOptions(
+                      autoPlay: false,
+                      enableInfiniteScroll:
+                          days.entries.length > 1 ? true : false,
+                      enlargeCenterPage: true,
+                      height: 550,
+                      enlargeFactor: .2),
+                )
+              : const Text(
+                  "Please select dates",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+        ),
+        saveCancelRow()
+      ],
     );
   }
 
@@ -205,7 +177,7 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
                   child: const Text("Add Recipe",
-                      style: TextStyle(color: Colors.white)),
+                      style: TextStyle(color: Colors.black)),
                   onPressed: () async {
                     await Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => SelectableListView(
@@ -214,13 +186,13 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                             selectedItems: weeks,
                             bottomActions: [
                               IconButton(
-                                icon: Icon(Icons.arrow_back),
+                                icon: const Icon(Icons.arrow_back),
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.add),
+                                icon: const Icon(Icons.add),
                                 onPressed: () {
                                   Navigator.of(context).push(MaterialPageRoute(
                                       builder: (context) =>
@@ -323,5 +295,34 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
       child:
           Text("${name["name"] ?? "No Name"}: ${name['qty'] ?? "No Quantity"}"),
     );
+  }
+
+  Widget saveCancelRow() {
+    return SaveCancelRow(
+      handleSave: handleSave,
+      handleCancel: handleCancel,
+    );
+  }
+
+  void handleSave() {
+    if (beginDate == null || endDate == null) {
+      showDialog(
+          context: context,
+          builder: (context) => errorPopUp("Dates can't be null"));
+    } else {
+      if (widget.week == null) {
+        weekRef.add(Week(beginDate: beginDate!, endDate: endDate!, days: days));
+      } else {
+        weekRef
+            .doc(widget.week!.id)
+            .set(Week(beginDate: beginDate!, endDate: endDate!, days: days));
+      }
+
+      context.pop();
+    }
+  }
+
+  void handleCancel() {
+    context.pop();
   }
 }

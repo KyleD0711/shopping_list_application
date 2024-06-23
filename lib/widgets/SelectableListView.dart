@@ -1,5 +1,7 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 
 class SelectableListView extends StatefulWidget {
   SelectableListView({
@@ -183,7 +185,7 @@ class _SelectableListViewState extends State<SelectableListView> {
             showDialog(
                 context: context,
                 builder: (context) {
-                  return toWidgetDialog(item);
+                  return toWidgetDialog(item, context);
                 });
           }
         },
@@ -233,7 +235,7 @@ class _SelectableListViewState extends State<SelectableListView> {
     );
   }
 
-  Widget toWidgetDialog(Map<String, String> item) {
+  Widget toWidgetDialog(Map<String, String> item, BuildContext context) {
     TextEditingController widgetTextController = TextEditingController();
     final key = GlobalKey<FormState>();
     return AlertDialog(
@@ -271,7 +273,7 @@ class _SelectableListViewState extends State<SelectableListView> {
               item['qty'] = widgetTextController.text;
               widget.selectedItems.add(item);
               setState(() {});
-              Navigator.of(context).pop();
+              Navigator.pop(context);
             }
           },
         )

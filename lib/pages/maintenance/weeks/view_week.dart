@@ -2,12 +2,11 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shopping_list_application/models/user.dart';
-import 'package:shopping_list_application/pages/maintenance/weeks/plan_week.dart';
-import 'package:shopping_list_application/services/shopping_list_service.dart';
+import 'package:shopping_list_application/pages/maintenance/builderPages/isLoadingPage.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
-import 'package:shopping_list_application/widgets/profile_picture.dart';
 
 class ViewWeekPage extends StatefulWidget {
   static const cardPadding =
@@ -37,91 +36,78 @@ class _ViewWeekPageState extends State<ViewWeekPage> {
         ref: weekRef,
         builder: (BuildContext context,
             AsyncSnapshot<WeekDocumentSnapshot> snapshot, Widget? child) {
+          if (snapshot.hasError) {
+            throw GoException(
+                "An error has occurred while trying to retrieve your data");
+          } else if (!snapshot.hasData) {
+            return const IsLoadingPage();
+          }
 
-          bool hasError = snapshot.hasError;
-          bool hasData = snapshot.hasData;
           Week? week = snapshot.data?.data;
 
+          if (week == null) {
+            throw GoException("No data found");
+          }
 
-          return Scaffold(
-            appBar: getAppBar(week),
-            bottomNavigationBar: getBottomNavigationBar(week, hasError, hasData),
-            body: getBody(week, hasError, hasData),
-          );
+          return getBody(week);
         });
   }
 
-  PreferredSizeWidget getAppBar(Week? week){
-    return AppBar(
-      centerTitle: true,
-      title: week != null
-          ? Text(
-              "${formatDate(week.beginDate)} - ${formatDate(week.endDate)}")
-          : const Text(""),
-      actions: const [ProfilePicture()],
+  Widget getBody(Week? week) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          children: [
+            dateCard(week!.beginDate, "Begin Date"),
+            dateCard(week.endDate, "End Date")
+          ],
+        ),
+        Expanded(
+          child: CarouselSlider(
+            items: getAllDayCards(week),
+            options: CarouselOptions(
+                autoPlay: false,
+                enableInfiniteScroll:
+                    week.days.entries.length > 1 ? true : false,
+                enlargeCenterPage: true,
+                height: 550,
+                enlargeFactor: .2),
+          ),
+        ),
+        buttonRow(week)
+      ],
     );
   }
 
-  Widget getBottomNavigationBar(Week? week, bool hasError, bool hasData){
-
-    return BottomNavigationBar(
-              backgroundColor: Theme.of(context).colorScheme.tertiary,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.edit), label: "Edit"),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.delete),
-                  label: "Delete",
-                ),
-              ],
-              onTap: (value) async {
-                if (value == 0) {
-                  if (!hasError && hasData && week != null) {
-                    await Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => PlanWeekPage(week: week)));
-                  }
-                } else if (value == 1) {
-                  weekRef.delete();
-                  Navigator.of(context).pop();
-                }
-              },
-            );
-  }
-
-  Widget getBody(Week? week, bool hasError, bool hasData){
-    if (hasError) {
-      return const Column(
-        children: [
-          Text("An error has occurred when trying to retrieve your data.")
-        ],
-      );
-    } else if (!hasData) {
-      return const Column(
-        children: [Text("Loading Data...")],
-      );
-    } else if (week == null) {
-      return const Column(
-        children: [Text("No data available")],
-      );
-    }
-
-    return ListView(children: [
-      Row(
-        children: [
-          dateCard(week!.beginDate, "Begin Date"),
-          dateCard(week.endDate, "End Date")
-        ],
-      ),
-      CarouselSlider(
-        items: getAllDayCards(week),
-        options: CarouselOptions(
-            autoPlay: false,
-            enableInfiniteScroll:
-                week.days.entries.length > 1 ? true : false,
-            enlargeCenterPage: true,
-            height: 550,
-            enlargeFactor: .2),
-      ),
-    ]);
+  Widget buttonRow(Week week) {
+    Color secondaryColor = Theme.of(context).colorScheme.secondary;
+    TextStyle buttonTextStyle = const TextStyle(color: Colors.white);
+    ButtonStyle deleteButtonStyle =
+        ButtonStyle(backgroundColor: MaterialStateProperty.all(secondaryColor));
+    return ButtonBar(
+      alignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        ElevatedButton(
+            onPressed: () {
+              context.go("/mealplanning/plan", extra: week);
+            },
+            child: Text(
+              "Edit",
+              style: buttonTextStyle,
+            )),
+        ElevatedButton(
+            style: deleteButtonStyle,
+            onPressed: () {
+              weekRef.delete();
+              context.go("/mealplanning");
+            },
+            child: Text(
+              "Delete",
+              style: buttonTextStyle,
+            ))
+      ],
+    );
   }
 
   String? validateDates(DateTime? date, String errorMessage) {

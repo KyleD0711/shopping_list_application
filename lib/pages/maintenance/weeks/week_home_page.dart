@@ -1,7 +1,9 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shopping_list_application/models/user.dart';
+import 'package:shopping_list_application/pages/maintenance/builderPages/isLoadingPage.dart';
 import 'package:shopping_list_application/pages/maintenance/recipe/recipe_home_page.dart';
 import 'package:shopping_list_application/pages/maintenance/shoppinglist/shopping_list_home.dart';
 import 'package:shopping_list_application/pages/maintenance/weeks/view_week.dart';
@@ -54,11 +56,7 @@ class _WeekHomePageState extends State<WeekHomePage> {
         ref: weeksRef,
         builder: (BuildContext context,
             AsyncSnapshot<WeekQuerySnapshot> snapshot, Widget? child) {
-          bool hasError = snapshot.hasError;
-          bool hasData = snapshot.hasData;
-          List<WeekQueryDocumentSnapshot>? weeks = snapshot.data?.docs;
-
-          return getBody(weeks, hasError, hasData);
+          return getBody(snapshot);
         });
   }
 
@@ -71,30 +69,28 @@ class _WeekHomePageState extends State<WeekHomePage> {
     );
   }
 
-  Widget getBody(
-      List<WeekQueryDocumentSnapshot>? snapshot, bool hasError, bool hasData) {
-    if (hasError) {
-      return const Column(
-        children: [
-          Text("An error has occurred when trying to retrieve your data.")
-        ],
-      );
-    } else if (!hasData) {
-      return const Column(
-        children: [Text("Loading Data...")],
-      );
-    } else if (snapshot == null) {
-      return const Column(
-        children: [Text("No data available")],
-      );
+  Widget getBody(AsyncSnapshot<WeekQuerySnapshot> snapshot) {
+    if (snapshot.hasError) {
+      throw GoException(
+          "An error has occurred while trying to retrieve your data");
+    } else if (!snapshot.hasData) {
+      return const IsLoadingPage();
     }
 
-    List<WeekQueryDocumentSnapshot> weeks = snapshot
+    List<WeekQueryDocumentSnapshot>? weeks = snapshot?.data?.docs
         .where((element) =>
             element.data.beginDate.month == monthFilterValue &&
             element.data.beginDate.year == yearFilterValue)
         .toList();
-    return Column(children: [filters(), displayWeeks(weeks), addButton()]);
+
+    if (weeks == null) {
+      throw GoException("No data found");
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [filters(), displayWeeks(weeks), addButton()],
+    );
   }
 
   Widget getBottomNavigationBar() {
@@ -195,20 +191,18 @@ class _WeekHomePageState extends State<WeekHomePage> {
   }
 
   Widget addButton() {
-    return Align(
-        alignment: Alignment.bottomCenter,
-        child: ElevatedButton(
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(
-                    Theme.of(context).colorScheme.secondary),
-                fixedSize: MaterialStateProperty.all(
-                    Size.fromWidth(MediaQuery.of(context).size.width))),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const PlanWeekPage()));
-            },
-            child: const Text("Plan Week",
-                style: TextStyle(color: Colors.white))));
+    TextStyle buttonStyle = const TextStyle(color: Colors.white, fontSize: 20);
+    MaterialStateProperty<Color> backgroundColor =
+        MaterialStateProperty.all(Theme.of(context).colorScheme.secondary);
+
+    return ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: backgroundColor,
+        ),
+        onPressed: () {
+          context.go("/mealplanning/plan");
+        },
+        child: Text("Plan Week", style: buttonStyle));
   }
 
   Widget _toWidget(Week week) {
@@ -232,8 +226,7 @@ class _WeekHomePageState extends State<WeekHomePage> {
         ),
       ),
       onTap: () {
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => ViewWeekPage(id: week.id)));
+        context.go("/mealplanning/viewplan", extra: week.id);
       },
     );
   }

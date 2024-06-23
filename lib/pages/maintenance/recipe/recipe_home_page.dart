@@ -55,20 +55,7 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
           ),
           itemCount: data.length,
         )),
-        Align(
-            alignment: Alignment.bottomCenter,
-            child: ElevatedButton(
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
-                        Theme.of(context).colorScheme.secondary),
-                    fixedSize: MaterialStateProperty.all(
-                        Size.fromWidth(MediaQuery.of(context).size.width))),
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const AddRecipePage()));
-                },
-                child: const Text("Add Recipe",
-                    style: TextStyle(color: Colors.white))))
+        addButton()
       ],
     );
   }
@@ -91,5 +78,21 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
       ),
       onTap: () => {context.go("/recipes/recipe", extra: recipe.id)},
     );
+  }
+
+  Widget addButton() {
+    TextStyle buttonStyle = const TextStyle(color: Colors.white, fontSize: 20);
+    MaterialStateProperty<Color> backgroundColor =
+        MaterialStateProperty.all(Theme.of(context).colorScheme.secondary);
+
+    return ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: backgroundColor,
+        ),
+        onPressed: () {
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const AddRecipePage()));
+        },
+        child: Text("Add Recipe", style: buttonStyle));
   }
 }
