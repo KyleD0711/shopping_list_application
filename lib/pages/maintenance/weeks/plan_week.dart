@@ -43,6 +43,7 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
   }
 
   Widget getBody() {
+    bool datesValid = areDatesValid(beginDate, endDate);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -53,7 +54,7 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
           ],
         ),
         Expanded(
-          child: beginDate != null && endDate != null
+          child: datesValid
               ? CarouselSlider(
                   items: getAllDayCards(days!),
                   options: CarouselOptions(
@@ -65,7 +66,7 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                       enlargeFactor: .2),
                 )
               : const Text(
-                  "Please select dates",
+                  "Please select valid dates",
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
@@ -75,27 +76,15 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
     );
   }
 
-  String? validateDates(DateTime? date, String errorMessage) {
-    if (date == null) {
-      return errorMessage;
+  bool areDatesValid(DateTime? beginDate, DateTime? endDate) {
+    if (beginDate == null || endDate == null) {
+      return false;
+    }
+    if (beginDate.isAfter(endDate)) {
+      return false;
     }
 
-    return null;
-  }
-
-  Widget errorPopUp(String message) {
-    return AlertDialog(
-      title: Text(message),
-      actions: [
-        ElevatedButton(
-          child: const Text(
-            "Acknowledge",
-            style: TextStyle(color: Colors.red, fontSize: 20),
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        )
-      ],
-    );
+    return true;
   }
 
   void calcDayCards(DateTime? startDate, DateTime? finishDate) {
@@ -245,8 +234,8 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
                     onPressed: () async {
                       date = await showDatePicker(
                           context: context,
-                          firstDate: DateTime(2024),
-                          lastDate: DateTime(2025),
+                          firstDate: DateTime(DateTime.now().year),
+                          lastDate: DateTime(DateTime.now().year + 1),
                           currentDate: DateTime.now(),
                           confirmText: "Confirm",
                           cancelText: "Cancel",
@@ -320,6 +309,21 @@ class _PlanWeekPageState extends State<PlanWeekPage> {
 
       context.pop();
     }
+  }
+
+  Widget errorPopUp(String message) {
+    return AlertDialog(
+      title: Text(message),
+      actions: [
+        ElevatedButton(
+          child: const Text(
+            "Acknowledge",
+            style: TextStyle(color: Colors.red, fontSize: 20),
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        )
+      ],
+    );
   }
 
   void handleCancel() {

@@ -56,7 +56,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
         descriptionWidget(recipe),
         ingredientsWidget(recipe),
         instructionsWidget(context, recipe),
-        recipesWidget(recipe),
+        if (recipe.recipes.isNotEmpty) recipesWidget(recipe),
         buttonRow(recipe)
       ],
     );
@@ -127,6 +127,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
                 context: context,
                 builder: (context) {
                   return AlertDialog(
+                    backgroundColor: Colors.white,
                     title: const Text('Instructions'),
                     content: Text(recipe?.instructions ?? ""),
                     actions: <Widget>[
@@ -135,7 +136,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
                           Navigator.of(context).pop();
                         },
                         child: const Text('Close',
-                            style: TextStyle(color: Colors.white)),
+                            style: TextStyle(color: Colors.black)),
                       ),
                     ],
                   );
@@ -184,7 +185,7 @@ class _ViewRecipePageState extends State<ViewRecipePage> {
             children: [
               const Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Text("Recipes", style: TextStyle(fontSize: 16)),
+                child: Text("Sub-recipes", style: TextStyle(fontSize: 16)),
               ),
               const Divider(height: 15.0, color: Colors.black),
               Expanded(

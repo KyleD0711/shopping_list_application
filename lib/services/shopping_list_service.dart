@@ -85,7 +85,7 @@ class ShoppingListService {
               if (ingredientWithoutMeasureMap[ingredientName] != null) {
                 ingredientWithoutMeasureMap[ingredientName]!.amount =
                     getNewAmount(
-                        ingredientWithMeasureMap[ingredientName]!, quantity);
+                        ingredientWithoutMeasureMap[ingredientName]!, quantity);
               } else {
                 ingredientWithoutMeasureMap.addEntries([
                   MapEntry(

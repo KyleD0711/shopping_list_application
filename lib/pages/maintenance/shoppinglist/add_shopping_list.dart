@@ -1,6 +1,8 @@
 import 'package:cloud_firestore_odm/cloud_firestore_odm.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shopping_list_application/models/user.dart';
+import 'package:shopping_list_application/pages/maintenance/builderPages/isLoadingPage.dart';
 import 'package:shopping_list_application/services/shopping_list_service.dart';
 import 'package:shopping_list_application/services/week_service.dart';
 import 'package:shopping_list_application/utils/date_helpers.dart';
@@ -37,82 +39,72 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
   int currentYear = DateTime.now().year;
   List<int> yearsList = [];
 
+  bool isGenerating = false;
   @override
   void initState() {
+    super.initState();
     yearsList = List.generate(
         (currentYear + 3) - currentYear + 1, (index) => currentYear + index);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Create Shopping Lists"),
-        automaticallyImplyLeading: false,
-        actions: const [ProfilePicture()],
-      ),
-      body: Column(
+    return getBody();
+  }
+
+  Widget getBody() {
+    if (isGenerating) {
+      return generatingList();
+    } else {
+      return Column(
         children: [
           potentialNameField(),
           filters(),
           displayWeeks(),
           generateShoppingListsButton()
         ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
-        items: [
-          const BottomNavigationBarItem(
-              icon: Icon(Icons.tab_outlined), label: "Recipes"),
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              label: "Home")
-        ],
-        onTap: (value) {
-          if (value == 0) {
-            Navigator.of(context).pop();
-          } else if (value == 1) {
-            Navigator.of(context).pop();
-          }
-        },
-      ),
+      );
+    }
+  }
+
+  Widget generatingList() {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Generating Shopping List..."),
+        CircularProgressIndicator()
+      ],
     );
   }
 
   Widget generateShoppingListsButton() {
+    TextStyle buttonStyle = const TextStyle(color: Colors.white, fontSize: 20);
+    MaterialStateProperty<Color> backgroundColor =
+        MaterialStateProperty.all(Theme.of(context).colorScheme.secondary);
+
     return Align(
         alignment: Alignment.bottomCenter,
         child: ElevatedButton(
-            style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(
-                    Theme.of(context).colorScheme.secondary),
-                fixedSize: MaterialStateProperty.all(
-                    Size.fromWidth(MediaQuery.of(context).size.width))),
+            style: ButtonStyle(backgroundColor: backgroundColor),
             onPressed: () async {
               if (selectedWeeks.isEmpty) {
                 errorDialog("No Weeks Selected!");
               } else {
-                await Future.delayed(const Duration(seconds: 3));
                 ShoppingListService()
                     .generateShoppingList(selectedWeeks, _nameController.text)
                     .then((value) async {
-                  await Future.delayed(const Duration(seconds: 2));
-                  successDialog("Shopping list generated successfully!");
-                  await Future.delayed(const Duration(seconds: 2));
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  context.goNamed("shoppingListHome");
                 });
+                isGenerating = true;
+                setState(() {});
               }
             },
-            child: const Text("Generate Shopping Lists",
-                style: TextStyle(color: Colors.white))));
+            child: Text("Generate Shopping Lists", style: buttonStyle)));
   }
 
   void successDialog(String message) {
+    const titlePadding = EdgeInsets.all(16);
     showDialog(
         context: context,
         builder: (context) => SimpleDialog(
@@ -120,32 +112,22 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
                 message,
                 textAlign: TextAlign.center,
               ),
-              titlePadding: const EdgeInsets.all(16),
+              titlePadding: titlePadding,
             ));
   }
 
   void errorDialog(String message) {
+    const errorTitleTextStyle = TextStyle(color: Colors.red);
+    const errorMessageTextStyle = TextStyle(fontSize: 25);
     showDialog(
         context: context,
         builder: (context) => SimpleDialog(
               backgroundColor: Colors.white,
-              title: const Text("Error", style: TextStyle(color: Colors.red)),
+              title: const Text("Error", style: errorTitleTextStyle),
               children: [
                 Align(
                     alignment: Alignment.center,
-                    child: Text(message, style: const TextStyle(fontSize: 25)))
-              ],
-            ));
-  }
-
-  void loadingDialog() {
-    showDialog(
-        context: context,
-        builder: (context) => const SimpleDialog(
-              title: Text("Generating Shopping List"),
-              children: [
-                SizedBox(
-                    height: 20, width: 20, child: CircularProgressIndicator())
+                    child: Text(message, style: errorMessageTextStyle))
               ],
             ));
   }
@@ -158,49 +140,64 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Card(
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                child: DropdownButton(
-                    dropdownColor: Colors.white,
-                    style: const TextStyle(color: Colors.black),
-                    borderRadius: BorderRadius.circular(10),
-                    items: months
-                        .map((month) => DropdownMenuItem(
-                              value: month,
-                              child: Text(getMonth(month),
-                                  style: const TextStyle(color: Colors.black)),
-                            ))
-                        .toList(),
-                    value: monthFilterValue,
-                    onChanged: ((value) =>
-                        setState(() => monthFilterValue = value))),
-              ),
-            ),
-            Card(
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                child: DropdownButton(
-                    dropdownColor: Colors.white,
-                    style: const TextStyle(color: Colors.black),
-                    borderRadius: BorderRadius.circular(10),
-                    items: yearsList
-                        .map((year) => DropdownMenuItem(
-                              value: year,
-                              child: Text(year.toString(),
-                                  style: const TextStyle(color: Colors.black)),
-                            ))
-                        .toList(),
-                    value: yearFilterValue,
-                    onChanged: ((value) =>
-                        setState(() => yearFilterValue = value))),
-              ),
-            ),
-          ],
+          children: [monthFilter(), yearFilter()],
         ),
+      ),
+    );
+  }
+
+  Widget monthFilter() {
+    const cardColor = Colors.white;
+    const dropDownPadding = EdgeInsets.only(left: 8.0, right: 8.0);
+    const dropDownColor = Colors.white;
+    const shownValueTextStyle = TextStyle(color: Colors.black);
+    final dropDownBorderRadius = BorderRadius.circular(10);
+    const dropDownOptionTextStyle = TextStyle(color: Colors.black);
+    return Card(
+      color: cardColor,
+      child: Padding(
+        padding: dropDownPadding,
+        child: DropdownButton(
+            dropdownColor: dropDownColor,
+            style: shownValueTextStyle,
+            borderRadius: dropDownBorderRadius,
+            items: months
+                .map((month) => DropdownMenuItem(
+                      value: month,
+                      child:
+                          Text(getMonth(month), style: dropDownOptionTextStyle),
+                    ))
+                .toList(),
+            value: monthFilterValue,
+            onChanged: ((value) => setState(() => monthFilterValue = value))),
+      ),
+    );
+  }
+
+  Widget yearFilter() {
+    const cardColor = Colors.white;
+    const dropDownPadding = EdgeInsets.only(left: 8.0, right: 8.0);
+    const dropDownColor = Colors.white;
+    const shownValueTextStyle = TextStyle(color: Colors.black);
+    final dropDownBorderRadius = BorderRadius.circular(10);
+    const dropDownOptionTextStyle = TextStyle(color: Colors.black);
+    return Card(
+      color: cardColor,
+      child: Padding(
+        padding: dropDownPadding,
+        child: DropdownButton(
+            dropdownColor: dropDownColor,
+            style: shownValueTextStyle,
+            borderRadius: dropDownBorderRadius,
+            items: yearsList
+                .map((year) => DropdownMenuItem(
+                      value: year,
+                      child:
+                          Text(year.toString(), style: dropDownOptionTextStyle),
+                    ))
+                .toList(),
+            value: yearFilterValue,
+            onChanged: ((value) => setState(() => yearFilterValue = value))),
       ),
     );
   }
@@ -210,46 +207,56 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
         ref: weeksRef,
         builder: (BuildContext context,
             AsyncSnapshot<WeekQuerySnapshot> snapshot, Widget? child) {
-          if (snapshot.hasError) return Text(snapshot.error.toString());
-          if (!snapshot.hasData) return const Text('Loading data...');
-
+          if (snapshot.hasError) {
+            throw GoException(
+                "An error has occurred while trying to retrieve your data");
+          }
+          if (!snapshot.hasData) return const IsLoadingPage();
           List<WeekQueryDocumentSnapshot> weeks = snapshot.requireData.docs
               .where((element) =>
                   element.data.beginDate.month == monthFilterValue &&
                   element.data.beginDate.year == yearFilterValue)
               .toList();
 
+          if (weeks.isEmpty) {
+            return const Expanded(child: Text("No meals found for this month"));
+          }
+
+          const padding = EdgeInsets.all(10.0);
+
           return Expanded(
-              child: snapshot.hasData
-                  ? ListView.separated(
-                      padding: const EdgeInsets.all(10.0),
-                      itemBuilder: (_, index) => _toWidget(weeks[index].data),
-                      separatorBuilder: (_, __) => const Divider(
-                        height: 5,
-                        color: Colors.transparent,
-                      ),
-                      itemCount: weeks.length,
-                    )
-                  : const Center(
-                      child: Text("No results"),
-                    ));
+              child: ListView.separated(
+            padding: padding,
+            itemBuilder: (_, index) => _toWidget(weeks[index].data),
+            separatorBuilder: (_, __) => const Divider(
+              height: 5,
+              color: Colors.transparent,
+            ),
+            itemCount: weeks.length,
+          ));
         });
   }
 
   Widget potentialNameField() {
+    const padding = EdgeInsets.all(8.0);
+    const fillColor = Colors.white;
+    const filled = true;
+    const hintText = "Optional Name:";
+    final border =
+        OutlineInputBorder(borderRadius: BorderRadius.circular(10.0));
+
     return Stack(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: padding,
           child: Align(
             alignment: Alignment.centerLeft,
             child: TextField(
                 decoration: InputDecoration(
-                  fillColor: Colors.white,
-                  filled: true,
-                  hintText: "Optional Name:",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0)),
+                  fillColor: fillColor,
+                  filled: filled,
+                  hintText: hintText,
+                  border: border,
                 ),
                 controller: _nameController,
                 textAlign: TextAlign.left),
@@ -260,11 +267,11 @@ class _AddShoppingListPageState extends State<AddShoppingListPage> {
   }
 
   Widget _toWidget(Week week) {
+    final isSelected = selectedWeeks.contains(week.id);
+    final primaryColor = Theme.of(context).colorScheme.primary;
     return GestureDetector(
       child: Card(
-        color: selectedWeeks.contains(week.id)
-            ? Theme.of(context).colorScheme.primary
-            : Colors.white,
+        color: isSelected ? primaryColor : Colors.white,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -34,7 +34,6 @@ class _RecipeHomePageState extends State<RecipeHomePage> {
     } else if (!snapshot.hasData) {
       return const IsLoadingPage();
     }
-
     List<RecipeQueryDocumentSnapshot>? data = snapshot.data?.docs;
 
     if (data == null) {

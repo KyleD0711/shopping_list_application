@@ -49,8 +49,8 @@ class _HomePageState extends State<HomePage> {
         onDestinationSelected: (selectedIndex) {
           setState(() {
             pageIndex = selectedIndex;
-            context.go(getSelectedRoute(selectedIndex));
           });
+          context.go(getSelectedRoute(selectedIndex));
         },
       ),
       body: widget.child,
@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
   String getSelectedRoute(int selectedIndex) {
     switch (selectedIndex) {
       case 2:
-        return "/shoppinglist";
+        return "/shoppinglists";
       case 1:
         return "/mealplanning";
       default:

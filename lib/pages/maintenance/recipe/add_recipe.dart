@@ -428,7 +428,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
               IngredientService()
                   .ingredientsRef
                   .add(Ingredient(name: ingredientNameController.text));
-              Navigator.of(context).pop();
+              Navigator.of(context, rootNavigator: true).pop();
             }
           },
           style: ButtonStyle(
